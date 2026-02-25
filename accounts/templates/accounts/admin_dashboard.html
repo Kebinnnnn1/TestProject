@@ -337,8 +337,13 @@
                             <td>
                                 {% if u == request.user %}
                                 <span class="badge-staff">
-                                    {% if u.role == 'admin' %}⭐ Admin{% elif u.role == 'moderator' %}🛡️ Moderator{%
-                                    else %}👤 Member{% endif %}
+                                    {% if u.role == 'admin' %}
+                                    ⭐ Admin
+                                    {% elif u.role == 'moderator' %}
+                                    🛡️ Moderator
+                                    {% else %}
+                                    👤 Member
+                                    {% endif %}
                                 </span>
                                 {% elif u.role == 'admin' %}
                                 <span
@@ -359,7 +364,11 @@
                                 </form>
                                 {% else %}
                                 <span class="badge-staff">
-                                    {% if u.role == 'moderator' %}🛡️ Moderator{% else %}👤 Member{% endif %}
+                                    {% if u.role == 'moderator' %}
+                                    🛡️ Moderator
+                                    {% else %}
+                                    👤 Member
+                                    {% endif %}
                                 </span>
                                 {% endif %}
                             </td>
