@@ -69,6 +69,20 @@
             padding: 2rem 1.5rem;
         }
     }
+
+    /* ─── Dark Mode ─── */
+    [data-theme="dark"] .login-card {
+        background: var(--surface);
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="dark"] .login-blob-1 {
+        background: radial-gradient(circle, rgba(67, 97, 238, 0.25), transparent 70%);
+    }
+
+    [data-theme="dark"] .login-blob-2 {
+        background: radial-gradient(circle, rgba(255, 107, 53, 0.25), transparent 70%);
+    }
 </style>
 {% endblock %}
 
