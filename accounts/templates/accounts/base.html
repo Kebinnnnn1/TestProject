@@ -651,6 +651,9 @@
       <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav mx-auto align-items-center gap-1">
           <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'converter' %}"
+              style="display:flex;align-items:center;gap:5px;"><i class="bi bi-arrow-left-right"
+                style="color:var(--blue);font-size:0.8rem;"></i>Converter</a></li>
           {% if user.is_authenticated %}
           <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
           {% if user.is_staff or user.is_superuser %}

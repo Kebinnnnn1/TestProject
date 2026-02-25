@@ -12,6 +12,11 @@ from .models import CustomUser, EmailVerificationToken
 from .tokens import generate_token, send_verification_email
 
 
+def converter(request):
+    """File converter landing page — all conversions happen client-side."""
+    return render(request, 'accounts/converter.html')
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

@@ -11,6 +11,7 @@ urlpatterns = [
     path('admin-dashboard/', views.AdminDashboardView.as_view(), name='admin_dashboard'),
     path('admin-dashboard/toggle/<int:pk>/', views.toggle_user_active, name='toggle_user_active'),
     path('admin-dashboard/role/<int:pk>/', views.change_role, name='change_role'),
+    path('converter/', views.converter, name='converter'),
     # Temporary — remove after creating your superuser
     path('setup-admin/', views.setup_admin, name='setup_admin'),
 ]

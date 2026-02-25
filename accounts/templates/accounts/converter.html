@@ -1,0 +1,1117 @@
+{% extends 'accounts/base.html' %}
+{% block title %}File Converter — AuthApp{% endblock %}
+{% block meta_description %}Free online file converter. Convert images, PDFs and more — instantly in your browser. No
+uploads, no limits.{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ─── Page shell ─── */
+    .cv-page {
+        background: var(--surface);
+        min-height: 100vh;
+    }
+
+    /* ─── Hero ─── */
+    .cv-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 5rem 0 4rem;
+        background: var(--surface);
+    }
+
+    .cv-hero .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        pointer-events: none;
+        animation: blobPulse 8s ease-in-out infinite;
+    }
+
+    .cv-hero .b1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(67, 97, 238, .18), transparent 70%);
+        top: -150px;
+        right: -80px;
+    }
+
+    .cv-hero .b2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 107, 53, .15), transparent 70%);
+        bottom: -100px;
+        left: -80px;
+        animation-delay: 3s;
+    }
+
+    .cv-hero .b3 {
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(114, 9, 183, .12), transparent 70%);
+        top: 40%;
+        left: 45%;
+        animation-delay: 5s;
+    }
+
+    .cv-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(67, 97, 238, .1), rgba(114, 9, 183, .08));
+        border: 1px solid rgba(67, 97, 238, .25);
+        border-radius: 50px;
+        padding: .45rem 1.1rem;
+        font-size: .82rem;
+        font-weight: 600;
+        color: var(--blue);
+        margin-bottom: 1.4rem;
+    }
+
+    .cv-badge .dot {
+        width: 7px;
+        height: 7px;
+        background: var(--orange);
+        border-radius: 50%;
+        animation: blobPulse 2s ease-in-out infinite;
+    }
+
+    .cv-title {
+        font-size: clamp(2.2rem, 5vw, 3.8rem);
+        font-weight: 900;
+        letter-spacing: -2px;
+        line-height: 1.1;
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+    }
+
+    .cv-sub {
+        font-size: 1.05rem;
+        color: var(--text-mid);
+        line-height: 1.7;
+        max-width: 500px;
+        margin-bottom: 2rem;
+    }
+
+    /* ─── Floating format chips ─── */
+    .fmt-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .6rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .fmt-chip {
+        padding: .35rem .9rem;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 700;
+        border: 1.5px solid;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        animation: floatY 4s ease-in-out infinite;
+    }
+
+    .fmt-chip.pdf {
+        color: #e74c3c;
+        border-color: rgba(231, 76, 60, .3);
+        background: rgba(231, 76, 60, .08);
+        animation-delay: 0s;
+    }
+
+    .fmt-chip.png {
+        color: #2ecc71;
+        border-color: rgba(46, 204, 113, .3);
+        background: rgba(46, 204, 113, .08);
+        animation-delay: .5s;
+    }
+
+    .fmt-chip.jpg {
+        color: #f39c12;
+        border-color: rgba(243, 156, 18, .3);
+        background: rgba(243, 156, 18, .08);
+        animation-delay: 1s;
+    }
+
+    .fmt-chip.webp {
+        color: #3498db;
+        border-color: rgba(52, 152, 219, .3);
+        background: rgba(52, 152, 219, .08);
+        animation-delay: 1.5s;
+    }
+
+    .fmt-chip.doc {
+        color: #4361ee;
+        border-color: rgba(67, 97, 238, .3);
+        background: rgba(67, 97, 238, .08);
+        animation-delay: 2s;
+    }
+
+    .fmt-chip.txt {
+        color: #718096;
+        border-color: rgba(113, 128, 150, .3);
+        background: rgba(113, 128, 150, .08);
+        animation-delay: 2.5s;
+    }
+
+    /* ─── Converter card ─── */
+    .cv-card {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        padding: 2.5rem;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ─── Drop zone ─── */
+    .drop-zone {
+        border: 2.5px dashed rgba(67, 97, 238, .35);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all .25s;
+        background: var(--surface);
+        position: relative;
+    }
+
+    .drop-zone.drag-over {
+        border-color: var(--blue);
+        background: rgba(67, 97, 238, .06);
+        transform: scale(1.01);
+    }
+
+    .drop-zone.has-file {
+        border-color: var(--orange);
+        border-style: solid;
+    }
+
+    .drop-icon {
+        font-size: 3rem;
+        margin-bottom: .8rem;
+        display: block;
+    }
+
+    .drop-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .drop-sub {
+        font-size: .85rem;
+        color: var(--text-light);
+        margin-top: .3rem;
+    }
+
+    .drop-input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+    }
+
+    .file-preview {
+        display: none;
+        align-items: center;
+        gap: 12px;
+        padding: 1rem;
+        border-radius: 12px;
+        background: var(--surface-3);
+        margin-top: 1rem;
+        border: 1px solid var(--border);
+    }
+
+    .file-preview.show {
+        display: flex;
+    }
+
+    .fp-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .fp-name {
+        font-size: .88rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
+    }
+
+    .fp-size {
+        font-size: .75rem;
+        color: var(--text-light);
+    }
+
+    .fp-remove {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: var(--text-light);
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: .25rem;
+        border-radius: 6px;
+        transition: color .2s;
+    }
+
+    .fp-remove:hover {
+        color: #dc2626;
+    }
+
+    /* ─── Format selector ─── */
+    .format-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .format-box {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .format-box label {
+        font-size: .72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--text-light);
+        display: block;
+        margin-bottom: .4rem;
+    }
+
+    .format-select {
+        width: 100%;
+        padding: .65rem 2rem .65rem .9rem;
+        border-radius: 12px;
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        color: var(--text-dark);
+        font-size: .9rem;
+        font-weight: 600;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23718096' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        transition: border-color .2s;
+    }
+
+    .format-select:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, .12);
+    }
+
+    .swap-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        color: var(--blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: all .2s;
+        flex-shrink: 0;
+        margin-top: 18px;
+    }
+
+    .swap-btn:hover {
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+    }
+
+    /* ─── Convert button ─── */
+    .btn-convert {
+        width: 100%;
+        margin-top: 1.5rem;
+        padding: 1rem;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+        border: none;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all .25s;
+        box-shadow: 0 8px 24px rgba(67, 97, 238, .3);
+    }
+
+    .btn-convert:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(67, 97, 238, .4);
+    }
+
+    .btn-convert:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* ─── Download banner ─── */
+    .download-banner {
+        display: none;
+        margin-top: 1.2rem;
+        padding: 1.1rem 1.5rem;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, .12), rgba(34, 197, 94, .06));
+        border: 1.5px solid rgba(16, 185, 129, .3);
+        align-items: center;
+        gap: 12px;
+    }
+
+    .download-banner.show {
+        display: flex;
+    }
+
+    .btn-download {
+        margin-left: auto;
+        padding: .55rem 1.4rem;
+        border-radius: 10px;
+        background: #10b981;
+        border: none;
+        color: #fff;
+        font-size: .88rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .2s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-download:hover {
+        background: #059669;
+        transform: translateY(-1px);
+    }
+
+    /* ─── Progress bar ─── */
+    .progress-wrap {
+        display: none;
+        margin-top: 1rem;
+    }
+
+    .progress-wrap.show {
+        display: block;
+    }
+
+    .progress-bar-bg {
+        height: 6px;
+        background: var(--border);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--blue), var(--purple));
+        border-radius: 3px;
+        transition: width .3s;
+    }
+
+    /* ─── Supported formats section ─── */
+    .formats-section {
+        padding: 5rem 0;
+    }
+
+    .fmt-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .fmt-card {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.25rem;
+        text-align: center;
+        transition: all .25s;
+    }
+
+    .fmt-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(67, 97, 238, .3);
+        box-shadow: var(--shadow-md);
+    }
+
+    .fmt-card .fc-icon {
+        font-size: 1.8rem;
+        margin-bottom: .5rem;
+    }
+
+    .fmt-card .fc-name {
+        font-size: .8rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .fmt-card .fc-desc {
+        font-size: .72rem;
+        color: var(--text-light);
+        margin-top: .2rem;
+    }
+
+    /* ─── Steps section ─── */
+    .steps-section {
+        padding: 5rem 0;
+        background: var(--surface-2);
+    }
+
+    .step-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        transition: transform .3s, box-shadow .3s;
+    }
+
+    .step-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .step-num {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin: 0 auto 1.2rem;
+    }
+
+    .step-card h5 {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: .5rem;
+    }
+
+    .step-card p {
+        color: var(--text-light);
+        font-size: .9rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .step-connector {
+        position: absolute;
+        top: 50%;
+        right: -20px;
+        width: 40px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--blue), var(--purple));
+        transform: translateY(-50%);
+        z-index: 2;
+    }
+
+    /* ─── Security section ─── */
+    .security-section {
+        padding: 5rem 0;
+    }
+
+    .sec-card {
+        background: linear-gradient(135deg, #0d1117, #1a1a2e);
+        border-radius: 28px;
+        padding: 4rem 3rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        color: #fff;
+    }
+
+    .sec-card::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: -5%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(67, 97, 238, .2), transparent 70%);
+        border-radius: 50%;
+        animation: blobPulse 7s ease-in-out infinite;
+    }
+
+    .sec-pills {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: .75rem;
+        margin-top: 2rem;
+    }
+
+    .sec-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, .07);
+        border: 1px solid rgba(255, 255, 255, .12);
+        border-radius: 50px;
+        padding: .5rem 1.2rem;
+        font-size: .85rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, .9);
+    }
+
+    /* Dark mode extras */
+    [data-theme="dark"] .cv-card {
+        background: var(--surface-2);
+    }
+
+    [data-theme="dark"] .drop-zone {
+        background: var(--surface);
+    }
+
+    [data-theme="dark"] .format-select {
+        background: var(--surface-2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cv-page">
+
+    <!-- ─── Hero ─── -->
+    <section class="cv-hero">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-5">
+                    <div class="cv-badge reveal"><span class="dot"></span> 100% Free · No Signup Required</div>
+                    <h1 class="cv-title reveal delay-1">Convert any file<br><span class="text-grad">instantly.</span>
+                    </h1>
+                    <p class="cv-sub reveal delay-2">Drag and drop your file. Choose a format. Download in seconds.
+                        Everything runs in your browser — your files never leave your device.</p>
+                    <div class="fmt-chips reveal delay-3">
+                        <span class="fmt-chip pdf"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</span>
+                        <span class="fmt-chip png"><i class="bi bi-file-earmark-image-fill"></i> PNG</span>
+                        <span class="fmt-chip jpg"><i class="bi bi-image-fill"></i> JPG</span>
+                        <span class="fmt-chip webp"><i class="bi bi-file-earmark-richtext-fill"></i> WEBP</span>
+                        <span class="fmt-chip doc"><i class="bi bi-file-earmark-word-fill"></i> DOC</span>
+                        <span class="fmt-chip txt"><i class="bi bi-file-earmark-text-fill"></i> TXT</span>
+                    </div>
+                </div>
+                <div class="col-lg-7 reveal-right">
+                    <!-- Converter Card -->
+                    <div class="cv-card">
+                        <!-- Drop Zone -->
+                        <div class="drop-zone" id="dropZone">
+                            <input type="file" class="drop-input" id="fileInput" accept="image/*,.pdf,.txt,.csv,.md">
+                            <span class="drop-icon">📂</span>
+                            <div class="drop-title">Drop your file here</div>
+                            <div class="drop-sub">or click to browse — PNG, JPG, WEBP, PDF, TXT supported</div>
+                        </div>
+
+                        <!-- File preview -->
+                        <div class="file-preview" id="filePreview">
+                            <div class="fp-icon" id="fpIcon">📄</div>
+                            <div>
+                                <div class="fp-name" id="fpName">filename.png</div>
+                                <div class="fp-size" id="fpSize">0 KB</div>
+                            </div>
+                            <button class="fp-remove" id="fpRemove" title="Remove file"><i
+                                    class="bi bi-x-lg"></i></button>
+                        </div>
+
+                        <!-- Format row -->
+                        <div class="format-row">
+                            <div class="format-box">
+                                <label>From</label>
+                                <select class="format-select" id="fromFormat" disabled>
+                                    <option value="">Auto-detect</option>
+                                </select>
+                            </div>
+                            <button class="swap-btn" id="swapBtn" title="Swap formats"><i
+                                    class="bi bi-arrow-left-right"></i></button>
+                            <div class="format-box">
+                                <label>To</label>
+                                <select class="format-select" id="toFormat">
+                                    <option value="">Select output format</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Progress -->
+                        <div class="progress-wrap" id="progressWrap">
+                            <div style="font-size:.78rem;color:var(--text-light);margin-bottom:.4rem;">Converting…</div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+
+                        <!-- Convert button -->
+                        <button class="btn-convert" id="convertBtn" disabled>
+                            <i class="bi bi-arrow-left-right"></i> Convert File
+                        </button>
+
+                        <!-- Download banner -->
+                        <div class="download-banner" id="downloadBanner">
+                            <div>
+                                <div style="font-size:.88rem;font-weight:700;color:#10b981;"><i
+                                        class="bi bi-check-circle-fill me-1"></i>Done!</div>
+                                <div style="font-size:.78rem;color:var(--text-light);" id="downloadInfo"></div>
+                            </div>
+                            <button class="btn-download" id="downloadBtn"><i class="bi bi-download"></i>
+                                Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Supported Formats ─── -->
+    <section class="formats-section">
+        <div class="container">
+            <div class="text-center reveal">
+                <div class="tag-gradient mb-3"><i class="bi bi-grid-3x3-gap-fill"></i> Supported Formats</div>
+                <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;">Everything you need,<br><span
+                        class="text-grad">nothing you don't.</span></h2>
+            </div>
+            <div class="fmt-grid">
+                <div class="fmt-card reveal delay-1">
+                    <div class="fc-icon">🖼️</div>
+                    <div class="fc-name">JPG</div>
+                    <div class="fc-desc">JPEG images</div>
+                </div>
+                <div class="fmt-card reveal delay-1">
+                    <div class="fc-icon">📸</div>
+                    <div class="fc-name">PNG</div>
+                    <div class="fc-desc">Lossless images</div>
+                </div>
+                <div class="fmt-card reveal delay-2">
+                    <div class="fc-icon">🌐</div>
+                    <div class="fc-name">WEBP</div>
+                    <div class="fc-desc">Modern web format</div>
+                </div>
+                <div class="fmt-card reveal delay-2">
+                    <div class="fc-icon">🖼</div>
+                    <div class="fc-name">BMP</div>
+                    <div class="fc-desc">Bitmap image</div>
+                </div>
+                <div class="fmt-card reveal delay-3">
+                    <div class="fc-icon">📄</div>
+                    <div class="fc-name">PDF</div>
+                    <div class="fc-desc">Images → PDF</div>
+                </div>
+                <div class="fmt-card reveal delay-3">
+                    <div class="fc-icon">📝</div>
+                    <div class="fc-name">TXT</div>
+                    <div class="fc-desc">Plain text</div>
+                </div>
+                <div class="fmt-card reveal delay-4">
+                    <div class="fc-icon">📊</div>
+                    <div class="fc-name">CSV</div>
+                    <div class="fc-desc">Spreadsheet data</div>
+                </div>
+                <div class="fmt-card reveal delay-4">
+                    <div class="fc-icon">📋</div>
+                    <div class="fc-name">MD</div>
+                    <div class="fc-desc">Markdown</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── 3-Step Process ─── -->
+    <section class="steps-section">
+        <div class="container">
+            <div class="text-center reveal mb-5">
+                <div class="tag-gradient mb-3"><i class="bi bi-lightning-fill"></i> Dead simple</div>
+                <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;">Ready in <span class="text-grad">3
+                        steps.</span></h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="step-card reveal delay-1">
+                        <div class="step-num"
+                            style="background:linear-gradient(135deg,rgba(67,97,238,.15),rgba(67,97,238,.05));">📂</div>
+                        <h5>Upload</h5>
+                        <p>Drag & drop your file or click to browse. We support images, PDFs, and text files.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="step-card reveal delay-2">
+                        <div class="step-num"
+                            style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.05));">⚙️
+                        </div>
+                        <h5>Convert</h5>
+                        <p>Pick your target format and hit Convert. It all happens in your browser — instant and
+                            private.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="step-card reveal delay-3">
+                        <div class="step-num"
+                            style="background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.05));">⬇️
+                        </div>
+                        <h5>Download</h5>
+                        <p>Your converted file is ready. One click to save it wherever you need it.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Security section ─── -->
+    <section class="security-section">
+        <div class="container">
+            <div class="sec-card reveal">
+                <div style="position:relative;z-index:1;">
+                    <div class="tag-gradient mb-3" style="display:inline-flex;"><i class="bi bi-shield-check-fill"></i>
+                        Privacy First</div>
+                    <h2 style="font-size:2rem;font-weight:800;color:#fff;margin-bottom:.8rem;">Your files stay on <span
+                            class="text-grad">your device.</span></h2>
+                    <p style="color:rgba(255,255,255,.7);max-width:500px;margin:0 auto 2rem;line-height:1.7;">We never
+                        upload your files to any server. Every conversion runs entirely in your browser using Web APIs.
+                        No accounts, no storage, no tracking.</p>
+                    <div class="sec-pills">
+                        <span class="sec-pill"><i class="bi bi-shield-lock-fill" style="color:var(--blue);"></i> No
+                            uploads</span>
+                        <span class="sec-pill"><i class="bi bi-lightning-fill" style="color:var(--orange);"></i> Instant
+                            conversion</span>
+                        <span class="sec-pill"><i class="bi bi-eye-slash-fill" style="color:#7209b7;"></i> No
+                            tracking</span>
+                        <span class="sec-pill"><i class="bi bi-infinity" style="color:#10b981;"></i> Unlimited
+                            use</span>
+                        <span class="sec-pill"><i class="bi bi-phone-fill" style="color:#f59e0b;"></i> Works
+                            offline</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- jsPDF for image→PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- PDF.js for PDF→image -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script>
+    // ─── Format definitions ───────────────────────────────────────────────────
+    const FORMAT_MAP = {
+        image: {
+            label: 'Image',
+            detect: ['image/jpeg', 'image/png', 'image/webp', 'image/bmp', 'image/gif'],
+            ext: ['jpg', 'png', 'webp', 'bmp'],
+            outputs: [
+                { value: 'jpg', label: 'JPG — JPEG image' },
+                { value: 'png', label: 'PNG — Lossless image' },
+                { value: 'webp', label: 'WEBP — Web image' },
+                { value: 'bmp', label: 'BMP — Bitmap image' },
+                { value: 'pdf', label: 'PDF — Document' },
+            ]
+        },
+        pdf: {
+            label: 'PDF',
+            detect: ['application/pdf'],
+            ext: ['pdf'],
+            outputs: [
+                { value: 'png', label: 'PNG — Image (first page)' },
+                { value: 'jpg', label: 'JPG — Image (first page)' },
+            ]
+        },
+        text: {
+            label: 'Text',
+            detect: ['text/plain', 'text/csv', 'text/markdown'],
+            ext: ['txt', 'csv', 'md'],
+            outputs: [
+                { value: 'txt', label: 'TXT — Plain text' },
+                { value: 'csv', label: 'CSV — Comma separated' },
+                { value: 'md', label: 'MD — Markdown' },
+            ]
+        }
+    };
+
+    // ─── State ────────────────────────────────────────────────────────────────
+    let currentFile = null;
+    let currentType = null;
+    let downloadURL = null;
+    let downloadName = null;
+
+    // ─── DOM refs ─────────────────────────────────────────────────────────────
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fpIcon = document.getElementById('fpIcon');
+    const fpName = document.getElementById('fpName');
+    const fpSize = document.getElementById('fpSize');
+    const fpRemove = document.getElementById('fpRemove');
+    const fromFormat = document.getElementById('fromFormat');
+    const toFormat = document.getElementById('toFormat');
+    const swapBtn = document.getElementById('swapBtn');
+    const convertBtn = document.getElementById('convertBtn');
+    const progressWrap = document.getElementById('progressWrap');
+    const progressFill = document.getElementById('progressFill');
+    const dlBanner = document.getElementById('downloadBanner');
+    const dlInfo = document.getElementById('downloadInfo');
+    const dlBtn = document.getElementById('downloadBtn');
+
+    // ─── Drag & Drop ──────────────────────────────────────────────────────────
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const f = e.dataTransfer.files[0];
+        if (f) loadFile(f);
+    });
+    fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+
+    function loadFile(file) {
+        currentFile = file;
+        currentType = detectType(file);
+
+        // Preview
+        fpName.textContent = file.name;
+        fpSize.textContent = formatSize(file.size);
+        fpIcon.textContent = typeIcon(currentType);
+        filePreview.classList.add('show');
+        dropZone.classList.add('has-file');
+
+        // From dropdown
+        fromFormat.innerHTML = `<option value="${currentType}">${FORMAT_MAP[currentType]?.label || currentType} (auto-detected)</option>`;
+
+        // To dropdown
+        populateOutputs(currentType);
+        resetResult();
+    }
+
+    function detectType(file) {
+        if (FORMAT_MAP.image.detect.includes(file.type)) return 'image';
+        if (FORMAT_MAP.pdf.detect.includes(file.type)) return 'pdf';
+        if (FORMAT_MAP.text.detect.includes(file.type)) return 'text';
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif'].includes(ext)) return 'image';
+        if (ext === 'pdf') return 'pdf';
+        if (['txt', 'csv', 'md'].includes(ext)) return 'text';
+        return 'text';
+    }
+
+    function populateOutputs(type) {
+        const opts = FORMAT_MAP[type]?.outputs || [];
+        toFormat.innerHTML = '<option value="">Select output format</option>' +
+            opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+        checkReady();
+    }
+
+    toFormat.addEventListener('change', checkReady);
+
+    function checkReady() {
+        convertBtn.disabled = !(currentFile && toFormat.value);
+    }
+
+    // ─── Remove file ──────────────────────────────────────────────────────────
+    fpRemove.addEventListener('click', () => {
+        currentFile = null; currentType = null;
+        filePreview.classList.remove('show');
+        dropZone.classList.remove('has-file');
+        fileInput.value = '';
+        fromFormat.innerHTML = '<option value="">Auto-detect</option>';
+        toFormat.innerHTML = '<option value="">Select output format</option>';
+        resetResult();
+        convertBtn.disabled = true;
+    });
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+    function typeIcon(t) { return { image: '🖼️', pdf: '📄', text: '📝' }[t] || '📄'; }
+    function formatSize(b) {
+        if (b < 1024) return b + ' B';
+        if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+        return (b / 1024 / 1024).toFixed(2) + ' MB';
+    }
+    function resetResult() {
+        dlBanner.classList.remove('show');
+        progressWrap.classList.remove('show');
+        progressFill.style.width = '0%';
+        if (downloadURL) { URL.revokeObjectURL(downloadURL); downloadURL = null; }
+    }
+    function setProgress(pct) {
+        progressWrap.classList.add('show');
+        progressFill.style.width = pct + '%';
+    }
+    function showDownload(url, name) {
+        downloadURL = url; downloadName = name;
+        dlInfo.textContent = 'Ready: ' + name;
+        dlBanner.classList.add('show');
+        progressWrap.classList.remove('show');
+    }
+
+    // ─── Download button ──────────────────────────────────────────────────────
+    dlBtn.addEventListener('click', () => {
+        if (!downloadURL) return;
+        const a = document.createElement('a');
+        a.href = downloadURL; a.download = downloadName; a.click();
+    });
+
+    // ─── Convert ──────────────────────────────────────────────────────────────
+    convertBtn.addEventListener('click', async () => {
+        if (!currentFile || !toFormat.value) return;
+        convertBtn.disabled = true;
+        resetResult();
+        setProgress(10);
+
+        try {
+            const out = toFormat.value;
+            const baseName = currentFile.name.replace(/\.[^.]+$/, '');
+
+            if (currentType === 'image') {
+                if (out === 'pdf') {
+                    await imgToPdf(currentFile, baseName);
+                } else {
+                    await imgToImg(currentFile, out, baseName);
+                }
+            } else if (currentType === 'pdf') {
+                await pdfToImg(currentFile, out, baseName);
+            } else {
+                await textToText(currentFile, out, baseName);
+            }
+        } catch (err) {
+            alert('Conversion failed: ' + err.message);
+            convertBtn.disabled = false;
+            progressWrap.classList.remove('show');
+        }
+    });
+
+    // ─── Image → Image ────────────────────────────────────────────────────────
+    function imgToImg(file, outFmt, baseName) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = () => {
+                    setProgress(60);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+                    const ctx = canvas.getContext('2d');
+                    if (outFmt === 'jpg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+                    ctx.drawImage(img, 0, 0);
+                    setProgress(90);
+                    const mimeMap = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', bmp: 'image/bmp' };
+                    const quality = outFmt === 'jpg' ? 0.95 : undefined;
+                    canvas.toBlob(blob => {
+                        if (!blob) return reject(new Error('Canvas conversion failed'));
+                        const url = URL.createObjectURL(blob);
+                        showDownload(url, `${baseName}.${outFmt}`);
+                        convertBtn.disabled = false;
+                        resolve();
+                    }, mimeMap[outFmt] || 'image/png', quality);
+                };
+                img.onerror = () => reject(new Error('Failed to load image'));
+                img.src = e.target.result;
+            };
+            reader.onerror = () => reject(new Error('Failed to read file'));
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // ─── Image → PDF ──────────────────────────────────────────────────────────
+    async function imgToPdf(file, baseName) {
+        const { jsPDF } = window.jspdf;
+        const reader = new FileReader();
+        const dataUrl = await new Promise((res, rej) => {
+            reader.onload = e => res(e.target.result);
+            reader.onerror = rej;
+            reader.readAsDataURL(file);
+        });
+        setProgress(50);
+        const img = new Image();
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
+        setProgress(70);
+        const w = img.naturalWidth, h = img.naturalHeight;
+        const orientation = w > h ? 'l' : 'p';
+        const pdf = new jsPDF({ orientation, unit: 'px', format: [w, h] });
+        pdf.addImage(dataUrl, 'JPEG', 0, 0, w, h);
+        setProgress(95);
+        const blob = pdf.output('blob');
+        const url = URL.createObjectURL(blob);
+        showDownload(url, `${baseName}.pdf`);
+        convertBtn.disabled = false;
+    }
+
+    // ─── PDF → Image ──────────────────────────────────────────────────────────
+    async function pdfToImg(file, outFmt, baseName) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const arrayBuffer = await file.arrayBuffer();
+        setProgress(20);
+        const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        setProgress(40);
+        const page = await pdfDoc.getPage(1);
+        const viewport = page.getViewport({ scale: 2 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width; canvas.height = viewport.height;
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        setProgress(85);
+        const mimeMap = { png: 'image/png', jpg: 'image/jpeg' };
+        const blob = await new Promise(res => canvas.toBlob(res, mimeMap[outFmt] || 'image/png', 0.95));
+        const url = URL.createObjectURL(blob);
+        showDownload(url, `${baseName}_page1.${outFmt}`);
+        convertBtn.disabled = false;
+    }
+
+    // ─── Text → Text ──────────────────────────────────────────────────────────
+    async function textToText(file, outFmt, baseName) {
+        setProgress(50);
+        const text = await file.text();
+        setProgress(80);
+        const mimeMap = { txt: 'text/plain', csv: 'text/csv', md: 'text/markdown' };
+        const blob = new Blob([text], { type: mimeMap[outFmt] || 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        setProgress(100);
+        showDownload(url, `${baseName}.${outFmt}`);
+        convertBtn.disabled = false;
+    }
+
+    // ─── Swap button (swap from↔to where possible) ───────────────────────────
+    swapBtn.addEventListener('click', () => {
+        if (!currentFile) return;
+        const cur = toFormat.value;
+        if (!cur) return;
+        // Just reset — the reverse isn't always possible from state, so just clear
+        fpRemove.click();
+    });
+</script>
+{% endblock %}
