@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8">
@@ -14,7 +14,9 @@
     rel="stylesheet">
 
   <style>
-    :root {
+    /* ─── Light Theme Variables ─── */
+    :root,
+    [data-theme="light"] {
       --orange: #ff6b35;
       --orange-light: #ff8c5a;
       --blue: #4361ee;
@@ -34,10 +36,33 @@
       --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
       --shadow-md: 0 8px 40px rgba(0, 0, 0, 0.10);
       --shadow-lg: 0 24px 72px rgba(0, 0, 0, 0.14);
-      --radius: 16px;
-      --radius-sm: 10px;
+      --nav-bg: rgba(255, 255, 255, 0.85);
+      --nav-border: rgba(0, 0, 0, 0.06);
+      --card-bg: #ffffff;
+      --input-bg: #f7f9fc;
+      --input-border: #eef2f7;
     }
 
+    /* ─── Dark Theme Variables ─── */
+    [data-theme="dark"] {
+      --text-dark: #f0f4ff;
+      --text-mid: #a0b0c8;
+      --text-light: #6b7d94;
+      --surface: #0f1521;
+      --surface-2: #161e2e;
+      --surface-3: #1e2a3e;
+      --border: rgba(255, 255, 255, 0.07);
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 40px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 24px 72px rgba(0, 0, 0, 0.5);
+      --nav-bg: rgba(15, 21, 33, 0.92);
+      --nav-border: rgba(255, 255, 255, 0.06);
+      --card-bg: #161e2e;
+      --input-bg: #1e2a3e;
+      --input-border: rgba(255, 255, 255, 0.08);
+    }
+
+    /* ─── Base ─── */
     *,
     *::before,
     *::after {
@@ -46,14 +71,19 @@
       padding: 0;
     }
 
+    html {
+      transition: background 0.3s, color 0.3s;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
-      background: #ffffff;
+      background: var(--surface);
       color: var(--text-dark);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
     }
 
     /* ─── Scrollbar ─── */
@@ -62,7 +92,7 @@
     }
 
     ::-webkit-scrollbar-track {
-      background: #f1f1f1;
+      background: var(--surface-2);
     }
 
     ::-webkit-scrollbar-thumb {
@@ -72,15 +102,15 @@
 
     /* ─── Navbar ─── */
     .navbar {
-      background: rgba(255, 255, 255, 0.85);
+      background: var(--nav-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid var(--nav-border);
       padding: 1rem 1.5rem;
       position: sticky;
       top: 0;
       z-index: 1000;
-      transition: box-shadow 0.3s;
+      transition: box-shadow 0.3s, background 0.3s;
     }
 
     .navbar.scrolled {
@@ -158,6 +188,28 @@
       box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
     }
 
+    /* Dark mode toggle */
+    .btn-theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1rem;
+    }
+
+    .btn-theme-toggle:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--surface-3);
+    }
+
     /* ─── Buttons ─── */
     .btn-primary-grad {
       background: var(--grad-main);
@@ -203,9 +255,9 @@
 
     /* ─── Cards ─── */
     .card-clean {
-      background: #fff;
+      background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 16px;
       box-shadow: var(--shadow-sm);
       transition: transform 0.25s, box-shadow 0.25s;
     }
@@ -216,20 +268,20 @@
     }
 
     .card-glass {
-      background: rgba(255, 255, 255, 0.7);
+      background: var(--nav-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      border-radius: 16px;
       box-shadow: var(--shadow-md);
     }
 
     /* ─── Forms ─── */
     .form-control {
-      background: var(--surface-2) !important;
-      border: 1.5px solid var(--surface-3) !important;
+      background: var(--input-bg) !important;
+      border: 1.5px solid var(--input-border) !important;
       color: var(--text-dark) !important;
-      border-radius: var(--radius-sm) !important;
+      border-radius: 10px !important;
       padding: 0.75rem 1rem !important;
       font-size: 0.92rem !important;
       transition: border-color 0.2s, box-shadow 0.2s !important;
@@ -238,11 +290,11 @@
     .form-control:focus {
       border-color: var(--blue) !important;
       box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.12) !important;
-      background: #fff !important;
+      background: var(--surface) !important;
     }
 
     .form-control::placeholder {
-      color: #a0aec0 !important;
+      color: var(--text-light) !important;
     }
 
     .form-label {
@@ -252,7 +304,7 @@
       margin-bottom: 0.45rem;
     }
 
-    /* ─── Alerts / Messages ─── */
+    /* ─── Alerts ─── */
     .messages-container {
       position: relative;
       z-index: 100;
@@ -294,41 +346,6 @@
       color: inherit;
       font-weight: 700;
       word-break: break-all;
-    }
-
-    /* ─── Tables ─── */
-    .table-modern {
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .table-modern thead th {
-      background: var(--surface-2);
-      color: var(--text-light);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      font-weight: 600;
-      padding: 1rem 1.25rem;
-      border: none;
-    }
-
-    .table-modern tbody td {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.9rem;
-      color: var(--text-dark);
-      vertical-align: middle;
-      background: #fff;
-    }
-
-    .table-modern tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    .table-modern tbody tr:hover td {
-      background: var(--surface-2);
     }
 
     /* ─── Badges ─── */
@@ -377,7 +394,28 @@
       font-weight: 600;
     }
 
-    /* ─── Gradient Tag ─── */
+    /* Dark mode badge overrides */
+    [data-theme="dark"] .badge-verified {
+      background: rgba(22, 163, 74, 0.15);
+    }
+
+    [data-theme="dark"] .badge-unverified {
+      background: rgba(220, 38, 38, 0.15);
+    }
+
+    [data-theme="dark"] .badge-active {
+      background: rgba(22, 163, 74, 0.15);
+    }
+
+    [data-theme="dark"] .badge-inactive {
+      background: rgba(217, 119, 6, 0.15);
+    }
+
+    [data-theme="dark"] .badge-staff {
+      background: rgba(37, 99, 235, 0.15);
+    }
+
+    /* ─── Gradient tag ─── */
     .tag-gradient {
       background: linear-gradient(135deg, rgba(255, 107, 53, 0.12), rgba(67, 97, 238, 0.12));
       color: var(--blue);
@@ -399,6 +437,7 @@
       color: var(--text-light);
       font-size: 0.84rem;
       margin-top: auto;
+      transition: background 0.3s;
     }
 
     footer a {
@@ -434,11 +473,11 @@
 
       0%,
       100% {
-        transform: translateY(0px);
+        transform: translateY(0px)
       }
 
       50% {
-        transform: translateY(-12px);
+        transform: translateY(-12px)
       }
     }
 
@@ -446,11 +485,11 @@
 
       0%,
       100% {
-        transform: translateX(0px);
+        transform: translateX(0px)
       }
 
       50% {
-        transform: translateX(8px);
+        transform: translateX(8px)
       }
     }
 
@@ -458,78 +497,88 @@
 
       0%,
       100% {
-        transform: scale(1) rotate(0deg);
+        transform: scale(1) rotate(0deg)
       }
 
       33% {
-        transform: scale(1.05) rotate(3deg);
+        transform: scale(1.05) rotate(3deg)
       }
 
       66% {
-        transform: scale(0.97) rotate(-2deg);
+        transform: scale(0.97) rotate(-2deg)
       }
     }
 
     @keyframes fadeInUp {
       from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(30px)
       }
 
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0)
       }
     }
 
     @keyframes fadeInLeft {
       from {
         opacity: 0;
-        transform: translateX(-30px);
+        transform: translateX(-30px)
       }
 
       to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateX(0)
       }
     }
 
     @keyframes fadeInRight {
       from {
         opacity: 0;
-        transform: translateX(30px);
+        transform: translateX(30px)
       }
 
       to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateX(0)
       }
     }
 
     @keyframes spin-slow {
       from {
-        transform: rotate(0deg);
+        transform: rotate(0deg)
       }
 
       to {
-        transform: rotate(360deg);
+        transform: rotate(360deg)
       }
     }
 
     @keyframes particleFloat {
       0% {
         transform: translateY(0) translateX(0) scale(1);
-        opacity: 0.6;
+        opacity: 0.6
       }
 
       50% {
         transform: translateY(-40px) translateX(20px) scale(1.2);
-        opacity: 1;
+        opacity: 1
       }
 
       100% {
         transform: translateY(0) translateX(0) scale(1);
-        opacity: 0.6;
+        opacity: 0.6
+      }
+    }
+
+    @keyframes marquee {
+      from {
+        transform: translateX(0)
+      }
+
+      to {
+        transform: translateX(-50%)
       }
     }
   </style>
@@ -560,6 +609,10 @@
           {% endif %}
         </ul>
         <div class="d-flex align-items-center gap-2">
+          <!-- Dark mode toggle -->
+          <button class="btn-theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+            <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+          </button>
           {% if user.is_authenticated %}
           <span style="color: var(--text-mid); font-size: 0.88rem; font-weight: 500;">
             <i class="bi bi-person-circle me-1"></i>{{ user.username }}
@@ -609,7 +662,26 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Navbar scroll effect
+    // ─── Dark Mode ───
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+
+    function setTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+    }
+
+    // Load saved preference (default: light)
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+
+    btn.addEventListener('click', () => {
+      setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    // ─── Navbar scroll effect ───
     const nav = document.getElementById('mainNav');
     window.addEventListener('scroll', () => {
       nav.classList.toggle('scrolled', window.scrollY > 20);
