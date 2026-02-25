@@ -104,6 +104,38 @@
         justify-content: space-between;
     }
 
+    /* Table — override Bootstrap thead highlight */
+    .admin-table thead tr th {
+        padding: 0.9rem 1.25rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #718096 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background-color: #f7f9fc !important;
+        border: none !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+        white-space: nowrap;
+    }
+
+    .admin-table tbody tr td {
+        padding: 0.95rem 1.25rem;
+        font-size: 0.88rem;
+        color: var(--text-dark);
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        background: #fff;
+    }
+
+    .admin-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .admin-table tbody tr:hover td {
+        background: #f7f9fc;
+    }
+
+    /* Buttons */
     .btn-deactivate {
         background: #fef2f2;
         color: #dc2626;
@@ -136,6 +168,7 @@
         background: #dcfce7;
     }
 
+    /* Avatar */
     .user-avatar {
         width: 34px;
         height: 34px;
@@ -147,6 +180,7 @@
         font-weight: 700;
         color: #fff;
         flex-shrink: 0;
+        background: linear-gradient(135deg, #4361ee, #7209b7);
     }
 
     .av-c0 {
@@ -167,25 +201,6 @@
 
     .av-c4 {
         background: linear-gradient(135deg, #f59e0b, #fbbf24);
-    }
-
-    .th {
-        padding: 0.9rem 1.25rem;
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: var(--text-light);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        border: none;
-        background: var(--surface-2);
-    }
-
-    .td {
-        padding: 0.95rem 1.25rem;
-        font-size: 0.88rem;
-        color: var(--text-dark);
-        vertical-align: middle;
-        border-bottom: 1px solid var(--border);
     }
 </style>
 {% endblock %}
@@ -234,51 +249,52 @@
                 <span style="font-size:0.78rem;color:var(--text-light);font-weight:500;">{{ users|length }} total</span>
             </div>
             <div class="table-responsive">
-                <table class="table mb-0" style="min-width:720px;">
+                <table class="table mb-0 admin-table" style="min-width:720px;">
                     <thead>
                         <tr>
-                            <th class="th">#</th>
-                            <th class="th">User</th>
-                            <th class="th">Email</th>
-                            <th class="th">Verified</th>
-                            <th class="th">Status</th>
-                            <th class="th">Role</th>
-                            <th class="th">Joined</th>
-                            <th class="th">Action</th>
+                            <th>#</th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Verified</th>
+                            <th>Status</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for u in users %}
-                        <tr class="user-row" data-active="{{ u.is_active|lower }}">
-                            <td class="td" style="color:var(--text-light);">{{ forloop.counter }}</td>
-                            <td class="td">
+                        <tr data-active="{{ u.is_active|lower }}">
+                            <td style="color:var(--text-light);">{{ forloop.counter }}</td>
+                            <td>
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div class="user-avatar" data-idx="{{ forloop.counter0 }}">{{
-                                        u.username|slice:":1"|upper }}</div>
-                                    <div style="font-size:0.88rem;font-weight:600;color:var(--text-dark);">
-                                        {{ u.username }}
+                                    <div class="user-avatar" data-idx="{{ forloop.counter0 }}">{{ u.username|first|upper
+                                        }}</div>
+                                    <div>
+                                        <div style="font-size:0.88rem;font-weight:600;color:var(--text-dark);">{{
+                                            u.username }}</div>
                                         {% if u == request.user %}
-                                        <span style="font-size:0.7rem;color:var(--blue);">(you)</span>
+                                        <div style="font-size:0.7rem;color:var(--blue);">you</div>
                                         {% endif %}
                                     </div>
                                 </div>
                             </td>
-                            <td class="td" style="color:var(--text-mid);">{{ u.email }}</td>
-                            <td class="td">
+                            <td style="color:var(--text-mid);">{{ u.email }}</td>
+                            <td>
                                 {% if u.is_verified %}
                                 <span class="badge-verified">✓ Verified</span>
                                 {% else %}
                                 <span class="badge-unverified">✗ Unverified</span>
                                 {% endif %}
                             </td>
-                            <td class="td">
+                            <td>
                                 {% if u.is_active %}
                                 <span class="badge-active">● Active</span>
                                 {% else %}
                                 <span class="badge-inactive">● Inactive</span>
                                 {% endif %}
                             </td>
-                            <td class="td">
+                            <td>
                                 {% if u.is_superuser %}
                                 <span class="badge-staff">Superuser</span>
                                 {% elif u.is_staff %}
@@ -287,8 +303,8 @@
                                 <span style="font-size:0.82rem;color:var(--text-light);">Member</span>
                                 {% endif %}
                             </td>
-                            <td class="td" style="color:var(--text-light);">{{ u.date_joined|date:"M j, Y" }}</td>
-                            <td class="td">
+                            <td style="color:var(--text-light);">{{ u.date_joined|date:"M j, Y" }}</td>
+                            <td>
                                 {% if u != request.user %}
                                 <form method="post" action="{% url 'toggle_user_active' u.pk %}">
                                     {% csrf_token %}
@@ -322,15 +338,12 @@
 </div>
 
 <script>
-    const rows = document.querySelectorAll('.user-row');
+    const rows = document.querySelectorAll('tr[data-active]');
     let a = 0, ic = 0;
     rows.forEach(r => { r.dataset.active === 'true' ? a++ : ic++; });
     document.getElementById('activeCount').textContent = a;
     document.getElementById('inactiveCount').textContent = ic;
-    rows.forEach(r => {
-        r.addEventListener('mouseenter', () => r.style.background = 'var(--surface-2)');
-        r.addEventListener('mouseleave', () => r.style.background = '');
-    });
+
     const colours = ['av-c0', 'av-c1', 'av-c2', 'av-c3', 'av-c4'];
     document.querySelectorAll('.user-avatar[data-idx]').forEach(el => {
         el.classList.add(colours[parseInt(el.dataset.idx) % colours.length]);
