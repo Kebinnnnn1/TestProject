@@ -1,5 +1,7 @@
 {% extends 'accounts/base.html' %}
-{% block title %}AuthApp — Secure Authentication for Modern Teams{% endblock %}
+{% block title %}Convertly — Convert Files Instantly, Free{% endblock %}
+{% block meta_description %}Convertly helps you convert files quickly and easily. Upload a file, choose your format, and
+download the converted version in seconds. No installations.{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -630,22 +632,22 @@
             <div class="col-lg-6 hero-content">
                 <div class="hero-badge">
                     <span class="dot"></span>
-                    Now with Neon PostgreSQL • Always live
+                    Free forever • No uploads to servers
                 </div>
                 <h1 class="hero-title">
-                    Authentication<br>
-                    that <span class="text-grad">just works.</span>
+                    Convert files<br>
+                    <span class="text-grad">in seconds.</span>
                 </h1>
                 <p class="hero-subtitle">
-                    AuthApp gives your team secure user registration, email verification, and role-based access —
-                    deployed in minutes.
+                    Upload a file, choose the format you need, and download the converted version instantly.
+                    No complicated tools, no installations, no account needed to try.
                 </p>
                 <div class="hero-actions">
-                    <a href="{% url 'register' %}" class="btn-primary-grad">
-                        <i class="bi bi-rocket-takeoff-fill"></i> Start for Free
+                    <a href="{% url 'converter' %}" class="btn-primary-grad">
+                        <i class="bi bi-arrow-repeat"></i> Start Converting
                     </a>
-                    <a href="{% url 'login' %}" class="btn-secondary-outline">
-                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                    <a href="{% url 'register' %}" class="btn-secondary-outline">
+                        <i class="bi bi-person-plus-fill"></i> Create Free Account
                     </a>
                 </div>
                 <div class="hero-trust">
@@ -656,7 +658,7 @@
                         <div class="av av-4">TL</div>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-mid); margin: 0;">
-                        <strong style="color: var(--text-dark);">1,200+ teams</strong> trust AuthApp
+                        <strong style="color: var(--text-dark);">5,000+ conversions</strong> done this month
                     </p>
                 </div>
             </div>
@@ -668,27 +670,27 @@
                     <div class="float-card float-card-1">
                         <div class="float-icon"
                             style="background: linear-gradient(135deg, rgba(67,97,238,0.15), rgba(67,97,238,0.05));">
-                            <i class="bi bi-shield-check-fill" style="color: var(--blue);"></i>
+                            <i class="bi bi-file-earmark-arrow-up-fill" style="color: var(--blue);"></i>
                         </div>
-                        <div class="float-label">Security</div>
-                        <div class="float-value" style="font-size: 0.95rem; color: #16a34a;">All Clear</div>
-                        <div class="float-sub" style="color: var(--text-light);">CSRF Protected</div>
+                        <div class="float-label">Privacy</div>
+                        <div class="float-value" style="font-size: 0.95rem; color: #16a34a;">100% Local</div>
+                        <div class="float-sub" style="color: var(--text-light);">No server uploads</div>
                     </div>
                     <!-- Floating card 2 -->
                     <div class="float-card float-card-2">
                         <div class="float-icon"
                             style="background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,107,53,0.05));">
-                            <i class="bi bi-envelope-check-fill" style="color: var(--orange);"></i>
+                            <i class="bi bi-arrow-repeat" style="color: var(--orange);"></i>
                         </div>
-                        <div class="float-label">Emails Sent</div>
-                        <div class="float-value">3,842</div>
-                        <div class="float-sub change-up"><i class="bi bi-arrow-up-short"></i>+12% today</div>
+                        <div class="float-label">Conversions</div>
+                        <div class="float-value">5,200</div>
+                        <div class="float-sub change-up"><i class="bi bi-arrow-up-short"></i>+18% today</div>
                     </div>
                     <!-- Floating card 3 -->
                     <div class="float-card float-card-3">
-                        <div class="float-label">Active Users</div>
-                        <div class="float-value">1,247</div>
-                        <div class="float-sub change-up"><i class="bi bi-arrow-up-short"></i>+8.4%</div>
+                        <div class="float-label">Formats</div>
+                        <div class="float-value">8+</div>
+                        <div class="float-sub change-up"><i class="bi bi-arrow-up-short"></i>Always free</div>
                     </div>
 
                     <!-- Main dashboard card -->
@@ -698,7 +700,7 @@
                             <div class="dot-yellow"></div>
                             <div class="dot-green"></div>
                             <span
-                                style="margin-left: auto; font-size: 0.75rem; font-weight: 600; color: var(--text-light);">AuthApp
+                                style="margin-left: auto; font-size: 0.75rem; font-weight: 600; color: var(--text-light);">Convertly
                                 Dashboard</span>
                         </div>
                         <div class="dashboard-body">
@@ -764,26 +766,25 @@
 <div class="feature-strip">
     <div class="strip-inner">
         {% for item in ",,,,,,,,,,,,,,,,,,,,,,,,"|make_list %}
-        <span class="strip-item"><i class="bi bi-shield-lock-fill"></i> CSRF Protection</span>
-        <span class="strip-item"><i class="bi bi-envelope-check-fill"></i> Email Verification</span>
-        <span class="strip-item"><i class="bi bi-lock-fill"></i> Password Hashing</span>
-        <span class="strip-item"><i class="bi bi-people-fill"></i> Admin Dashboard</span>
-        <span class="strip-item"><i class="bi bi-cloud-check-fill"></i> Vercel Ready</span>
-        <span class="strip-item"><i class="bi bi-database-fill-check"></i> Neon PostgreSQL</span>
+        <span class="strip-item"><i class="bi bi-file-earmark-image-fill"></i> PNG → JPG</span>
+        <span class="strip-item"><i class="bi bi-file-earmark-pdf-fill"></i> Image → PDF</span>
+        <span class="strip-item"><i class="bi bi-arrow-repeat"></i> PDF → PNG</span>
+        <span class="strip-item"><i class="bi bi-shield-lock-fill"></i> No Server Uploads</span>
+        <span class="strip-item"><i class="bi bi-lightning-fill"></i> Instant Conversion</span>
+        <span class="strip-item"><i class="bi bi-eye-slash-fill"></i> 100% Private</span>
         {% endfor %}
     </div>
 </div>
 
-<!-- Features Grid -->
 <section class="features-section">
     <div class="container">
         <div class="text-center mb-5">
-            <div class="tag-gradient mb-3"><i class="bi bi-stars"></i> Everything you need</div>
+            <div class="tag-gradient mb-3"><i class="bi bi-stars"></i> Why Convertly</div>
             <h2 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;">
-                Built for scale.<br><span class="text-grad">Secured by design.</span>
+                Fast, free, and <span class="text-grad">totally private.</span>
             </h2>
             <p style="color: var(--text-light); max-width: 480px; margin: 1rem auto 0; line-height: 1.7;">
-                Every feature you need to handle auth in a production app — out of the box.
+                No complicated software. No subscriptions. Just upload, convert, and download.
             </p>
         </div>
 
@@ -792,66 +793,66 @@
                 <div class="feature-card">
                     <div class="feature-icon"
                         style="background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,140,90,0.08));">
-                        <i class="bi bi-envelope-check-fill" style="color: var(--orange);"></i>
+                        <i class="bi bi-file-earmark-image-fill" style="color: var(--orange);"></i>
                     </div>
-                    <h5>Email Verification</h5>
-                    <p>Secure UUID tokens delivered via SMTP. Accounts stay locked until verified, with a dev-mode
-                        fallback.</p>
+                    <h5>Image Conversion</h5>
+                    <p>Convert between JPG, PNG, WEBP, and BMP instantly using your browser's Canvas API. Zero quality
+                        loss on lossless formats.</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
                 <div class="feature-card">
                     <div class="feature-icon"
                         style="background: linear-gradient(135deg, rgba(67,97,238,0.15), rgba(94,122,245,0.08));">
-                        <i class="bi bi-lock-fill" style="color: var(--blue);"></i>
+                        <i class="bi bi-file-earmark-pdf-fill" style="color: var(--blue);"></i>
                     </div>
-                    <h5>Secure Auth</h5>
-                    <p>PBKDF2 password hashing, CSRF protection on every form, and session-based auth via signed
-                        cookies.</p>
+                    <h5>Image → PDF</h5>
+                    <p>Turn any image into a perfectly sized PDF document in one click. Great for sharing photos as
+                        documents.</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
                 <div class="feature-card">
                     <div class="feature-icon"
                         style="background: linear-gradient(135deg, rgba(114,9,183,0.15), rgba(155,47,224,0.08));">
-                        <i class="bi bi-speedometer2" style="color: var(--purple);"></i>
+                        <i class="bi bi-file-earmark-break-fill" style="color: var(--purple);"></i>
                     </div>
-                    <h5>Admin Dashboard</h5>
-                    <p>View all registered users, toggle account activation, and manage roles directly from the web
-                        interface.</p>
+                    <h5>PDF → Image</h5>
+                    <p>Extract the first page of any PDF as a high-resolution PNG or JPG. Powered by PDF.js right in
+                        your browser.</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
                 <div class="feature-card">
                     <div class="feature-icon"
                         style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(52,211,153,0.08));">
-                        <i class="bi bi-database-fill-check" style="color: #10b981;"></i>
+                        <i class="bi bi-shield-lock-fill" style="color: #10b981;"></i>
                     </div>
-                    <h5>Persistent Database</h5>
-                    <p>Neon PostgreSQL keeps your data safe across serverless instances. SQLite fallback for local
-                        development.</p>
+                    <h5>100% Private</h5>
+                    <p>Your files never leave your device. All conversions happen in your browser using Web APIs — no
+                        uploads, ever.</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
                 <div class="feature-card">
                     <div class="feature-icon"
                         style="background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.08));">
-                        <i class="bi bi-cloud-upload-fill" style="color: #f59e0b;"></i>
+                        <i class="bi bi-lightning-fill" style="color: #f59e0b;"></i>
                     </div>
-                    <h5>Vercel Deploy</h5>
-                    <p>Push to GitHub and auto-deploy in seconds. WhiteNoise serves static files, migrations run on cold
-                        start.</p>
+                    <h5>Instant Results</h5>
+                    <p>No waiting for server queues. Conversion starts the moment you click — small files convert in
+                        under a second.</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
                 <div class="feature-card">
                     <div class="feature-icon"
                         style="background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(248,113,113,0.06));">
-                        <i class="bi bi-person-badge-fill" style="color: #ef4444;"></i>
+                        <i class="bi bi-infinity" style="color: #ef4444;"></i>
                     </div>
-                    <h5>Role System</h5>
-                    <p>Django's built-in superuser and staff roles keep your admin panel locked to authorized users
-                        only.</p>
+                    <h5>Always Free</h5>
+                    <p>No limits, no subscriptions, no credit card. Convertly is completely free to use as many times as
+                        you want.</p>
                 </div>
             </div>
         </div>
@@ -861,8 +862,8 @@
 <!-- CTA Section -->
 <div class="container">
     <div class="cta-section">
-        <h2>Ready to ship secure auth?</h2>
-        <p>Join thousands of developers who trust AuthApp for their user authentication.</p>
+        <h2>Start converting for free.</h2>
+        <p>Join thousands of users who use Convertly to convert files in seconds — no installations, no limits.</p>
         <a href="{% url 'register' %}" class="btn-cta-white">
             <i class="bi bi-rocket-takeoff-fill"></i> Create Free Account
         </a>
