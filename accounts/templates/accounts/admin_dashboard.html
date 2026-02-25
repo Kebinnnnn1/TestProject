@@ -346,7 +346,7 @@
                                     title="Admins cannot be modified">
                                     <i class="bi bi-shield-lock-fill"></i> Admin
                                 </span>
-                                {% else %}
+                                {% elif request.user.role == 'admin' %}
                                 <form method="post" action="{% url 'change_role' u.pk %}">
                                     {% csrf_token %}
                                     <select name="role" class="role-select role-{{ u.role }}"
@@ -357,11 +357,25 @@
                                         <option value="admin">⭐ Admin</option>
                                     </select>
                                 </form>
+                                {% else %}
+                                <span class="badge-staff">
+                                    {% if u.role == 'moderator' %}🛡️ Moderator{% else %}👤 Member{% endif %}
+                                </span>
                                 {% endif %}
                             </td>
                             <td style="color:var(--text-light);">{{ u.date_joined|date:"M j, Y" }}</td>
                             <td>
-                                {% if u != request.user %}
+                                {% if u == request.user %}
+                                <span style="font-size:0.8rem;color:var(--text-light);">—</span>
+                                {% elif u.role == 'admin' %}
+                                <span style="font-size:0.8rem;color:var(--text-light);"
+                                    title="Admins cannot be deactivated"><i class="bi bi-shield-lock"
+                                        style="color:#7209b7;"></i></span>
+                                {% elif request.user.role == 'moderator' and u.role != 'member' %}
+                                <span style="font-size:0.78rem;color:var(--text-light);"
+                                    title="Moderators can only manage Members"><i class="bi bi-lock-fill"
+                                        style="color:var(--text-light);"></i></span>
+                                {% else %}
                                 <form method="post" action="{% url 'toggle_user_active' u.pk %}">
                                     {% csrf_token %}
                                     {% if u.is_active %}
@@ -372,8 +386,6 @@
                                             class="bi bi-person-check me-1"></i>Activate</button>
                                     {% endif %}
                                 </form>
-                                {% else %}
-                                <span style="font-size:0.8rem;color:var(--text-light);">—</span>
                                 {% endif %}
                             </td>
                         </tr>

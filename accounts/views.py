@@ -174,15 +174,31 @@ class AdminDashboardView(View):
 @user_passes_test(is_staff_user, login_url='/login/')
 @require_POST
 def toggle_user_active(request, pk):
-    """Flip a user's is_active status. Staff cannot deactivate themselves."""
+    """Flip a user's is_active status.
+    - Admins can toggle any non-admin user.
+    - Moderators can only toggle Members.
+    """
     target = get_object_or_404(CustomUser, pk=pk)
+    requester_role = request.user.role
+
     if target == request.user:
         messages.warning(request, "You cannot deactivate your own account.")
-    else:
-        target.is_active = not target.is_active
-        target.save()
-        state = 'activated' if target.is_active else 'deactivated'
-        messages.success(request, f"User '{target.username}' has been {state}.")
+        return redirect('admin_dashboard')
+
+    # Moderators may only manage Members
+    if requester_role == CustomUser.MODERATOR and target.role != CustomUser.MEMBER:
+        messages.error(request, f"Moderators cannot activate/deactivate {target.role.capitalize()}s.")
+        return redirect('admin_dashboard')
+
+    # Admins cannot deactivate other Admins
+    if requester_role == CustomUser.ADMIN and target.role == CustomUser.ADMIN:
+        messages.error(request, "Admins cannot deactivate other Admins.")
+        return redirect('admin_dashboard')
+
+    target.is_active = not target.is_active
+    target.save()
+    state = 'activated' if target.is_active else 'deactivated'
+    messages.success(request, f"'{target.username}' has been {state}.")
     return redirect('admin_dashboard')
 
 
@@ -190,13 +206,19 @@ def toggle_user_active(request, pk):
 @user_passes_test(is_staff_user, login_url='/login/')
 @require_POST
 def change_role(request, pk):
-    """Change a user's role between Member, Moderator, and Admin."""
+    """Change a user's role. Only Admins can do this."""
+    # Only Admins may change roles
+    if request.user.role != CustomUser.ADMIN:
+        messages.error(request, "Only Admins can change user roles.")
+        return redirect('admin_dashboard')
+
     target = get_object_or_404(CustomUser, pk=pk)
+
     if target == request.user:
         messages.warning(request, "You cannot change your own role.")
         return redirect('admin_dashboard')
 
-    # Protect existing admins — their role cannot be changed
+    # Protect existing admins — cannot be demoted
     if target.role == CustomUser.ADMIN:
         messages.error(request, f"'{target.username}' is an Admin and cannot be modified.")
         return redirect('admin_dashboard')
@@ -214,7 +236,7 @@ def change_role(request, pk):
     elif new_role == CustomUser.MODERATOR:
         target.is_staff = True
         target.is_superuser = False
-    else:  # member
+    else:
         target.is_staff = False
         target.is_superuser = False
     target.save()
