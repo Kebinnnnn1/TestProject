@@ -1,1091 +1,283 @@
-﻿{% extends 'accounts/base.html' %}
-{% block title %}File Converter &mdash; Convertly{% endblock %}
-{% block meta_description %}Free online file converter by Convertly. Convert images, PDFs and text files instantly in
-your browser. No uploads, no limits.{% endblock %}
+{% extends 'accounts/base.html' %}
+{% block title %}File Converter - Convertly{% endblock %}
+{% block meta_description %}Free online file converter by Convertly. Convert images, PDFs and text files instantly in your browser. No uploads, no limits.{% endblock %}
 
 {% block extra_head %}
 <style>
-    .cv-page {
-        background: var(--surface);
-        min-height: 100vh;
-    }
-
-    /* Hero */
-    .cv-hero {
-        position: relative;
-        overflow: hidden;
-        padding: 5rem 0 4rem;
-        background: var(--surface);
-    }
-
-    .cv-hero .blob {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(80px);
-        pointer-events: none;
-        animation: blobPulse 8s ease-in-out infinite;
-    }
-
-    .cv-hero .b1 {
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(circle, rgba(67, 97, 238, .18), transparent 70%);
-        top: -150px;
-        right: -80px;
-    }
-
-    .cv-hero .b2 {
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(255, 107, 53, .15), transparent 70%);
-        bottom: -100px;
-        left: -80px;
-        animation-delay: 3s;
-    }
-
-    .cv-hero .b3 {
-        width: 300px;
-        height: 300px;
-        background: radial-gradient(circle, rgba(114, 9, 183, .12), transparent 70%);
-        top: 40%;
-        left: 45%;
-        animation-delay: 5s;
-    }
-
-    .cv-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: linear-gradient(135deg, rgba(67, 97, 238, .1), rgba(114, 9, 183, .08));
-        border: 1px solid rgba(67, 97, 238, .25);
-        border-radius: 50px;
-        padding: .45rem 1.1rem;
-        font-size: .82rem;
-        font-weight: 600;
-        color: var(--blue);
-        margin-bottom: 1.4rem;
-    }
-
-    .cv-badge .dot {
-        width: 7px;
-        height: 7px;
-        background: var(--orange);
-        border-radius: 50%;
-        animation: blobPulse 2s ease-in-out infinite;
-    }
-
-    .cv-title {
-        font-size: clamp(2.2rem, 5vw, 3.8rem);
-        font-weight: 900;
-        letter-spacing: -2px;
-        line-height: 1.1;
-        color: var(--text-dark);
-        margin-bottom: 1rem;
-    }
-
-    .cv-sub {
-        font-size: 1.05rem;
-        color: var(--text-mid);
-        line-height: 1.7;
-        max-width: 500px;
-        margin-bottom: 2rem;
-    }
-
-    /* Format chips */
-    .fmt-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: .6rem;
-        margin-bottom: 2.5rem;
-    }
-
-    .fmt-chip {
-        padding: .35rem .9rem;
-        border-radius: 20px;
-        font-size: .78rem;
-        font-weight: 700;
-        border: 1.5px solid;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        animation: floatY 4s ease-in-out infinite;
-    }
-
-    .fmt-chip.pdf {
-        color: #e74c3c;
-        border-color: rgba(231, 76, 60, .3);
-        background: rgba(231, 76, 60, .08);
-    }
-
-    .fmt-chip.png {
-        color: #2ecc71;
-        border-color: rgba(46, 204, 113, .3);
-        background: rgba(46, 204, 113, .08);
-        animation-delay: .5s;
-    }
-
-    .fmt-chip.jpg {
-        color: #f39c12;
-        border-color: rgba(243, 156, 18, .3);
-        background: rgba(243, 156, 18, .08);
-        animation-delay: 1s;
-    }
-
-    .fmt-chip.webp {
-        color: #3498db;
-        border-color: rgba(52, 152, 219, .3);
-        background: rgba(52, 152, 219, .08);
-        animation-delay: 1.5s;
-    }
-
-    .fmt-chip.gif {
-        color: #e74c3c;
-        border-color: rgba(231, 76, 60, .3);
-        background: rgba(231, 76, 60, .08);
-        animation-delay: 2s;
-    }
-
-    .fmt-chip.svg {
-        color: #06b6d4;
-        border-color: rgba(6, 182, 212, .3);
-        background: rgba(6, 182, 212, .08);
-        animation-delay: 2.5s;
-    }
-
-    .fmt-chip.txt {
-        color: #718096;
-        border-color: rgba(113, 128, 150, .3);
-        background: rgba(113, 128, 150, .08);
-        animation-delay: 3s;
-    }
-
-    /* Converter card */
-    .cv-card {
-        background: var(--surface-2);
-        border: 1px solid var(--border);
-        border-radius: 28px;
-        padding: 2.5rem;
-        box-shadow: var(--shadow-lg);
-        position: relative;
-        z-index: 1;
-    }
-
-    /* Drop zone */
-    .drop-zone {
-        border: 2.5px dashed rgba(67, 97, 238, .35);
-        border-radius: 20px;
-        padding: 3rem 2rem;
-        text-align: center;
-        cursor: pointer;
-        transition: all .25s;
-        background: var(--surface);
-        position: relative;
-    }
-
-    .drop-zone.drag-over {
-        border-color: var(--blue);
-        background: rgba(67, 97, 238, .06);
-        transform: scale(1.01);
-    }
-
-    .drop-zone.has-file {
-        border-color: var(--orange);
-        border-style: solid;
-    }
-
-    .drop-icon {
-        font-size: 2.5rem;
-        margin-bottom: .8rem;
-        display: block;
-        color: var(--blue);
-    }
-
-    .drop-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: var(--text-dark);
-    }
-
-    .drop-sub {
-        font-size: .85rem;
-        color: var(--text-light);
-        margin-top: .3rem;
-    }
-
-    .drop-input {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        cursor: pointer;
-        width: 100%;
-        height: 100%;
-    }
-
-    /* File preview */
-    .file-preview {
-        display: none;
-        align-items: center;
-        gap: 12px;
-        padding: 1rem;
-        border-radius: 12px;
-        background: var(--surface-3);
-        margin-top: 1rem;
-        border: 1px solid var(--border);
-    }
-
-    .file-preview.show {
-        display: flex;
-    }
-
-    .fp-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.3rem;
-        flex-shrink: 0;
-        color: var(--blue);
-        background: rgba(67, 97, 238, .1);
-    }
-
-    .fp-name {
-        font-size: .88rem;
-        font-weight: 600;
-        color: var(--text-dark);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 200px;
-    }
-
-    .fp-size {
-        font-size: .75rem;
-        color: var(--text-light);
-    }
-
-    .fp-remove {
-        margin-left: auto;
-        background: none;
-        border: none;
-        color: var(--text-light);
-        cursor: pointer;
-        font-size: 1.1rem;
-        padding: .25rem;
-        border-radius: 6px;
-        transition: color .2s;
-    }
-
-    .fp-remove:hover {
-        color: #dc2626;
-    }
-
-    /* Format selector */
-    .format-row {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-top: 1.5rem;
-        flex-wrap: wrap;
-    }
-
-    .format-box {
-        flex: 1;
-        min-width: 120px;
-    }
-
-    .format-box label {
-        font-size: .72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .05em;
-        color: var(--text-light);
-        display: block;
-        margin-bottom: .4rem;
-    }
-
-    .format-select {
-        width: 100%;
-        padding: .65rem 2rem .65rem .9rem;
-        border-radius: 12px;
-        border: 1.5px solid var(--border);
-        background: var(--surface);
-        color: var(--text-dark);
-        font-size: .9rem;
-        font-weight: 600;
-        cursor: pointer;
-        appearance: none;
-        -webkit-appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23718096' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
-        transition: border-color .2s;
-    }
-
-    .format-select:focus {
-        outline: none;
-        border-color: var(--blue);
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, .12);
-    }
-
-    /* Options panel (PDF pages, etc.) */
-    .options-panel {
-        display: none;
-        margin-top: 1rem;
-        padding: 1rem;
-        border-radius: 12px;
-        background: var(--surface);
-        border: 1.5px solid rgba(67, 97, 238, .2);
-    }
-
-    .options-panel.show {
-        display: block;
-    }
-
-    .options-label {
-        font-size: .72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .05em;
-        color: var(--text-light);
-        margin-bottom: .7rem;
-    }
-
-    .options-radios {
-        display: flex;
-        gap: .75rem;
-        flex-wrap: wrap;
-    }
-
-    .options-radios label {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        cursor: pointer;
-        font-size: .88rem;
-        font-weight: 600;
-    }
-
-    .options-radios input[type=radio] {
-        accent-color: var(--blue);
-        width: 15px;
-        height: 15px;
-    }
-
-    /* Convert button */
-    .btn-convert {
-        width: 100%;
-        margin-top: 1.5rem;
-        padding: 1rem;
-        border-radius: 14px;
-        background: linear-gradient(135deg, var(--blue), var(--purple));
-        border: none;
-        color: #fff;
-        font-size: 1rem;
-        font-weight: 700;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: all .25s;
-        box-shadow: 0 8px 24px rgba(67, 97, 238, .3);
-    }
-
-    .btn-convert:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 32px rgba(67, 97, 238, .4);
-    }
-
-    .btn-convert:disabled {
-        opacity: .5;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    /* Progress bar */
-    .progress-wrap {
-        display: none;
-        margin-top: 1rem;
-    }
-
-    .progress-wrap.show {
-        display: block;
-    }
-
-    .progress-bar-bg {
-        height: 6px;
-        background: var(--border);
-        border-radius: 3px;
-        overflow: hidden;
-    }
-
-    .progress-bar-fill {
-        height: 100%;
-        width: 0%;
-        background: linear-gradient(90deg, var(--blue), var(--purple));
-        border-radius: 3px;
-        transition: width .3s;
-    }
-
-    /* Download banner */
-    .download-banner {
-        display: none;
-        margin-top: 1.2rem;
-        padding: 1.1rem 1.5rem;
-        border-radius: 14px;
-        background: linear-gradient(135deg, rgba(16, 185, 129, .12), rgba(34, 197, 94, .06));
-        border: 1.5px solid rgba(16, 185, 129, .3);
-        align-items: center;
-        gap: 12px;
-    }
-
-    .download-banner.show {
-        display: flex;
-    }
-
-    .btn-download {
-        margin-left: auto;
-        padding: .55rem 1.4rem;
-        border-radius: 10px;
-        background: #10b981;
-        border: none;
-        color: #fff;
-        font-size: .88rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all .2s;
-        white-space: nowrap;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .btn-download:hover {
-        background: #059669;
-        transform: translateY(-1px);
-    }
-
-    /* Supported formats */
-    .formats-section {
-        padding: 5rem 0;
-    }
-
-    .fmt-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 1rem;
-        margin-top: 2rem;
-    }
-
-    .fmt-card {
-        background: var(--surface-2);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 1.25rem;
-        text-align: center;
-        transition: all .25s;
-    }
-
-    .fmt-card:hover {
-        transform: translateY(-4px);
-        border-color: rgba(67, 97, 238, .3);
-        box-shadow: var(--shadow-md);
-    }
-
-    .fmt-card .fc-icon {
-        font-size: 1.8rem;
-        margin-bottom: .5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .fmt-card .fc-name {
-        font-size: .8rem;
-        font-weight: 700;
-        color: var(--text-dark);
-        text-transform: uppercase;
-        letter-spacing: .05em;
-    }
-
-    .fmt-card .fc-desc {
-        font-size: .72rem;
-        color: var(--text-light);
-        margin-top: .2rem;
-    }
-
-    /* PDF Tools section */
-    .pdf-tools-section {
-        padding: 5rem 0;
-        background: var(--surface-2);
-    }
-
-    .pdf-tool-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 1.75rem;
-        transition: all .25s;
-        height: 100%;
-    }
-
-    .pdf-tool-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-md);
-        border-color: rgba(67, 97, 238, .25);
-    }
-
-    .pdf-tool-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.3rem;
-        margin-bottom: 1rem;
-    }
-
-    .pdf-tool-card h5 {
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: .4rem;
-        font-size: 1rem;
-    }
-
-    .pdf-tool-card p {
-        color: var(--text-light);
-        font-size: .85rem;
-        line-height: 1.6;
-        margin: 0 0 1rem;
-    }
-
-    .tool-input {
-        width: 100%;
-        padding: .55rem .85rem;
-        border-radius: 10px;
-        border: 1.5px solid var(--border);
-        background: var(--surface-2);
-        color: var(--text-dark);
-        font-size: .88rem;
-        margin-bottom: .75rem;
-        transition: border-color .2s;
-    }
-
-    .tool-input:focus {
-        outline: none;
-        border-color: var(--blue);
-    }
-
-    .tool-input-file {
-        padding: .45rem .85rem;
-        cursor: pointer;
-    }
-
-    .btn-tool {
-        width: 100%;
-        padding: .7rem;
-        border-radius: 10px;
-        background: linear-gradient(135deg, var(--blue), var(--purple));
-        border: none;
-        color: #fff;
-        font-size: .88rem;
-        font-weight: 700;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        transition: all .2s;
-    }
-
-    .btn-tool:hover:not(:disabled) {
-        opacity: .88;
-        transform: translateY(-1px);
-    }
-
-    .btn-tool:disabled {
-        opacity: .45;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    .tool-status {
-        font-size: .78rem;
-        color: var(--text-light);
-        margin-top: .6rem;
-        min-height: 1.2em;
-    }
-
-    .tool-dl {
-        display: none;
-        margin-top: .6rem;
-        padding: .6rem 1rem;
-        border-radius: 9px;
-        background: rgba(16, 185, 129, .1);
-        border: 1px solid rgba(16, 185, 129, .25);
-        font-size: .82rem;
-        font-weight: 600;
-        color: #10b981;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-    }
-
-    .tool-dl.show {
-        display: flex;
-    }
-
-    /* Steps section */
-    .steps-section {
-        padding: 5rem 0;
-    }
-
-    .step-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 24px;
-        padding: 2rem;
-        text-align: center;
-        height: 100%;
-        transition: transform .3s, box-shadow .3s;
-    }
-
-    .step-card:hover {
-        transform: translateY(-6px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .step-num {
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.4rem;
-        margin: 0 auto 1.2rem;
-    }
-
-    .step-card h5 {
-        font-weight: 700;
-        color: var(--text-dark);
-        margin-bottom: .5rem;
-    }
-
-    .step-card p {
-        color: var(--text-light);
-        font-size: .9rem;
-        line-height: 1.6;
-        margin: 0;
-    }
-
-    /* Security section */
-    .security-section {
-        padding: 5rem 0;
-    }
-
-    .sec-card {
-        background: linear-gradient(135deg, #0d1117, #1a1a2e);
-        border-radius: 28px;
-        padding: 4rem 3rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-        color: #fff;
-    }
-
-    .sec-card::before {
-        content: '';
-        position: absolute;
-        top: -30%;
-        right: -5%;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(67, 97, 238, .2), transparent 70%);
-        border-radius: 50%;
-        animation: blobPulse 7s ease-in-out infinite;
-    }
-
-    .sec-pills {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: .75rem;
-        margin-top: 2rem;
-    }
-
-    .sec-pill {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(255, 255, 255, .07);
-        border: 1px solid rgba(255, 255, 255, .12);
-        border-radius: 50px;
-        padding: .5rem 1.2rem;
-        font-size: .85rem;
-        font-weight: 600;
-        color: rgba(255, 255, 255, .9);
-    }
-
-    /* Dark mode */
-    [data-theme="dark"] .cv-card {
-        background: var(--surface-2);
-    }
-
-    [data-theme="dark"] .drop-zone {
-        background: var(--surface);
-    }
-
-    [data-theme="dark"] .format-select {
-        background: var(--surface-2);
-    }
-
-    [data-theme="dark"] .tool-input {
-        background: var(--surface-3);
-    }
+.cv-page{background:var(--surface);min-height:100vh;}
+.cv-hero{position:relative;overflow:hidden;padding:5rem 0 4rem;background:var(--surface);}
+.cv-hero .blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;animation:blobPulse 8s ease-in-out infinite;}
+.cv-hero .b1{width:500px;height:500px;background:radial-gradient(circle,rgba(67,97,238,.18),transparent 70%);top:-150px;right:-80px;}
+.cv-hero .b2{width:400px;height:400px;background:radial-gradient(circle,rgba(255,107,53,.15),transparent 70%);bottom:-100px;left:-80px;animation-delay:3s;}
+.cv-hero .b3{width:300px;height:300px;background:radial-gradient(circle,rgba(114,9,183,.12),transparent 70%);top:40%;left:45%;animation-delay:5s;}
+.cv-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(67,97,238,.1),rgba(114,9,183,.08));border:1px solid rgba(67,97,238,.25);border-radius:50px;padding:.45rem 1.1rem;font-size:.82rem;font-weight:600;color:var(--blue);margin-bottom:1.4rem;}
+.cv-badge .dot{width:7px;height:7px;background:var(--orange);border-radius:50%;animation:blobPulse 2s ease-in-out infinite;}
+.cv-title{font-size:clamp(2.2rem,5vw,3.8rem);font-weight:900;letter-spacing:-2px;line-height:1.1;color:var(--text-dark);margin-bottom:1rem;}
+.cv-sub{font-size:1.05rem;color:var(--text-mid);line-height:1.7;max-width:500px;margin-bottom:2rem;}
+.fmt-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:2.5rem;}
+.fmt-chip{padding:.35rem .9rem;border-radius:20px;font-size:.78rem;font-weight:700;border:1.5px solid;display:flex;align-items:center;gap:5px;animation:floatY 4s ease-in-out infinite;}
+.fmt-chip.pdf{color:#e74c3c;border-color:rgba(231,76,60,.3);background:rgba(231,76,60,.08);}
+.fmt-chip.png{color:#2ecc71;border-color:rgba(46,204,113,.3);background:rgba(46,204,113,.08);animation-delay:.5s;}
+.fmt-chip.jpg{color:#f39c12;border-color:rgba(243,156,18,.3);background:rgba(243,156,18,.08);animation-delay:1s;}
+.fmt-chip.webp{color:#3498db;border-color:rgba(52,152,219,.3);background:rgba(52,152,219,.08);animation-delay:1.5s;}
+.fmt-chip.gif{color:#e74c3c;border-color:rgba(231,76,60,.3);background:rgba(231,76,60,.08);animation-delay:2s;}
+.fmt-chip.svg{color:#06b6d4;border-color:rgba(6,182,212,.3);background:rgba(6,182,212,.08);animation-delay:2.5s;}
+.fmt-chip.txt{color:#718096;border-color:rgba(113,128,150,.3);background:rgba(113,128,150,.08);animation-delay:3s;}
+.cv-card{background:var(--surface-2);border:1px solid var(--border);border-radius:28px;padding:2.5rem;box-shadow:var(--shadow-lg);position:relative;z-index:1;}
+.drop-zone{border:2.5px dashed rgba(67,97,238,.35);border-radius:20px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:all .25s;background:var(--surface);position:relative;}
+.drop-zone.drag-over{border-color:var(--blue);background:rgba(67,97,238,.06);transform:scale(1.01);}
+.drop-zone.has-file{border-color:var(--orange);border-style:solid;}
+.drop-icon{font-size:2.5rem;margin-bottom:.8rem;display:block;color:var(--blue);}
+.drop-title{font-size:1.1rem;font-weight:700;color:var(--text-dark);}
+.drop-sub{font-size:.85rem;color:var(--text-light);margin-top:.3rem;}
+.drop-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.file-preview{display:none;align-items:center;gap:12px;padding:1rem;border-radius:12px;background:var(--surface-3);margin-top:1rem;border:1px solid var(--border);}
+.file-preview.show{display:flex;}
+.fp-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;color:var(--blue);background:rgba(67,97,238,.1);}
+.fp-name{font-size:.88rem;font-weight:600;color:var(--text-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+.fp-size{font-size:.75rem;color:var(--text-light);}
+.fp-remove{margin-left:auto;background:none;border:none;color:var(--text-light);cursor:pointer;font-size:1.1rem;padding:.25rem;border-radius:6px;transition:color .2s;}
+.fp-remove:hover{color:#dc2626;}
+.format-row{display:flex;align-items:center;gap:1rem;margin-top:1.5rem;flex-wrap:wrap;}
+.format-box{flex:1;min-width:120px;}
+.format-box label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-light);display:block;margin-bottom:.4rem;}
+.format-select{width:100%;padding:.65rem 2rem .65rem .9rem;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text-dark);font-size:.9rem;font-weight:600;cursor:pointer;appearance:none;-webkit-appearance:none;transition:border-color .2s;}
+.format-select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(67,97,238,.12);}
+.options-panel{display:none;margin-top:1rem;padding:1rem;border-radius:12px;background:var(--surface);border:1.5px solid rgba(67,97,238,.2);}
+.options-panel.show{display:block;}
+.options-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-light);margin-bottom:.7rem;}
+.options-radios{display:flex;gap:.75rem;flex-wrap:wrap;}
+.options-radios label{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:.88rem;font-weight:600;}
+.options-radios input[type=radio]{accent-color:var(--blue);width:15px;height:15px;}
+.btn-convert{width:100%;margin-top:1.5rem;padding:1rem;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--purple));border:none;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .25s;box-shadow:0 8px 24px rgba(67,97,238,.3);}
+.btn-convert:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 32px rgba(67,97,238,.4);}
+.btn-convert:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.progress-wrap{display:none;margin-top:1rem;}
+.progress-wrap.show{display:block;}
+.progress-bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.progress-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:3px;transition:width .3s;}
+.download-banner{display:none;margin-top:1.2rem;padding:1.1rem 1.5rem;border-radius:14px;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(34,197,94,.06));border:1.5px solid rgba(16,185,129,.3);align-items:center;gap:12px;}
+.download-banner.show{display:flex;}
+.btn-download{margin-left:auto;padding:.55rem 1.4rem;border-radius:10px;background:#10b981;border:none;color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.btn-download:hover{background:#059669;transform:translateY(-1px);}
+.formats-section{padding:5rem 0;}
+.fmt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:1rem;margin-top:2rem;}
+.fmt-card{background:var(--surface-2);border:1px solid var(--border);border-radius:16px;padding:1.25rem;text-align:center;transition:all .25s;}
+.fmt-card:hover{transform:translateY(-4px);border-color:rgba(67,97,238,.3);box-shadow:var(--shadow-md);}
+.fmt-card .fc-icon{margin-bottom:.5rem;display:flex;align-items:center;justify-content:center;}
+.fmt-card .fc-name{font-size:.8rem;font-weight:700;color:var(--text-dark);text-transform:uppercase;letter-spacing:.05em;}
+.fmt-card .fc-desc{font-size:.72rem;color:var(--text-light);margin-top:.2rem;}
+.pdf-tools-section{padding:5rem 0;background:var(--surface-2);}
+.pdf-tool-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1.75rem;transition:all .25s;height:100%;}
+.pdf-tool-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:rgba(67,97,238,.25);}
+.pdf-tool-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+.pdf-tool-card h5{font-weight:700;color:var(--text-dark);margin-bottom:.4rem;font-size:1rem;}
+.pdf-tool-card p{color:var(--text-light);font-size:.85rem;line-height:1.6;margin:0 0 1rem;}
+.tool-input{width:100%;padding:.55rem .85rem;border-radius:10px;border:1.5px solid var(--border);background:var(--surface-2);color:var(--text-dark);font-size:.88rem;margin-bottom:.75rem;transition:border-color .2s;box-sizing:border-box;}
+.tool-input:focus{outline:none;border-color:var(--blue);}
+.btn-tool{width:100%;padding:.7rem;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--purple));border:none;color:#fff;font-size:.88rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
+.btn-tool:hover:not(:disabled){opacity:.88;transform:translateY(-1px);}
+.btn-tool:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.tool-status{font-size:.78rem;color:var(--text-light);margin-top:.6rem;min-height:1.2em;}
+.tool-dl{display:none;margin-top:.6rem;padding:.6rem 1rem;border-radius:9px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);font-size:.82rem;font-weight:600;color:#10b981;align-items:center;gap:8px;cursor:pointer;}
+.tool-dl.show{display:flex;}
+.steps-section{padding:5rem 0;}
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:2rem;text-align:center;height:100%;transition:transform .3s,box-shadow .3s;}
+.step-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-md);}
+.step-num{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 1.2rem;}
+.step-card h5{font-weight:700;color:var(--text-dark);margin-bottom:.5rem;}
+.step-card p{color:var(--text-light);font-size:.9rem;line-height:1.6;margin:0;}
+.security-section{padding:5rem 0;}
+.sec-card{background:linear-gradient(135deg,#0d1117,#1a1a2e);border-radius:28px;padding:4rem 3rem;text-align:center;position:relative;overflow:hidden;color:#fff;}
+.sec-card::before{content:'';position:absolute;top:-30%;right:-5%;width:400px;height:400px;background:radial-gradient(circle,rgba(67,97,238,.2),transparent 70%);border-radius:50%;animation:blobPulse 7s ease-in-out infinite;}
+.sec-pills{display:flex;flex-wrap:wrap;justify-content:center;gap:.75rem;margin-top:2rem;}
+.sec-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:50px;padding:.5rem 1.2rem;font-size:.85rem;font-weight:600;color:rgba(255,255,255,.9);}
+[data-theme="dark"] .cv-card,[data-theme="dark"] .drop-zone{background:var(--surface-2);}
+[data-theme="dark"] .format-select,[data-theme="dark"] .tool-input{background:var(--surface-3);}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="cv-page">
 
-    <!-- Hero -->
-    <section class="cv-hero">
-        <div class="blob b1"></div>
-        <div class="blob b2"></div>
-        <div class="blob b3"></div>
-        <div class="container">
-            <div class="row align-items-center g-5">
-                <div class="col-lg-5">
-                    <div class="cv-badge reveal"><span class="dot"></span> 100% Free &middot; No Signup to Try</div>
-                    <h1 class="cv-title reveal delay-1">Convert any file<br><span class="text-grad">instantly.</span>
-                    </h1>
-                    <p class="cv-sub reveal delay-2">Drag and drop your file. Choose a format. Download in seconds.
-                        Everything runs in your browser &mdash; your files never leave your device.</p>
-                    <div class="fmt-chips reveal delay-3">
-                        <span class="fmt-chip pdf"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</span>
-                        <span class="fmt-chip png"><i class="bi bi-file-earmark-image-fill"></i> PNG</span>
-                        <span class="fmt-chip jpg"><i class="bi bi-image-fill"></i> JPG</span>
-                        <span class="fmt-chip webp"><i class="bi bi-file-earmark-richtext-fill"></i> WEBP</span>
-                        <span class="fmt-chip gif"><i class="bi bi-camera-video-fill"></i> GIF</span>
-                        <span class="fmt-chip svg"><i class="bi bi-vector-pen"></i> SVG</span>
-                        <span class="fmt-chip txt"><i class="bi bi-file-earmark-text-fill"></i> TXT</span>
-                    </div>
-                </div>
-                <div class="col-lg-7 reveal-right">
-                    <div class="cv-card">
-                        <!-- Drop zone -->
-                        <div class="drop-zone" id="dropZone">
-                            <input type="file" class="drop-input" id="fileInput"
-                                accept="image/*,.pdf,.txt,.csv,.md,.svg">
-                            <span class="drop-icon"><i class="bi bi-cloud-upload-fill"></i></span>
-                            <div class="drop-title">Drop your file here</div>
-                            <div class="drop-sub">PNG, JPG, WEBP, BMP, GIF, SVG, PDF, TXT, CSV, MD</div>
-                        </div>
-
-                        <!-- File preview -->
-                        <div class="file-preview" id="filePreview">
-                            <div class="fp-icon" id="fpIcon"><i class="bi bi-file-earmark-fill"></i></div>
-                            <div>
-                                <div class="fp-name" id="fpName">filename.png</div>
-                                <div class="fp-size" id="fpSize">0 KB</div>
-                            </div>
-                            <button class="fp-remove" id="fpRemove" title="Remove file"><i
-                                    class="bi bi-x-lg"></i></button>
-                        </div>
-
-                        <!-- Format row -->
-                        <div class="format-row">
-                            <div class="format-box">
-                                <label>From</label>
-                                <select class="format-select" id="fromFormat" disabled>
-                                    <option value="">Auto-detect</option>
-                                </select>
-                            </div>
-                            <div
-                                style="display:flex;align-items:center;margin-top:18px;color:var(--blue);font-size:1.2rem;">
-                                <i class="bi bi-arrow-right"></i>
-                            </div>
-                            <div class="format-box">
-                                <label>To</label>
-                                <select class="format-select" id="toFormat">
-                                    <option value="">Select output format</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- PDF page options -->
-                        <div class="options-panel" id="pdfPageOptions">
-                            <div class="options-label"><i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF Page Options
-                            </div>
-                            <div class="options-radios">
-                                <label><input type="radio" name="pdfPages" value="first" checked> First page
-                                    only</label>
-                                <label><input type="radio" name="pdfPages" value="all"> All pages (ZIP)</label>
-                            </div>
-                            <div id="pdfPageCount" style="font-size:.75rem;color:var(--text-light);margin-top:.5rem;">
-                            </div>
-                        </div>
-
-                        <!-- Progress -->
-                        <div class="progress-wrap" id="progressWrap">
-                            <div style="font-size:.78rem;color:var(--text-light);margin-bottom:.4rem;"
-                                id="progressLabel">Converting&hellip;</div>
-                            <div class="progress-bar-bg">
-                                <div class="progress-bar-fill" id="progressFill"></div>
-                            </div>
-                        </div>
-
-                        <!-- Convert button -->
-                        <button class="btn-convert" id="convertBtn" disabled>
-                            <i class="bi bi-arrow-repeat"></i> Convert File
-                        </button>
-
-                        <!-- Download banner -->
-                        <div class="download-banner" id="downloadBanner">
-                            <div>
-                                <div style="font-size:.88rem;font-weight:700;color:#10b981;"><i
-                                        class="bi bi-check-circle-fill me-1"></i>Done!</div>
-                                <div style="font-size:.78rem;color:var(--text-light);" id="downloadInfo"></div>
-                            </div>
-                            <button class="btn-download" id="downloadBtn"><i class="bi bi-download"></i>
-                                Download</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- Hero -->
+<section class="cv-hero">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5">
+        <div class="cv-badge reveal"><span class="dot"></span> 100% Free &middot; No Signup to Try</div>
+        <h1 class="cv-title reveal delay-1">Convert any file<br><span class="text-grad">instantly.</span></h1>
+        <p class="cv-sub reveal delay-2">Drag and drop your file. Choose a format. Download in seconds. Everything runs in your browser - your files never leave your device.</p>
+        <div class="fmt-chips reveal delay-3">
+          <span class="fmt-chip pdf"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</span>
+          <span class="fmt-chip png"><i class="bi bi-file-earmark-image-fill"></i> PNG</span>
+          <span class="fmt-chip jpg"><i class="bi bi-image-fill"></i> JPG</span>
+          <span class="fmt-chip webp"><i class="bi bi-file-earmark-richtext-fill"></i> WEBP</span>
+          <span class="fmt-chip gif"><i class="bi bi-camera-video-fill"></i> GIF</span>
+          <span class="fmt-chip svg"><i class="bi bi-vector-pen"></i> SVG</span>
+          <span class="fmt-chip txt"><i class="bi bi-file-earmark-text-fill"></i> TXT</span>
         </div>
-    </section>
-
-    <!-- Supported Formats -->
-    <section class="formats-section">
-        <div class="container">
-            <div class="text-center reveal">
-                <div class="tag-gradient mb-3"><i class="bi bi-grid-3x3-gap-fill"></i> Supported Formats</div>
-                <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;">Everything you need,<br><span
-                        class="text-grad">nothing you don&apos;t.</span></h2>
+      </div>
+      <div class="col-lg-7 reveal-right">
+        <div class="cv-card">
+          <div class="drop-zone" id="dropZone">
+            <input type="file" class="drop-input" id="fileInput" accept="image/*,.pdf,.txt,.csv,.md,.svg">
+            <span class="drop-icon"><i class="bi bi-cloud-upload-fill"></i></span>
+            <div class="drop-title">Drop your file here</div>
+            <div class="drop-sub">PNG, JPG, WEBP, BMP, GIF, SVG, PDF, TXT, CSV, MD</div>
+          </div>
+          <div class="file-preview" id="filePreview">
+            <div class="fp-icon" id="fpIcon"><i class="bi bi-file-earmark-fill"></i></div>
+            <div><div class="fp-name" id="fpName">filename.png</div><div class="fp-size" id="fpSize">0 KB</div></div>
+            <button class="fp-remove" id="fpRemove" title="Remove file"><i class="bi bi-x-lg"></i></button>
+          </div>
+          <div class="format-row">
+            <div class="format-box"><label>From</label><select class="format-select" id="fromFormat" disabled><option value="">Auto-detect</option></select></div>
+            <div style="display:flex;align-items:center;margin-top:18px;color:var(--blue);font-size:1.2rem;"><i class="bi bi-arrow-right"></i></div>
+            <div class="format-box"><label>To</label><select class="format-select" id="toFormat"><option value="">Select output format</option></select></div>
+          </div>
+          <div class="options-panel" id="pdfPageOptions">
+            <div class="options-label"><i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF Page Options</div>
+            <div class="options-radios">
+              <label><input type="radio" name="pdfPages" value="first" checked> First page only</label>
+              <label><input type="radio" name="pdfPages" value="all"> All pages (ZIP)</label>
             </div>
-            <div class="fmt-grid">
-                <div class="fmt-card reveal delay-1">
-                    <div class="fc-icon"><i class="bi bi-file-earmark-image-fill"
-                            style="color:#f39c12;font-size:2rem;"></i></div>
-                    <div class="fc-name">JPG</div>
-                    <div class="fc-desc">JPEG images</div>
-                </div>
-                <div class="fmt-card reveal delay-1">
-                    <div class="fc-icon"><i class="bi bi-file-earmark-image" style="color:#2ecc71;font-size:2rem;"></i>
-                    </div>
-                    <div class="fc-name">PNG</div>
-                    <div class="fc-desc">Lossless images</div>
-                </div>
-                <div class="fmt-card reveal delay-2">
-                    <div class="fc-icon"><i class="bi bi-globe" style="color:#3498db;font-size:2rem;"></i></div>
-                    <div class="fc-name">WEBP</div>
-                    <div class="fc-desc">Modern web format</div>
-                </div>
-                <div class="fmt-card reveal delay-2">
-                    <div class="fc-icon"><i class="bi bi-image-fill" style="color:#9b59b6;font-size:2rem;"></i></div>
-                    <div class="fc-name">BMP</div>
-                    <div class="fc-desc">Bitmap image</div>
-                </div>
-                <div class="fmt-card reveal delay-3">
-                    <div class="fc-icon"><i class="bi bi-camera-video-fill" style="color:#e74c3c;font-size:2rem;"></i>
-                    </div>
-                    <div class="fc-name">GIF</div>
-                    <div class="fc-desc">Animated image</div>
-                </div>
-                <div class="fmt-card reveal delay-3">
-                    <div class="fc-icon"><i class="bi bi-vector-pen" style="color:#06b6d4;font-size:2rem;"></i></div>
-                    <div class="fc-name">SVG</div>
-                    <div class="fc-desc">Vector graphic</div>
-                </div>
-                <div class="fmt-card reveal delay-4">
-                    <div class="fc-icon"><i class="bi bi-file-earmark-pdf-fill"
-                            style="color:#e74c3c;font-size:2rem;"></i></div>
-                    <div class="fc-name">PDF</div>
-                    <div class="fc-desc">Multi-page doc</div>
-                </div>
-                <div class="fmt-card reveal delay-4">
-                    <div class="fc-icon"><i class="bi bi-file-earmark-text-fill"
-                            style="color:#718096;font-size:2rem;"></i></div>
-                    <div class="fc-name">TXT</div>
-                    <div class="fc-desc">Plain text</div>
-                </div>
-                <div class="fmt-card reveal delay-5">
-                    <div class="fc-icon"><i class="bi bi-table" style="color:#10b981;font-size:2rem;"></i></div>
-                    <div class="fc-name">CSV</div>
-                    <div class="fc-desc">Spreadsheet data</div>
-                </div>
-                <div class="fmt-card reveal delay-5">
-                    <div class="fc-icon"><i class="bi bi-markdown-fill" style="color:#4361ee;font-size:2rem;"></i></div>
-                    <div class="fc-name">MD</div>
-                    <div class="fc-desc">Markdown</div>
-                </div>
+            <div id="pdfPageCount" style="font-size:.75rem;color:var(--text-light);margin-top:.5rem;"></div>
+          </div>
+          <div class="progress-wrap" id="progressWrap">
+            <div style="font-size:.78rem;color:var(--text-light);margin-bottom:.4rem;" id="progressLabel">Converting...</div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+          </div>
+          <button class="btn-convert" id="convertBtn" disabled><i class="bi bi-arrow-repeat"></i> Convert File</button>
+          <div class="download-banner" id="downloadBanner">
+            <div>
+              <div style="font-size:.88rem;font-weight:700;color:#10b981;"><i class="bi bi-check-circle-fill me-1"></i>Done!</div>
+              <div style="font-size:.78rem;color:var(--text-light);" id="downloadInfo"></div>
             </div>
+            <button class="btn-download" id="downloadBtn"><i class="bi bi-download"></i> Download</button>
+          </div>
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- PDF Tools -->
-    <section class="pdf-tools-section">
-        <div class="container">
-            <div class="text-center reveal mb-5">
-                <div class="tag-gradient mb-3"><i class="bi bi-file-earmark-pdf-fill"></i> PDF Tools</div>
-                <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;">Powerful PDF tools,<br><span
-                        class="text-grad">completely free.</span></h2>
-                <p style="color:var(--text-light);max-width:480px;margin:1rem auto 0;line-height:1.7;">All operations
-                    run in your browser using pdf-lib. No uploads, no waiting.</p>
-            </div>
-            <div class="row g-4">
+<!-- Supported Formats -->
+<section class="formats-section">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="tag-gradient mb-3"><i class="bi bi-grid-3x3-gap-fill"></i> Supported Formats</div>
+      <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;">Everything you need,<br><span class="text-grad">nothing you don't.</span></h2>
+    </div>
+    <div class="fmt-grid">
+      <div class="fmt-card reveal delay-1"><div class="fc-icon"><i class="bi bi-file-earmark-image-fill" style="color:#f39c12;font-size:2rem;"></i></div><div class="fc-name">JPG</div><div class="fc-desc">JPEG images</div></div>
+      <div class="fmt-card reveal delay-1"><div class="fc-icon"><i class="bi bi-file-earmark-image" style="color:#2ecc71;font-size:2rem;"></i></div><div class="fc-name">PNG</div><div class="fc-desc">Lossless images</div></div>
+      <div class="fmt-card reveal delay-2"><div class="fc-icon"><i class="bi bi-globe" style="color:#3498db;font-size:2rem;"></i></div><div class="fc-name">WEBP</div><div class="fc-desc">Modern web format</div></div>
+      <div class="fmt-card reveal delay-2"><div class="fc-icon"><i class="bi bi-image-fill" style="color:#9b59b6;font-size:2rem;"></i></div><div class="fc-name">BMP</div><div class="fc-desc">Bitmap image</div></div>
+      <div class="fmt-card reveal delay-3"><div class="fc-icon"><i class="bi bi-camera-video-fill" style="color:#e74c3c;font-size:2rem;"></i></div><div class="fc-name">GIF</div><div class="fc-desc">Animated image</div></div>
+      <div class="fmt-card reveal delay-3"><div class="fc-icon"><i class="bi bi-vector-pen" style="color:#06b6d4;font-size:2rem;"></i></div><div class="fc-name">SVG</div><div class="fc-desc">Vector graphic</div></div>
+      <div class="fmt-card reveal delay-4"><div class="fc-icon"><i class="bi bi-file-earmark-pdf-fill" style="color:#e74c3c;font-size:2rem;"></i></div><div class="fc-name">PDF</div><div class="fc-desc">Multi-page doc</div></div>
+      <div class="fmt-card reveal delay-4"><div class="fc-icon"><i class="bi bi-file-earmark-text-fill" style="color:#718096;font-size:2rem;"></i></div><div class="fc-name">TXT</div><div class="fc-desc">Plain text</div></div>
+      <div class="fmt-card reveal delay-5"><div class="fc-icon"><i class="bi bi-table" style="color:#10b981;font-size:2rem;"></i></div><div class="fc-name">CSV</div><div class="fc-desc">Spreadsheet data</div></div>
+      <div class="fmt-card reveal delay-5"><div class="fc-icon"><i class="bi bi-markdown-fill" style="color:#4361ee;font-size:2rem;"></i></div><div class="fc-name">MD</div><div class="fc-desc">Markdown</div></div>
+    </div>
+  </div>
+</section>
 
-                <!-- Merge PDF -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="pdf-tool-card reveal delay-1">
-                        <div class="pdf-tool-icon"
-                            style="background:linear-gradient(135deg,rgba(67,97,238,.15),rgba(67,97,238,.05));"><i
-                                class="bi bi-file-earmark-plus-fill" style="color:var(--blue);font-size:1.4rem;"></i>
-                        </div>
-                        <h5>Merge PDF</h5>
-                        <p>Combine multiple PDFs into one document.</p>
-                        <input type="file" class="tool-input tool-input-file" id="mergeFiles" accept=".pdf" multiple>
-                        <button class="btn-tool" id="mergeBtn" onclick="mergePdfs()"><i class="bi bi-arrow-repeat"></i>
-                            Merge PDFs</button>
-                        <div class="tool-status" id="mergeSt"></div>
-                        <div class="tool-dl" id="mergeDl" onclick="triggerDl('merge')"><i class="bi bi-download"></i>
-                            Download merged PDF</div>
-                    </div>
-                </div>
-
-                <!-- Split PDF -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="pdf-tool-card reveal delay-2">
-                        <div class="pdf-tool-icon"
-                            style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.05));"><i
-                                class="bi bi-scissors" style="color:var(--orange);font-size:1.4rem;"></i></div>
-                        <h5>Split PDF</h5>
-                        <p>Split a PDF into individual pages (ZIP).</p>
-                        <input type="file" class="tool-input tool-input-file" id="splitFile" accept=".pdf">
-                        <button class="btn-tool" id="splitBtn" onclick="splitPdf()"><i class="bi bi-arrow-repeat"></i>
-                            Split into Pages</button>
-                        <div class="tool-status" id="splitSt"></div>
-                        <div class="tool-dl" id="splitDl" onclick="triggerDl('split')"><i class="bi bi-download"></i>
-                            Download ZIP</div>
-                    </div>
-                </div>
-
-                <!-- Extract Pages -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="pdf-tool-card reveal delay-3">
-                        <div class="pdf-tool-icon"
-                            style="background:linear-gradient(135deg,rgba(114,9,183,.15),rgba(114,9,183,.05));"><i
-                                class="bi bi-file-earmark-break-fill" style="color:var(--purple);font-size:1.4rem;"></i>
-                        </div>
-                        <h5>Extract Pages</h5>
-                        <p>Save specific pages as a new PDF.</p>
-                        <input type="file" class="tool-input tool-input-file" id="extractFile" accept=".pdf">
-                        <input type="text" class="tool-input" id="extractRange" placeholder='Pages e.g. "1-3,5,7"'>
-                        <button class="btn-tool" id="extractBtn" onclick="extractPages()"><i
-                                class="bi bi-arrow-repeat"></i> Extract Pages</button>
-                        <div class="tool-status" id="extractSt"></div>
-                        <div class="tool-dl" id="extractDl" onclick="triggerDl('extract')"><i
-                                class="bi bi-download"></i> Download PDF</div>
-                    </div>
-                </div>
-
-                <!-- Remove Page -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="pdf-tool-card reveal delay-4">
-                        <div class="pdf-tool-icon"
-                            style="background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(248,113,113,.06));"><i
-                                class="bi bi-file-earmark-x-fill" style="color:#ef4444;font-size:1.4rem;"></i></div>
-                        <h5>Remove Pages</h5>
-                        <p>Delete specific pages from a PDF.</p>
-                        <input type="file" class="tool-input tool-input-file" id="removeFile" accept=".pdf">
-                        <input type="text" class="tool-input" id="removeRange"
-                            placeholder='Pages to remove e.g. "2,4-6"'>
-                        <button class="btn-tool" id="removeBtn" onclick="removePages()"><i
-                                class="bi bi-arrow-repeat"></i> Remove Pages</button>
-                        <div class="tool-status" id="removeSt"></div>
-                        <div class="tool-dl" id="removeDl" onclick="triggerDl('remove')"><i class="bi bi-download"></i>
-                            Download PDF</div>
-                    </div>
-                </div>
-
-            </div>
+<!-- PDF Tools -->
+<section class="pdf-tools-section">
+  <div class="container">
+    <div class="text-center reveal mb-5">
+      <div class="tag-gradient mb-3"><i class="bi bi-file-earmark-pdf-fill"></i> PDF Tools</div>
+      <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;">Powerful PDF tools,<br><span class="text-grad">completely free.</span></h2>
+      <p style="color:var(--text-light);max-width:480px;margin:1rem auto 0;line-height:1.7;">All operations run in your browser using pdf-lib. No uploads, no waiting.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="pdf-tool-card reveal delay-1">
+          <div class="pdf-tool-icon" style="background:linear-gradient(135deg,rgba(67,97,238,.15),rgba(67,97,238,.05));"><i class="bi bi-file-earmark-plus-fill" style="color:var(--blue);font-size:1.4rem;"></i></div>
+          <h5>Merge PDF</h5>
+          <p>Combine multiple PDFs into one document.</p>
+          <input type="file" class="tool-input" id="mergeFiles" accept=".pdf" multiple style="cursor:pointer;">
+          <button class="btn-tool" onclick="mergePdfs()"><i class="bi bi-arrow-repeat"></i> Merge PDFs</button>
+          <div class="tool-status" id="mergeSt"></div>
+          <div class="tool-dl" id="mergeDl" onclick="triggerDl('merge')"><i class="bi bi-download"></i> Download merged PDF</div>
         </div>
-    </section>
-
-    <!-- 3-Step Process -->
-    <section class="steps-section">
-        <div class="container">
-            <div class="text-center reveal mb-5">
-                <div class="tag-gradient mb-3"><i class="bi bi-lightning-fill"></i> Dead simple</div>
-                <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;">Ready in <span class="text-grad">3
-                        steps.</span></h2>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="step-card reveal delay-1">
-                        <div class="step-num"
-                            style="background:linear-gradient(135deg,rgba(67,97,238,.15),rgba(67,97,238,.05));"><i
-                                class="bi bi-cloud-upload-fill" style="color:var(--blue);font-size:1.6rem;"></i></div>
-                        <h5>Upload</h5>
-                        <p>Drag &amp; drop your file or click to browse. We support images, PDFs, and text files.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="step-card reveal delay-2">
-                        <div class="step-num"
-                            style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.05));"><i
-                                class="bi bi-arrow-repeat" style="color:var(--orange);font-size:1.6rem;"></i></div>
-                        <h5>Convert</h5>
-                        <p>Pick your target format and hit Convert. It all happens in your browser &mdash; instant and
-                            private.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="step-card reveal delay-3">
-                        <div class="step-num"
-                            style="background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.05));"><i
-                                class="bi bi-download" style="color:#10b981;font-size:1.6rem;"></i></div>
-                        <h5>Download</h5>
-                        <p>Your converted file is ready. One click to save it wherever you need it.</p>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="pdf-tool-card reveal delay-2">
+          <div class="pdf-tool-icon" style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.05));"><i class="bi bi-scissors" style="color:var(--orange);font-size:1.4rem;"></i></div>
+          <h5>Split PDF</h5>
+          <p>Split a PDF into individual pages (ZIP).</p>
+          <input type="file" class="tool-input" id="splitFile" accept=".pdf" style="cursor:pointer;">
+          <button class="btn-tool" onclick="splitPdf()"><i class="bi bi-arrow-repeat"></i> Split into Pages</button>
+          <div class="tool-status" id="splitSt"></div>
+          <div class="tool-dl" id="splitDl" onclick="triggerDl('split')"><i class="bi bi-download"></i> Download ZIP</div>
         </div>
-    </section>
-
-    <!-- Security section -->
-    <section class="security-section">
-        <div class="container">
-            <div class="sec-card reveal">
-                <div style="position:relative;z-index:1;">
-                    <div class="tag-gradient mb-3" style="display:inline-flex;"><i class="bi bi-shield-check-fill"></i>
-                        Privacy First</div>
-                    <h2 style="font-size:2rem;font-weight:800;color:#fff;margin-bottom:.8rem;">Your files stay on <span
-                            class="text-grad">your device.</span></h2>
-                    <p style="color:rgba(255,255,255,.7);max-width:500px;margin:0 auto 2rem;line-height:1.7;">We never
-                        upload your files to any server. Every conversion runs entirely in your browser using Web APIs.
-                        No accounts, no storage, no tracking.</p>
-                    <div class="sec-pills">
-                        <span class="sec-pill"><i class="bi bi-shield-lock-fill" style="color:var(--blue);"></i> No
-                            uploads</span>
-                        <span class="sec-pill"><i class="bi bi-lightning-fill" style="color:var(--orange);"></i> Instant
-                            conversion</span>
-                        <span class="sec-pill"><i class="bi bi-eye-slash-fill" style="color:#7209b7;"></i> No
-                            tracking</span>
-                        <span class="sec-pill"><i class="bi bi-infinity" style="color:#10b981;"></i> Unlimited
-                            use</span>
-                        <span class="sec-pill"><i class="bi bi-phone-fill" style="color:#f59e0b;"></i> Works
-                            offline</span>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="pdf-tool-card reveal delay-3">
+          <div class="pdf-tool-icon" style="background:linear-gradient(135deg,rgba(114,9,183,.15),rgba(114,9,183,.05));"><i class="bi bi-file-earmark-break-fill" style="color:var(--purple);font-size:1.4rem;"></i></div>
+          <h5>Extract Pages</h5>
+          <p>Save specific pages as a new PDF.</p>
+          <input type="file" class="tool-input" id="extractFile" accept=".pdf" style="cursor:pointer;">
+          <input type="text" class="tool-input" id="extractRange" placeholder="Pages e.g. 1-3,5,7">
+          <button class="btn-tool" onclick="extractPages()"><i class="bi bi-arrow-repeat"></i> Extract Pages</button>
+          <div class="tool-status" id="extractSt"></div>
+          <div class="tool-dl" id="extractDl" onclick="triggerDl('extract')"><i class="bi bi-download"></i> Download PDF</div>
         </div>
-    </section>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="pdf-tool-card reveal delay-4">
+          <div class="pdf-tool-icon" style="background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(248,113,113,.06));"><i class="bi bi-file-earmark-x-fill" style="color:#ef4444;font-size:1.4rem;"></i></div>
+          <h5>Remove Pages</h5>
+          <p>Delete specific pages from a PDF.</p>
+          <input type="file" class="tool-input" id="removeFile" accept=".pdf" style="cursor:pointer;">
+          <input type="text" class="tool-input" id="removeRange" placeholder="Pages to remove e.g. 2,4-6">
+          <button class="btn-tool" onclick="removePages()"><i class="bi bi-arrow-repeat"></i> Remove Pages</button>
+          <div class="tool-status" id="removeSt"></div>
+          <div class="tool-dl" id="removeDl" onclick="triggerDl('remove')"><i class="bi bi-download"></i> Download PDF</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Steps -->
+<section class="steps-section">
+  <div class="container">
+    <div class="text-center reveal mb-5">
+      <div class="tag-gradient mb-3"><i class="bi bi-lightning-fill"></i> Dead simple</div>
+      <h2 style="font-size:2rem;font-weight:800;letter-spacing:-1px;">Ready in <span class="text-grad">3 steps.</span></h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4"><div class="step-card reveal delay-1"><div class="step-num" style="background:linear-gradient(135deg,rgba(67,97,238,.15),rgba(67,97,238,.05));"><i class="bi bi-cloud-upload-fill" style="color:var(--blue);font-size:1.6rem;"></i></div><h5>Upload</h5><p>Drag and drop your file or click to browse. We support images, PDFs, and text files.</p></div></div>
+      <div class="col-md-4"><div class="step-card reveal delay-2"><div class="step-num" style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.05));"><i class="bi bi-arrow-repeat" style="color:var(--orange);font-size:1.6rem;"></i></div><h5>Convert</h5><p>Pick your target format and hit Convert. It all happens in your browser - instant and private.</p></div></div>
+      <div class="col-md-4"><div class="step-card reveal delay-3"><div class="step-num" style="background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.05));"><i class="bi bi-download" style="color:#10b981;font-size:1.6rem;"></i></div><h5>Download</h5><p>Your converted file is ready. One click to save it wherever you need it.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Security -->
+<section class="security-section">
+  <div class="container">
+    <div class="sec-card reveal">
+      <div style="position:relative;z-index:1;">
+        <div class="tag-gradient mb-3" style="display:inline-flex;"><i class="bi bi-shield-check-fill"></i> Privacy First</div>
+        <h2 style="font-size:2rem;font-weight:800;color:#fff;margin-bottom:.8rem;">Your files stay on <span class="text-grad">your device.</span></h2>
+        <p style="color:rgba(255,255,255,.7);max-width:500px;margin:0 auto 2rem;line-height:1.7;">We never upload your files to any server. Every conversion runs entirely in your browser using Web APIs. No accounts, no storage, no tracking.</p>
+        <div class="sec-pills">
+          <span class="sec-pill"><i class="bi bi-shield-lock-fill" style="color:var(--blue);"></i> No uploads</span>
+          <span class="sec-pill"><i class="bi bi-lightning-fill" style="color:var(--orange);"></i> Instant conversion</span>
+          <span class="sec-pill"><i class="bi bi-eye-slash-fill" style="color:#7209b7;"></i> No tracking</span>
+          <span class="sec-pill"><i class="bi bi-infinity" style="color:#10b981;"></i> Unlimited use</span>
+          <span class="sec-pill"><i class="bi bi-phone-fill" style="color:#f59e0b;"></i> Works offline</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 </div>
 {% endblock %}
@@ -1096,325 +288,43 @@ your browser. No uploads, no limits.{% endblock %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
-    // ── FORMAT MAP ─────────────────────────────────────────────────────────────
-    const FORMAT_MAP = {
-        image: {
-            label: 'Image',
-            detect: ['image/jpeg', 'image/png', 'image/webp', 'image/bmp', 'image/gif', 'image/svg+xml'],
-            outputs: [
-                { value: 'jpg', label: 'JPG - JPEG image' },
-                { value: 'png', label: 'PNG - Lossless image' },
-                { value: 'webp', label: 'WEBP - Web image' },
-                { value: 'bmp', label: 'BMP - Bitmap image' },
-                { value: 'pdf', label: 'PDF - Document' },
-            ]
-        },
-        pdf: {
-            label: 'PDF',
-            detect: ['application/pdf'],
-            outputs: [
-                { value: 'png', label: 'PNG - Image' },
-                { value: 'jpg', label: 'JPG - Image' },
-            ]
-        },
-        text: {
-            label: 'Text',
-            detect: ['text/plain', 'text/csv', 'text/markdown'],
-            outputs: [
-                { value: 'txt', label: 'TXT - Plain text' },
-                { value: 'csv', label: 'CSV - Comma separated' },
-                { value: 'md', label: 'MD - Markdown' },
-            ]
-        }
-    };
-
-    // ── STATE ──────────────────────────────────────────────────────────────────
-    let currentFile = null, currentType = null, downloadURL = null, downloadName = null, cachedPdfDoc = null;
-
-    // ── DOM ────────────────────────────────────────────────────────────────────
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-    const filePreview = document.getElementById('filePreview');
-    const fpIcon = document.getElementById('fpIcon');
-    const fpName = document.getElementById('fpName');
-    const fpSize = document.getElementById('fpSize');
-    const fpRemove = document.getElementById('fpRemove');
-    const fromFormat = document.getElementById('fromFormat');
-    const toFormat = document.getElementById('toFormat');
-    const convertBtn = document.getElementById('convertBtn');
-    const progressWrap = document.getElementById('progressWrap');
-    const progressFill = document.getElementById('progressFill');
-    const progressLabel = document.getElementById('progressLabel');
-    const dlBanner = document.getElementById('downloadBanner');
-    const dlInfo = document.getElementById('downloadInfo');
-    const dlBtn = document.getElementById('downloadBtn');
-    const pdfPageOpts = document.getElementById('pdfPageOptions');
-    const pdfPageCount = document.getElementById('pdfPageCount');
-
-    // ── DRAG & DROP ────────────────────────────────────────────────────────────
-    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) loadFile(f); });
-    fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
-
-    function loadFile(file) {
-        currentFile = file; currentType = detectType(file);
-        fpName.textContent = file.name; fpSize.textContent = fmtSize(file.size);
-        fpIcon.innerHTML = typeIcon(currentType);
-        filePreview.classList.add('show'); dropZone.classList.add('has-file');
-        fromFormat.innerHTML = `<option value="${currentType}">${FORMAT_MAP[currentType]?.label || currentType} (auto-detected)</option>`;
-        populateOutputs(currentType); resetResult();
-        if (currentType === 'pdf') prefetchPageCount(file);
-    }
-
-    function detectType(file) {
-        if (file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) return 'image';
-        if (FORMAT_MAP.image.detect.includes(file.type)) return 'image';
-        if (FORMAT_MAP.pdf.detect.includes(file.type)) return 'pdf';
-        if (FORMAT_MAP.text.detect.includes(file.type)) return 'text';
-        const ext = file.name.split('.').pop().toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif', 'svg'].includes(ext)) return 'image';
-        if (ext === 'pdf') return 'pdf';
-        return 'text';
-    }
-
-    function populateOutputs(type) {
-        const opts = FORMAT_MAP[type]?.outputs || [];
-        toFormat.innerHTML = '<option value="">Select output format</option>' + opts.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
-        checkReady();
-    }
-
-    toFormat.addEventListener('change', () => {
-        const show = currentType === 'pdf' && ['png', 'jpg'].includes(toFormat.value);
-        pdfPageOpts.classList.toggle('show', show);
-        checkReady();
-    });
-
-    async function prefetchPageCount(file) {
-        try {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-            cachedPdfDoc = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
-            pdfPageCount.textContent = `${cachedPdfDoc.numPages} page${cachedPdfDoc.numPages > 1 ? 's' : ''} detected`;
-        } catch (e) { pdfPageCount.textContent = ''; }
-    }
-
-    function checkReady() { convertBtn.disabled = !(currentFile && toFormat.value); }
-
-    fpRemove.addEventListener('click', () => {
-        currentFile = null; currentType = null; cachedPdfDoc = null;
-        filePreview.classList.remove('show'); dropZone.classList.remove('has-file'); fileInput.value = '';
-        fromFormat.innerHTML = '<option value="">Auto-detect</option>';
-        toFormat.innerHTML = '<option value="">Select output format</option>';
-        pdfPageOpts.classList.remove('show'); pdfPageCount.textContent = '';
-        document.querySelector('input[name="pdfPages"][value="first"]').checked = true;
-        resetResult(); convertBtn.disabled = true;
-    });
-
-    function typeIcon(t) { const m = { image: '<i class="bi bi-file-earmark-image-fill"></i>', pdf: '<i class="bi bi-file-earmark-pdf-fill"></i>', text: '<i class="bi bi-file-earmark-text-fill"></i>' }; return m[t] || m.text; }
-    function fmtSize(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b / 1024).toFixed(1) + ' KB'; return (b / 1048576).toFixed(2) + ' MB'; }
-    function resetResult() { dlBanner.classList.remove('show'); progressWrap.classList.remove('show'); progressFill.style.width = '0%'; if (downloadURL) { URL.revokeObjectURL(downloadURL); downloadURL = null; } }
-    function setProgress(pct, lbl) { progressWrap.classList.add('show'); progressFill.style.width = pct + '%'; if (lbl) progressLabel.textContent = lbl; }
-    function showDownload(url, name) { downloadURL = url; downloadName = name; dlInfo.textContent = 'Ready: ' + name; dlBanner.classList.add('show'); progressWrap.classList.remove('show'); }
-
-    dlBtn.addEventListener('click', () => { if (!downloadURL) return; const a = document.createElement('a'); a.href = downloadURL; a.download = downloadName; a.click(); });
-
-    // ── CONVERT DISPATCHER ────────────────────────────────────────────────────
-    convertBtn.addEventListener('click', async () => {
-        if (!currentFile || !toFormat.value) return;
-        convertBtn.disabled = true; resetResult(); setProgress(5, 'Starting...');
-        try {
-            const out = toFormat.value, base = currentFile.name.replace(/\.[^.]+$/, '');
-            if (currentType === 'image') { out === 'pdf' ? await imgToPdf(currentFile, base) : await imgToImg(currentFile, out, base); }
-            else if (currentType === 'pdf') {
-                const mode = document.querySelector('input[name="pdfPages"]:checked')?.value || 'first';
-                mode === 'all' ? await pdfToImgAll(currentFile, out, base) : await pdfToImgSingle(currentFile, out, base);
-            } else { await textToText(currentFile, out, base); }
-        } catch (err) { alert('Conversion failed: ' + err.message); convertBtn.disabled = false; progressWrap.classList.remove('show'); }
-    });
-
-    // ── IMAGE -> IMAGE ─────────────────────────────────────────────────────────
-    function imgToImg(file, outFmt, base) {
-        return new Promise((resolve, reject) => {
-            const url = URL.createObjectURL(file), img = new Image();
-            img.onload = () => {
-                setProgress(60, 'Rendering...');
-                const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-                const ctx = c.getContext('2d');
-                if (outFmt === 'jpg') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); }
-                ctx.drawImage(img, 0, 0); URL.revokeObjectURL(url); setProgress(90, 'Encoding...');
-                const mime = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', bmp: 'image/bmp' };
-                c.toBlob(blob => { if (!blob) return reject(new Error('Canvas failed')); showDownload(URL.createObjectURL(blob), `${base}.${outFmt}`); convertBtn.disabled = false; resolve(); }, mime[outFmt] || 'image/png', outFmt === 'jpg' ? 0.95 : undefined);
-            };
-            img.onerror = () => reject(new Error('Failed to load image'));
-            img.src = url;
-        });
-    }
-
-    // ── IMAGE -> PDF ───────────────────────────────────────────────────────────
-    async function imgToPdf(file, base) {
-        const { jsPDF } = window.jspdf;
-        const dataUrl = await fileToDataUrl(file); setProgress(50, 'Building PDF...');
-        const img = new Image(); await new Promise((r, j) => { img.onload = r; img.onerror = j; img.src = dataUrl; }); setProgress(75, 'Encoding...');
-        const w = img.naturalWidth, h = img.naturalHeight;
-        const pdf = new jsPDF({ orientation: w > h ? 'l' : 'p', unit: 'px', format: [w, h] });
-        pdf.addImage(dataUrl, 'JPEG', 0, 0, w, h); setProgress(95, 'Finalising...');
-        showDownload(URL.createObjectURL(pdf.output('blob')), `${base}.pdf`); convertBtn.disabled = false;
-    }
-
-    // ── PDF -> IMAGE (single) ─────────────────────────────────────────────────
-    async function pdfToImgSingle(file, outFmt, base) {
-        const doc = await loadPdfJs(file); setProgress(40, 'Rendering page 1...');
-        const blob = await renderPage(doc, 1, outFmt); setProgress(95, 'Done!');
-        showDownload(URL.createObjectURL(blob), `${base}_p1.${outFmt}`); convertBtn.disabled = false;
-    }
-
-    // ── PDF -> IMAGE (all pages ZIP) ──────────────────────────────────────────
-    async function pdfToImgAll(file, outFmt, base) {
-        const doc = await loadPdfJs(file), total = doc.numPages, zip = new JSZip();
-        for (let i = 1; i <= total; i++) {
-            setProgress(Math.round(10 + (i / total) * 80), `Rendering page ${i} of ${total}...`);
-            const blob = await renderPage(doc, i, outFmt);
-            zip.file(`${base}_p${String(i).padStart(String(total).length, '0')}.${outFmt}`, blob);
-        }
-        setProgress(95, 'Creating ZIP...');
-        showDownload(URL.createObjectURL(await zip.generateAsync({ type: 'blob' })), `${base}_all_pages.zip`); convertBtn.disabled = false;
-    }
-
-    async function loadPdfJs(file) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        if (cachedPdfDoc) return cachedPdfDoc;
-        setProgress(15, 'Loading PDF...');
-        return pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
-    }
-    async function renderPage(doc, n, fmt) {
-        const page = await doc.getPage(n), vp = page.getViewport({ scale: 2 });
-        const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
-        await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
-        return new Promise(r => c.toBlob(r, fmt === 'jpg' ? 'image/jpeg' : 'image/png', 0.95));
-    }
-
-    // ── TEXT -> TEXT ───────────────────────────────────────────────────────────
-    async function textToText(file, outFmt, base) {
-        setProgress(50, 'Reading...'); const text = await file.text(); setProgress(90, 'Saving...');
-        const mime = { txt: 'text/plain', csv: 'text/csv', md: 'text/markdown' };
-        showDownload(URL.createObjectURL(new Blob([text], { type: mime[outFmt] || 'text/plain' })), `${base}.${outFmt}`); convertBtn.disabled = false;
-    }
-
-    function fileToDataUrl(file) { return new Promise((r, j) => { const rd = new FileReader(); rd.onload = e => r(e.target.result); rd.onerror = j; rd.readAsDataURL(file); }); }
-
-    // ════════════════════════════════════════════════════════════════════════════
-    // PDF TOOLS (pdf-lib)
-    // ════════════════════════════════════════════════════════════════════════════
-    const toolBlobs = { merge: null, split: null, extract: null, remove: null };
-    function triggerDl(key) { const b = toolBlobs[key]; if (!b) return; const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = b._name; a.click(); }
-    function setToolStatus(key, msg, isErr) { const el = document.getElementById(key + 'St'); el.textContent = msg; el.style.color = isErr ? '#ef4444' : 'var(--text-light)'; }
-
-    // Parse page range string like "1-3,5,7" -> [1,3,5,7] (0-indexed)
-    function parseRange(str, total) {
-        const pages = new Set();
-        str.split(',').forEach(part => {
-            part = part.trim();
-            if (part.includes('-')) { const [a, b] = part.split('-').map(Number); for (let i = a; i <= b; i++)if (i >= 1 && i <= total) pages.add(i - 1); }
-            else { const n = parseInt(part); if (n >= 1 && n <= total) pages.add(n - 1); }
-        });
-        return [...pages].sort((a, b) => a - b);
-    }
-
-    // MERGE
-    async function mergePdfs() {
-        const files = document.getElementById('mergeFiles').files;
-        if (files.length < 2) { setToolStatus('merge', 'Please select at least 2 PDF files.', true); return; }
-        const btn = document.getElementById('mergeBtn'); btn.disabled = true;
-        setToolStatus('merge', 'Merging...');
-        try {
-            const merged = await PDFLib.PDFDocument.create();
-            for (const f of files) {
-                const bytes = await f.arrayBuffer();
-                const pdf = await PDFLib.PDFDocument.load(bytes);
-                const copied = await merged.copyPages(pdf, pdf.getPageIndices());
-                copied.forEach(p => merged.addPage(p));
-            }
-            const bytes = await merged.save();
-            const blob = new Blob([bytes], { type: 'application/pdf' });
-            blob._name = 'merged.pdf'; toolBlobs.merge = blob;
-            setToolStatus('merge', `Done! ${files.length} PDFs merged.`);
-            document.getElementById('mergeDl').classList.add('show');
-        } catch (e) { setToolStatus('merge', 'Error: ' + e.message, true); }
-        btn.disabled = false;
-    }
-
-    // SPLIT
-    async function splitPdf() {
-        const file = document.getElementById('splitFile').files[0];
-        if (!file) { setToolStatus('split', 'Please select a PDF.', true); return; }
-        const btn = document.getElementById('splitBtn'); btn.disabled = true;
-        setToolStatus('split', 'Splitting...');
-        try {
-            const original = await PDFLib.PDFDocument.load(await file.arrayBuffer());
-            const total = original.getPageCount(), zip = new JSZip();
-            const pad = String(total).length;
-            for (let i = 0; i < total; i++) {
-                const single = await PDFLib.PDFDocument.create();
-                const [copied] = await single.copyPages(original, [i]);
-                single.addPage(copied);
-                const bytes = await single.save();
-                zip.file(`page_${String(i + 1).padStart(pad, '0')}.pdf`, bytes);
-                setToolStatus('split', `Processing page ${i + 1} of ${total}...`);
-            }
-            const zipBlob = await zip.generateAsync({ type: 'blob' });
-            zipBlob._name = file.name.replace('.pdf', '') + '_pages.zip'; toolBlobs.split = zipBlob;
-            setToolStatus('split', `Done! ${total} pages split.`);
-            document.getElementById('splitDl').classList.add('show');
-        } catch (e) { setToolStatus('split', 'Error: ' + e.message, true); }
-        btn.disabled = false;
-    }
-
-    // EXTRACT
-    async function extractPages() {
-        const file = document.getElementById('extractFile').files[0];
-        const rangeStr = document.getElementById('extractRange').value.trim();
-        if (!file || !rangeStr) { setToolStatus('extract', 'Please select a PDF and enter page numbers.', true); return; }
-        const btn = document.getElementById('extractBtn'); btn.disabled = true;
-        setToolStatus('extract', 'Extracting...');
-        try {
-            const original = await PDFLib.PDFDocument.load(await file.arrayBuffer());
-            const indices = parseRange(rangeStr, original.getPageCount());
-            if (!indices.length) { setToolStatus('extract', 'No valid pages found.', true); btn.disabled = false; return; }
-            const newPdf = await PDFLib.PDFDocument.create();
-            const copied = await newPdf.copyPages(original, indices);
-            copied.forEach(p => newPdf.addPage(p));
-            const bytes = await newPdf.save();
-            const blob = new Blob([bytes], { type: 'application/pdf' });
-            blob._name = file.name.replace('.pdf', '') + '_extracted.pdf'; toolBlobs.extract = blob;
-            setToolStatus('extract', `Done! ${indices.length} page(s) extracted.`);
-            document.getElementById('extractDl').classList.add('show');
-        } catch (e) { setToolStatus('extract', 'Error: ' + e.message, true); }
-        btn.disabled = false;
-    }
-
-    // REMOVE PAGES
-    async function removePages() {
-        const file = document.getElementById('removeFile').files[0];
-        const rangeStr = document.getElementById('removeRange').value.trim();
-        if (!file || !rangeStr) { setToolStatus('remove', 'Please select a PDF and enter pages to remove.', true); return; }
-        const btn = document.getElementById('removeBtn'); btn.disabled = true;
-        setToolStatus('remove', 'Removing pages...');
-        try {
-            const original = await PDFLib.PDFDocument.load(await file.arrayBuffer());
-            const total = original.getPageCount();
-            const toRemove = new Set(parseRange(rangeStr, total));
-            const keep = [...Array(total).keys()].filter(i => !toRemove.has(i));
-            if (!keep.length) { setToolStatus('remove', 'Cannot remove all pages.', true); btn.disabled = false; return; }
-            const newPdf = await PDFLib.PDFDocument.create();
-            const copied = await newPdf.copyPages(original, keep);
-            copied.forEach(p => newPdf.addPage(p));
-            const bytes = await newPdf.save();
-            const blob = new Blob([bytes], { type: 'application/pdf' });
-            blob._name = file.name.replace('.pdf', '') + '_modified.pdf'; toolBlobs.remove = blob;
-            setToolStatus('remove', `Done! ${toRemove.size} page(s) removed.`);
-            document.getElementById('removeDl').classList.add('show');
-        } catch (e) { setToolStatus('remove', 'Error: ' + e.message, true); }
-        btn.disabled = false;
-    }
+const FORMAT_MAP={image:{label:'Image',detect:['image/jpeg','image/png','image/webp','image/bmp','image/gif','image/svg+xml'],outputs:[{value:'jpg',label:'JPG - JPEG image'},{value:'png',label:'PNG - Lossless image'},{value:'webp',label:'WEBP - Web image'},{value:'bmp',label:'BMP - Bitmap image'},{value:'pdf',label:'PDF - Document'}]},pdf:{label:'PDF',detect:['application/pdf'],outputs:[{value:'png',label:'PNG - Image'},{value:'jpg',label:'JPG - Image'}]},text:{label:'Text',detect:['text/plain','text/csv','text/markdown'],outputs:[{value:'txt',label:'TXT - Plain text'},{value:'csv',label:'CSV - Comma separated'},{value:'md',label:'MD - Markdown'}]}};
+let currentFile=null,currentType=null,downloadURL=null,downloadName=null,cachedPdfDoc=null;
+const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),filePreview=document.getElementById('filePreview'),fpIcon=document.getElementById('fpIcon'),fpName=document.getElementById('fpName'),fpSize=document.getElementById('fpSize'),fpRemove=document.getElementById('fpRemove'),fromFormat=document.getElementById('fromFormat'),toFormat=document.getElementById('toFormat'),convertBtn=document.getElementById('convertBtn'),progressWrap=document.getElementById('progressWrap'),progressFill=document.getElementById('progressFill'),progressLabel=document.getElementById('progressLabel'),dlBanner=document.getElementById('downloadBanner'),dlInfo=document.getElementById('downloadInfo'),dlBtn=document.getElementById('downloadBtn'),pdfPageOpts=document.getElementById('pdfPageOptions'),pdfPageCount=document.getElementById('pdfPageCount');
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f)loadFile(f);});
+fileInput.addEventListener('change',e=>{if(e.target.files[0])loadFile(e.target.files[0]);});
+function loadFile(file){currentFile=file;currentType=detectType(file);fpName.textContent=file.name;fpSize.textContent=fmtSize(file.size);fpIcon.innerHTML=typeIcon(currentType);filePreview.classList.add('show');dropZone.classList.add('has-file');fromFormat.innerHTML=`<option value="${currentType}">${FORMAT_MAP[currentType]?.label||currentType} (auto-detected)</option>`;populateOutputs(currentType);resetResult();if(currentType==='pdf')prefetchPageCount(file);}
+function detectType(file){if(file.type==='image/svg+xml'||file.name.toLowerCase().endsWith('.svg'))return 'image';if(FORMAT_MAP.image.detect.includes(file.type))return 'image';if(FORMAT_MAP.pdf.detect.includes(file.type))return 'pdf';if(FORMAT_MAP.text.detect.includes(file.type))return 'text';const ext=file.name.split('.').pop().toLowerCase();if(['jpg','jpeg','png','webp','bmp','gif','svg'].includes(ext))return 'image';if(ext==='pdf')return 'pdf';return 'text';}
+function populateOutputs(type){const opts=FORMAT_MAP[type]?.outputs||[];toFormat.innerHTML='<option value="">Select output format</option>'+opts.map(o=>`<option value="${o.value}">${o.label}</option>`).join('');checkReady();}
+toFormat.addEventListener('change',()=>{const show=currentType==='pdf'&&['png','jpg'].includes(toFormat.value);pdfPageOpts.classList.toggle('show',show);checkReady();});
+async function prefetchPageCount(file){try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';cachedPdfDoc=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;pdfPageCount.textContent=cachedPdfDoc.numPages+' page'+(cachedPdfDoc.numPages>1?'s':'')+' detected';}catch(e){pdfPageCount.textContent='';}}
+function checkReady(){convertBtn.disabled=!(currentFile&&toFormat.value);}
+fpRemove.addEventListener('click',()=>{currentFile=null;currentType=null;cachedPdfDoc=null;filePreview.classList.remove('show');dropZone.classList.remove('has-file');fileInput.value='';fromFormat.innerHTML='<option value="">Auto-detect</option>';toFormat.innerHTML='<option value="">Select output format</option>';pdfPageOpts.classList.remove('show');pdfPageCount.textContent='';document.querySelector('input[name="pdfPages"][value="first"]').checked=true;resetResult();convertBtn.disabled=true;});
+function typeIcon(t){const m={image:'<i class="bi bi-file-earmark-image-fill"></i>',pdf:'<i class="bi bi-file-earmark-pdf-fill"></i>',text:'<i class="bi bi-file-earmark-text-fill"></i>'};return m[t]||m.text;}
+function fmtSize(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(2)+' MB';}
+function resetResult(){dlBanner.classList.remove('show');progressWrap.classList.remove('show');progressFill.style.width='0%';if(downloadURL){URL.revokeObjectURL(downloadURL);downloadURL=null;}}
+function setProgress(pct,lbl){progressWrap.classList.add('show');progressFill.style.width=pct+'%';if(lbl)progressLabel.textContent=lbl;}
+function showDownload(url,name){downloadURL=url;downloadName=name;dlInfo.textContent='Ready: '+name;dlBanner.classList.add('show');progressWrap.classList.remove('show');}
+dlBtn.addEventListener('click',()=>{if(!downloadURL)return;const a=document.createElement('a');a.href=downloadURL;a.download=downloadName;a.click();});
+convertBtn.addEventListener('click',async()=>{if(!currentFile||!toFormat.value)return;convertBtn.disabled=true;resetResult();setProgress(5,'Starting...');try{const out=toFormat.value,base=currentFile.name.replace(/\.[^.]+$/,'');if(currentType==='image'){out==='pdf'?await imgToPdf(currentFile,base):await imgToImg(currentFile,out,base);}else if(currentType==='pdf'){const mode=document.querySelector('input[name="pdfPages"]:checked')?.value||'first';mode==='all'?await pdfToImgAll(currentFile,out,base):await pdfToImgSingle(currentFile,out,base);}else{await textToText(currentFile,out,base);}}catch(err){alert('Conversion failed: '+err.message);convertBtn.disabled=false;progressWrap.classList.remove('show');}});
+function imgToImg(file,outFmt,base){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{setProgress(60,'Rendering...');const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const ctx=c.getContext('2d');if(outFmt==='jpg'){ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);}ctx.drawImage(img,0,0);URL.revokeObjectURL(url);setProgress(90,'Encoding...');const mime={jpg:'image/jpeg',png:'image/png',webp:'image/webp',bmp:'image/bmp'};c.toBlob(blob=>{if(!blob)return reject(new Error('Canvas failed'));showDownload(URL.createObjectURL(blob),base+'.'+outFmt);convertBtn.disabled=false;resolve();},mime[outFmt]||'image/png',outFmt==='jpg'?0.95:undefined);};img.onerror=()=>reject(new Error('Failed to load image'));img.src=url;});}
+async function imgToPdf(file,base){const{jsPDF}=window.jspdf;const dataUrl=await fileToDataUrl(file);setProgress(50,'Building PDF...');const img=new Image();await new Promise((r,j)=>{img.onload=r;img.onerror=j;img.src=dataUrl;});setProgress(75,'Encoding...');const w=img.naturalWidth,h=img.naturalHeight;const pdf=new jsPDF({orientation:w>h?'l':'p',unit:'px',format:[w,h]});pdf.addImage(dataUrl,'JPEG',0,0,w,h);setProgress(95,'Finalising...');showDownload(URL.createObjectURL(pdf.output('blob')),base+'.pdf');convertBtn.disabled=false;}
+async function pdfToImgSingle(file,outFmt,base){const doc=await loadPdfJs(file);setProgress(40,'Rendering page 1...');const blob=await renderPage(doc,1,outFmt);setProgress(95,'Done!');showDownload(URL.createObjectURL(blob),base+'_p1.'+outFmt);convertBtn.disabled=false;}
+async function pdfToImgAll(file,outFmt,base){const doc=await loadPdfJs(file),total=doc.numPages,zip=new JSZip();for(let i=1;i<=total;i++){setProgress(Math.round(10+(i/total)*80),'Rendering page '+i+' of '+total+'...');const blob=await renderPage(doc,i,outFmt);zip.file(base+'_p'+String(i).padStart(String(total).length,'0')+'.'+outFmt,blob);}setProgress(95,'Creating ZIP...');showDownload(URL.createObjectURL(await zip.generateAsync({type:'blob'})),base+'_all_pages.zip');convertBtn.disabled=false;}
+async function loadPdfJs(file){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';if(cachedPdfDoc)return cachedPdfDoc;setProgress(15,'Loading PDF...');return pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;}
+async function renderPage(doc,n,fmt){const page=await doc.getPage(n),vp=page.getViewport({scale:2});const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;return new Promise(r=>c.toBlob(r,fmt==='jpg'?'image/jpeg':'image/png',0.95));}
+async function textToText(file,outFmt,base){setProgress(50,'Reading...');const text=await file.text();setProgress(90,'Saving...');const mime={txt:'text/plain',csv:'text/csv',md:'text/markdown'};showDownload(URL.createObjectURL(new Blob([text],{type:mime[outFmt]||'text/plain'})),base+'.'+outFmt);convertBtn.disabled=false;}
+function fileToDataUrl(file){return new Promise((r,j)=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.onerror=j;rd.readAsDataURL(file);});}
+// PDF TOOLS
+const toolBlobs={merge:null,split:null,extract:null,remove:null};
+function triggerDl(key){const b=toolBlobs[key];if(!b)return;const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=b._name;a.click();}
+function setToolStatus(key,msg,isErr){const el=document.getElementById(key+'St');el.textContent=msg;el.style.color=isErr?'#ef4444':'var(--text-light)';}
+function parseRange(str,total){const pages=new Set();str.split(',').forEach(part=>{part=part.trim();if(part.includes('-')){const[a,b]=part.split('-').map(Number);for(let i=a;i<=b;i++)if(i>=1&&i<=total)pages.add(i-1);}else{const n=parseInt(part);if(n>=1&&n<=total)pages.add(n-1);}});return[...pages].sort((a,b)=>a-b);}
+async function mergePdfs(){const files=document.getElementById('mergeFiles').files;if(files.length<2){setToolStatus('merge','Please select at least 2 PDF files.',true);return;}setToolStatus('merge','Merging...');try{const merged=await PDFLib.PDFDocument.create();for(const f of files){const bytes=await f.arrayBuffer();const pdf=await PDFLib.PDFDocument.load(bytes);const copied=await merged.copyPages(pdf,pdf.getPageIndices());copied.forEach(p=>merged.addPage(p));}const bytes=await merged.save();const blob=new Blob([bytes],{type:'application/pdf'});blob._name='merged.pdf';toolBlobs.merge=blob;setToolStatus('merge','Done! '+files.length+' PDFs merged.');document.getElementById('mergeDl').classList.add('show');}catch(e){setToolStatus('merge','Error: '+e.message,true);}}
+async function splitPdf(){const file=document.getElementById('splitFile').files[0];if(!file){setToolStatus('split','Please select a PDF.',true);return;}setToolStatus('split','Splitting...');try{const original=await PDFLib.PDFDocument.load(await file.arrayBuffer());const total=original.getPageCount(),zip=new JSZip(),pad=String(total).length;for(let i=0;i<total;i++){const single=await PDFLib.PDFDocument.create();const[copied]=await single.copyPages(original,[i]);single.addPage(copied);const bytes=await single.save();zip.file('page_'+String(i+1).padStart(pad,'0')+'.pdf',bytes);setToolStatus('split','Processing page '+(i+1)+' of '+total+'...');}const zipBlob=await zip.generateAsync({type:'blob'});zipBlob._name=file.name.replace('.pdf','')+'_pages.zip';toolBlobs.split=zipBlob;setToolStatus('split','Done! '+total+' pages split.');document.getElementById('splitDl').classList.add('show');}catch(e){setToolStatus('split','Error: '+e.message,true);}}
+async function extractPages(){const file=document.getElementById('extractFile').files[0];const rangeStr=document.getElementById('extractRange').value.trim();if(!file||!rangeStr){setToolStatus('extract','Please select a PDF and enter page numbers.',true);return;}setToolStatus('extract','Extracting...');try{const original=await PDFLib.PDFDocument.load(await file.arrayBuffer());const indices=parseRange(rangeStr,original.getPageCount());if(!indices.length){setToolStatus('extract','No valid pages found.',true);return;}const newPdf=await PDFLib.PDFDocument.create();const copied=await newPdf.copyPages(original,indices);copied.forEach(p=>newPdf.addPage(p));const bytes=await newPdf.save();const blob=new Blob([bytes],{type:'application/pdf'});blob._name=file.name.replace('.pdf','')+'_extracted.pdf';toolBlobs.extract=blob;setToolStatus('extract','Done! '+indices.length+' page(s) extracted.');document.getElementById('extractDl').classList.add('show');}catch(e){setToolStatus('extract','Error: '+e.message,true);}}
+async function removePages(){const file=document.getElementById('removeFile').files[0];const rangeStr=document.getElementById('removeRange').value.trim();if(!file||!rangeStr){setToolStatus('remove','Please select a PDF and enter pages to remove.',true);return;}setToolStatus('remove','Removing pages...');try{const original=await PDFLib.PDFDocument.load(await file.arrayBuffer());const total=original.getPageCount();const toRemove=new Set(parseRange(rangeStr,total));const keep=[...Array(total).keys()].filter(i=>!toRemove.has(i));if(!keep.length){setToolStatus('remove','Cannot remove all pages.',true);return;}const newPdf=await PDFLib.PDFDocument.create();const copied=await newPdf.copyPages(original,keep);copied.forEach(p=>newPdf.addPage(p));const bytes=await newPdf.save();const blob=new Blob([bytes],{type:'application/pdf'});blob._name=file.name.replace('.pdf','')+'_modified.pdf';toolBlobs.remove=blob;setToolStatus('remove','Done! '+toRemove.size+' page(s) removed.');document.getElementById('removeDl').classList.add('show');}catch(e){setToolStatus('remove','Error: '+e.message,true);}}
 </script>
 {% endblock %}
