@@ -614,6 +614,97 @@ download the converted version in seconds. No installations.{% endblock %}
         background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(67, 97, 238, 0.15));
         border-color: rgba(67, 97, 238, 0.3);
     }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 1199px) {
+        .float-card {
+            display: none;
+        }
+    }
+
+    @media (max-width: 991px) {
+        .hero {
+            min-height: auto;
+            padding: 4rem 0 3rem;
+        }
+
+        .hero-visual {
+            display: none;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+        }
+
+        .hero-content {
+            text-align: center;
+        }
+
+        .hero-actions {
+            justify-content: center;
+        }
+
+        .hero-trust {
+            justify-content: center;
+        }
+
+        .feature-strip {
+            margin: 0;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .hero {
+            padding: 3rem 0 2.5rem;
+        }
+
+        .hero-title {
+            font-size: 2.2rem;
+            letter-spacing: -1px;
+        }
+
+        .hero-subtitle {
+            font-size: .95rem;
+        }
+
+        .hero-actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: .75rem;
+        }
+
+        .hero-actions a {
+            text-align: center;
+            justify-content: center;
+        }
+
+        .hero-badge {
+            font-size: .75rem;
+        }
+
+        .strip-inner {
+            animation-duration: 20s;
+        }
+
+        .feature-section {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+
+        .cta-section {
+            padding: 3rem 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-title {
+            font-size: 1.95rem;
+        }
+
+        .trust-avatars {
+            flex-wrap: wrap;
+        }
+    }
 </style>
 {% endblock %}
 

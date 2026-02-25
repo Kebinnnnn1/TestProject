@@ -631,6 +631,63 @@
     .delay-5 {
       transition-delay: 0.40s !important;
     }
+
+    /* ─── Global Responsive ─── */
+    html,
+    body {
+      overflow-x: hidden;
+    }
+
+    /* Disable side-slide animations on small screens (prevent layout shift) */
+    @media (max-width: 767px) {
+
+      .reveal-left,
+      .reveal-right {
+        transform: translateY(20px) !important;
+      }
+
+      .reveal-left.visible,
+      .reveal-right.visible {
+        transform: translate(0, 0) !important;
+      }
+    }
+
+    /* Navbar mobile: stack action buttons nicely */
+    @media (max-width: 991px) {
+      .navbar .d-flex {
+        flex-wrap: wrap;
+        gap: .5rem;
+        margin-top: .5rem;
+        padding-bottom: .5rem;
+      }
+
+      .navbar-nav {
+        gap: 0 !important;
+      }
+    }
+
+    /* Footer: stack on small screens */
+    @media (max-width: 576px) {
+      footer p {
+        font-size: .78rem;
+        text-align: center;
+        line-height: 1.8;
+      }
+
+      footer p br {
+        display: block;
+        content: '';
+        margin: .25rem 0;
+      }
+    }
+
+    /* Section padding shrink on mobile */
+    @media (max-width: 767px) {
+      .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+    }
   </style>
 
   {% block extra_head %}{% endblock %}
