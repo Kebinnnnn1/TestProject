@@ -71,13 +71,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'authapp.wsgi.application'
 
-# On Vercel the filesystem is read-only — use /tmp for SQLite
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/tmp/db.sqlite3' if ON_VERCEL else BASE_DIR / 'db.sqlite3',
+# Database
+# - On Vercel: set DATABASE_URL to a Neon PostgreSQL connection string
+# - Locally: falls back to SQLite
+import dj_database_url
+_DATABASE_URL = config('DATABASE_URL', default='')
+if _DATABASE_URL:
+    DATABASES = {'default': dj_database_url.parse(_DATABASE_URL, conn_max_age=600)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
