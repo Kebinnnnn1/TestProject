@@ -555,6 +555,63 @@
         box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
         color: var(--purple);
     }
+
+    /* ─── Dark Mode Overrides ─── */
+    [data-theme="dark"] .hero {
+        background: var(--surface);
+    }
+
+    [data-theme="dark"] .blob-1 {
+        background: radial-gradient(circle, rgba(255, 107, 53, 0.35), transparent 70%);
+    }
+
+    [data-theme="dark"] .blob-2 {
+        background: radial-gradient(circle, rgba(67, 97, 238, 0.3), transparent 70%);
+    }
+
+    [data-theme="dark"] .blob-3 {
+        background: radial-gradient(circle, rgba(114, 9, 183, 0.25), transparent 70%);
+    }
+
+    [data-theme="dark"] .dashboard-card {
+        background: #1a2236;
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), 0 4px 20px rgba(67, 97, 238, 0.2);
+    }
+
+    [data-theme="dark"] .dashboard-header {
+        background: linear-gradient(135deg, #1e2a3e, #16213a);
+        border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+
+    [data-theme="dark"] .float-card {
+        background: rgba(22, 30, 46, 0.92);
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="dark"] .float-value {
+        color: var(--text-dark);
+    }
+
+    [data-theme="dark"] .feature-card {
+        background: var(--surface-2);
+        border-color: var(--border);
+    }
+
+    [data-theme="dark"] .feature-card:hover {
+        box-shadow: 0 20px 60px rgba(67, 97, 238, 0.2);
+        border-color: rgba(67, 97, 238, 0.3);
+    }
+
+    [data-theme="dark"] .trust-avatars .av {
+        border-color: var(--surface);
+    }
+
+    [data-theme="dark"] .hero-badge {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(67, 97, 238, 0.15));
+        border-color: rgba(67, 97, 238, 0.3);
+    }
 </style>
 {% endblock %}
 
