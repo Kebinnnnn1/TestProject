@@ -184,3 +184,52 @@ def toggle_user_active(request, pk):
         state = 'activated' if target.is_active else 'deactivated'
         messages.success(request, f"User '{target.username}' has been {state}.")
     return redirect('admin_dashboard')
+
+
+# ---------------------------------------------------------------------------
+# Temporary: Setup Admin Endpoint  ← REMOVE AFTER USE
+# ---------------------------------------------------------------------------
+
+def setup_admin(request):
+    """
+    One-time endpoint to promote a registered user to superuser.
+    Usage: /setup-admin/?key=YOUR_SECRET&username=your_username
+    Remove this view and URL after use.
+    """
+    from django.conf import settings as django_settings
+
+    setup_key = django_settings.ADMIN_SETUP_KEY
+
+    # Block if no key configured
+    if not setup_key:
+        return render(request, 'accounts/setup_admin.html', {
+            'error': 'ADMIN_SETUP_KEY is not configured.'
+        })
+
+    provided_key = request.GET.get('key', '')
+    username = request.GET.get('username', '').strip()
+    promoted = False
+    error = None
+
+    if provided_key != setup_key:
+        error = 'Invalid secret key.'
+    elif not username:
+        error = 'Please provide a ?username= parameter.'
+    else:
+        try:
+            user = CustomUser.objects.get(username=username)
+            user.is_staff = True
+            user.is_superuser = True
+            user.is_verified = True
+            user.is_active = True
+            user.save()
+            promoted = True
+        except CustomUser.DoesNotExist:
+            error = f"No user found with username '{username}'."
+
+    return render(request, 'accounts/setup_admin.html', {
+        'promoted': promoted,
+        'username': username,
+        'error': error,
+    })
+

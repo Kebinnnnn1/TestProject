@@ -27,6 +27,9 @@ CSRF_TRUSTED_ORIGINS = [
 if ON_VERCEL:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# Secret key for the temporary /setup-admin/ endpoint (remove after use)
+ADMIN_SETUP_KEY = config('ADMIN_SETUP_KEY', default='')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

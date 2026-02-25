@@ -1,0 +1,48 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Setup Admin — AuthApp{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh; padding: 2rem 1rem;">
+    <div style="width: 100%; max-width: 480px;">
+        <div class="card-glass p-5 text-center">
+            {% if promoted %}
+            <div
+                style="width: 60px; height: 60px; background: linear-gradient(135deg, #10b981, #34d399); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <i class="bi bi-shield-fill-check" style="font-size: 1.6rem; color: #fff;"></i>
+            </div>
+            <h2 style="color: #fff; font-weight: 700;">Superuser Created!</h2>
+            <p style="color: #94a3b8; margin: 1rem 0;">
+                <strong style="color: #34d399;">{{ username }}</strong> is now a verified superuser.<br>
+                You can now log in and access the admin dashboard.
+            </p>
+            <div class="d-flex flex-column gap-2 mt-4">
+                <a href="{% url 'login' %}" class="btn-primary-custom btn">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Go to Login
+                </a>
+                <a href="{% url 'admin_dashboard' %}" class="btn"
+                    style="border: 1px solid rgba(255,255,255,0.12); color: #94a3b8; border-radius: 10px; padding: 0.65rem;">
+                    Admin Dashboard
+                </a>
+            </div>
+            <p class="mt-4" style="color: #ef4444; font-size: 0.82rem;">
+                ⚠️ <strong>Remove this URL from urls.py</strong> after use for security.
+            </p>
+            {% else %}
+            <div
+                style="width: 60px; height: 60px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <i class="bi bi-shield-lock-fill" style="font-size: 1.6rem; color: #fff;"></i>
+            </div>
+            <h2 style="color: #fff; font-weight: 700;">Setup Admin</h2>
+            {% if error %}
+            <div class="alert alert-danger mt-3">
+                <i class="bi bi-x-circle-fill me-2"></i>{{ error }}
+            </div>
+            {% else %}
+            <p style="color: #94a3b8;">Provide the secret key and username via URL parameters.</p>
+            <code style="color: #a5b4fc; font-size: 0.82rem;">/setup-admin/?key=SECRET&amp;username=YOUR_USERNAME</code>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
