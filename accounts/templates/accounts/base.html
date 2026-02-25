@@ -581,6 +581,56 @@
         transform: translateX(-50%)
       }
     }
+
+    /* ─── Global Reveal ─── */
+    .reveal,
+    .reveal-left,
+    .reveal-right {
+      transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+
+    .reveal.visible,
+    .reveal-left.visible,
+    .reveal-right.visible {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+
+    .delay-1 {
+      transition-delay: 0.08s !important;
+    }
+
+    .delay-2 {
+      transition-delay: 0.16s !important;
+    }
+
+    .delay-3 {
+      transition-delay: 0.24s !important;
+    }
+
+    .delay-4 {
+      transition-delay: 0.32s !important;
+    }
+
+    .delay-5 {
+      transition-delay: 0.40s !important;
+    }
   </style>
 
   {% block extra_head %}{% endblock %}
@@ -686,6 +736,24 @@
     window.addEventListener('scroll', () => {
       nav.classList.toggle('scrolled', window.scrollY > 20);
     });
+
+    // ─── Global Scroll-Reveal (Intersection Observer) ───
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    function initReveal() {
+      document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => {
+        revealObs.observe(el);
+      });
+    }
+    initReveal();
+    setTimeout(initReveal, 250);
   </script>
   {% block extra_scripts %}{% endblock %}
 </body>

@@ -186,6 +186,38 @@ def toggle_user_active(request, pk):
     return redirect('admin_dashboard')
 
 
+@login_required
+@user_passes_test(is_staff_user, login_url='/login/')
+@require_POST
+def change_role(request, pk):
+    """Change a user's role between Member, Moderator, and Admin."""
+    target = get_object_or_404(CustomUser, pk=pk)
+    if target == request.user:
+        messages.warning(request, "You cannot change your own role.")
+        return redirect('admin_dashboard')
+
+    new_role = request.POST.get('role', '').strip()
+    valid_roles = [CustomUser.MEMBER, CustomUser.MODERATOR, CustomUser.ADMIN]
+    if new_role not in valid_roles:
+        messages.error(request, "Invalid role selected.")
+        return redirect('admin_dashboard')
+
+    target.role = new_role
+    if new_role == CustomUser.ADMIN:
+        target.is_staff = True
+        target.is_superuser = True
+    elif new_role == CustomUser.MODERATOR:
+        target.is_staff = True
+        target.is_superuser = False
+    else:  # member
+        target.is_staff = False
+        target.is_superuser = False
+    target.save()
+    messages.success(request, f"'{target.username}' is now a {new_role.capitalize()}.")
+    return redirect('admin_dashboard')
+
+
+
 # ---------------------------------------------------------------------------
 # Temporary: Setup Admin Endpoint  ← REMOVE AFTER USE
 # ---------------------------------------------------------------------------

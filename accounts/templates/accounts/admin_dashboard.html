@@ -109,11 +109,12 @@
         color: #dc2626;
         border: 1px solid rgba(239, 68, 68, 0.2);
         border-radius: 8px;
-        padding: 0.35rem 0.9rem;
+        padding: 0.35rem 0.85rem;
         font-size: 0.78rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.2s;
+        white-space: nowrap;
     }
 
     .btn-deactivate:hover {
@@ -125,11 +126,12 @@
         color: #16a34a;
         border: 1px solid rgba(34, 197, 94, 0.25);
         border-radius: 8px;
-        padding: 0.35rem 0.9rem;
+        padding: 0.35rem 0.85rem;
         font-size: 0.78rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.2s;
+        white-space: nowrap;
     }
 
     .btn-activate:hover {
@@ -137,13 +139,13 @@
     }
 
     .user-avatar {
-        width: 34px;
-        height: 34px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.78rem;
+        font-size: 0.82rem;
         font-weight: 700;
         color: #fff;
         flex-shrink: 0;
@@ -170,15 +172,15 @@
         background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
     }
 
-    /* Table styles that override Bootstrap */
+    /* Table */
     .admin-table {
         border-collapse: collapse;
         width: 100%;
     }
 
     .admin-table thead th {
-        padding: 0.9rem 1.25rem;
-        font-size: 0.72rem;
+        padding: 0.85rem 1.1rem;
+        font-size: 0.7rem;
         font-weight: 700;
         color: var(--text-light);
         text-transform: uppercase;
@@ -190,8 +192,8 @@
     }
 
     .admin-table tbody td {
-        padding: 0.95rem 1.25rem;
-        font-size: 0.88rem;
+        padding: 0.9rem 1.1rem;
+        font-size: 0.86rem;
         color: var(--text-dark);
         vertical-align: middle;
         border-bottom: 1px solid var(--border);
@@ -206,6 +208,45 @@
         background: var(--surface-2);
         transition: background 0.15s;
     }
+
+    /* Role selector */
+    .role-select {
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: var(--surface);
+        color: var(--text-dark);
+        cursor: pointer;
+        transition: all 0.2s;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23718096' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        padding-right: 28px;
+    }
+
+    .role-select.role-member {
+        border-color: rgba(113, 128, 150, 0.3);
+    }
+
+    .role-select.role-moderator {
+        border-color: rgba(37, 99, 235, 0.4);
+        color: #2563eb;
+    }
+
+    .role-select.role-admin {
+        border-color: rgba(114, 9, 183, 0.4);
+        color: #7209b7;
+    }
+
+    .role-select:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.12);
+    }
 </style>
 {% endblock %}
 
@@ -213,14 +254,14 @@
 <div class="admin-wrap">
     <div class="container">
 
-        <div class="admin-header" style="animation: fadeInUp 0.6s ease both;">
+        <div class="admin-header reveal">
             <div class="row align-items-center g-3">
                 <div class="col-lg-6">
                     <p
                         style="font-size:0.78rem;opacity:0.5;margin-bottom:0.2rem;text-transform:uppercase;letter-spacing:0.05em;position:relative;z-index:1;">
                         Admin Panel</p>
                     <h1><i class="bi bi-speedometer2 me-2" style="color:var(--orange);"></i>User Management</h1>
-                    <p>Manage all registered AuthApp users</p>
+                    <p>Manage roles, status, and access for all AuthApp users</p>
                 </div>
                 <div class="col-lg-6">
                     <div class="row g-2" style="position:relative;z-index:1;">
@@ -247,7 +288,7 @@
             </div>
         </div>
 
-        <div class="users-card" style="animation: fadeInUp 0.6s 0.1s ease both;">
+        <div class="users-card reveal">
             <div class="users-card-header">
                 <span><i class="bi bi-people-fill me-2" style="color:var(--blue);"></i>All Users</span>
                 <span style="font-size:0.78rem;color:var(--text-light);font-weight:500;">{{ users|length }} total</span>
@@ -263,7 +304,7 @@
                             <th>Status</th>
                             <th>Role</th>
                             <th>Joined</th>
-                            <th>Action</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -297,12 +338,24 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if u.is_superuser %}
-                                <span class="badge-staff">Superuser</span>
-                                {% elif u.is_staff %}
-                                <span class="badge-staff">Staff</span>
+                                {% if u != request.user %}
+                                <form method="post" action="{% url 'change_role' u.pk %}" class="role-form">
+                                    {% csrf_token %}
+                                    <select name="role" class="role-select role-{{ u.role }}"
+                                        onchange="this.form.submit()" title="Change role">
+                                        <option value="member" {% if u.role=='member' %}selected{% endif %}>👤 Member
+                                        </option>
+                                        <option value="moderator" {% if u.role=='moderator' %}selected{% endif %}>🛡️
+                                            Moderator</option>
+                                        <option value="admin" {% if u.role=='admin' %}selected{% endif %}>⭐ Admin
+                                        </option>
+                                    </select>
+                                </form>
                                 {% else %}
-                                <span style="font-size:0.82rem;color:var(--text-light);">Member</span>
+                                <span class="badge-staff">
+                                    {% if u.role == 'admin' %}⭐ Admin{% elif u.role == 'moderator' %}🛡️ Moderator{%
+                                    else %}👤 Member{% endif %}
+                                </span>
                                 {% endif %}
                             </td>
                             <td style="color:var(--text-light);">{{ u.date_joined|date:"M j, Y" }}</td>
@@ -340,17 +393,21 @@
 </div>
 
 <script>
-    // Stat counters
     const rows = document.querySelectorAll('tr[data-active]');
     let a = 0, ic = 0;
     rows.forEach(r => { r.dataset.active === 'true' ? a++ : ic++; });
     document.getElementById('activeCount').textContent = a;
     document.getElementById('inactiveCount').textContent = ic;
-    // Avatar: colour + first letter from data-name (NO template filters needed)
     const colours = ['av-c0', 'av-c1', 'av-c2', 'av-c3', 'av-c4'];
     document.querySelectorAll('.user-avatar[data-name]').forEach((el, i) => {
         el.textContent = el.dataset.name.charAt(0).toUpperCase();
         el.classList.add(colours[i % colours.length]);
+    });
+    // Update select colour class on change
+    document.querySelectorAll('.role-select').forEach(sel => {
+        sel.addEventListener('change', () => {
+            sel.className = 'role-select role-' + sel.value;
+        });
     });
 </script>
 {% endblock %}

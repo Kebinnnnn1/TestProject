@@ -47,7 +47,7 @@
     }
 
     .stat-card {
-        background: #fff;
+        background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 16px;
         padding: 1.5rem;
@@ -87,7 +87,7 @@
     }
 
     .info-card {
-        background: #fff;
+        background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 16px;
         padding: 1.5rem;
@@ -127,40 +127,81 @@
         font-weight: 600;
         color: var(--text-dark);
     }
+
+    .quick-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.9rem 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        background: var(--surface-2);
+    }
+
+    .quick-link:hover {
+        transform: translateX(4px);
+    }
+
+    .quick-link-blue {
+        background: rgba(67, 97, 238, 0.06);
+        border-color: rgba(67, 97, 238, 0.15);
+        color: var(--blue);
+    }
+
+    .quick-link-purple {
+        background: rgba(114, 9, 183, 0.06);
+        border-color: rgba(114, 9, 183, 0.15);
+        color: var(--purple);
+    }
+
+    .quick-link-red {
+        background: #fef2f2;
+        border-color: rgba(239, 68, 68, 0.2);
+        color: #dc2626;
+        width: 100%;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    [data-theme="dark"] .quick-link-red {
+        background: rgba(220, 38, 38, 0.12);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="dash-wrap">
     <div class="container">
-        <!-- Header banner -->
-        <div class="dash-header" style="animation: fadeInUp 0.6s ease both;">
-            <p style="font-size: 0.82rem; opacity: 0.7; margin-bottom: 0.2rem;">WELCOME BACK</p>
-            <h1>{{ user.username }} <span
-                    style="font-size: 1rem; opacity: 0.7; font-weight: 500; letter-spacing: 0;">👋</span></h1>
+
+        <div class="dash-header reveal">
+            <p style="font-size:0.82rem;opacity:0.7;margin-bottom:0.2rem;">WELCOME BACK</p>
+            <h1>{{ user.username }} <span style="font-size:1rem;opacity:0.7;font-weight:500;">👋</span></h1>
             <p>Here's an overview of your account.</p>
         </div>
 
-        <!-- Stat cards -->
-        <div class="row g-3 mb-4" style="animation: fadeInUp 0.6s 0.1s ease both;">
+        <div class="row g-3 mb-4">
             <div class="col-sm-6 col-lg-3">
-                <div class="stat-card">
+                <div class="stat-card reveal delay-1">
                     <div class="sc-icon"
-                        style="background: linear-gradient(135deg, rgba(67,97,238,0.15), rgba(94,122,245,0.07));">
-                        <i class="bi bi-person-fill" style="color: var(--blue);"></i>
+                        style="background:linear-gradient(135deg,rgba(67,97,238,0.15),rgba(94,122,245,0.07));">
+                        <i class="bi bi-person-fill" style="color:var(--blue);"></i>
                     </div>
                     <div class="sc-label">Account</div>
-                    <div class="sc-value" style="font-size: 1.1rem;">{{ user.username }}</div>
+                    <div class="sc-value" style="font-size:1.1rem;">{{ user.username }}</div>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-3">
-                <div class="stat-card">
+                <div class="stat-card reveal delay-2">
                     <div class="sc-icon"
-                        style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(52,211,153,0.07));">
-                        <i class="bi bi-patch-check-fill" style="color: #10b981;"></i>
+                        style="background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(52,211,153,0.07));">
+                        <i class="bi bi-patch-check-fill" style="color:#10b981;"></i>
                     </div>
                     <div class="sc-label">Email Status</div>
-                    <div class="sc-value" style="font-size: 1rem;">
+                    <div class="sc-value" style="font-size:1rem;">
                         {% if user.is_verified %}
                         <span class="badge-verified">✓ Verified</span>
                         {% else %}
@@ -170,36 +211,39 @@
                 </div>
             </div>
             <div class="col-sm-6 col-lg-3">
-                <div class="stat-card">
+                <div class="stat-card reveal delay-3">
                     <div class="sc-icon"
-                        style="background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.07));">
-                        <i class="bi bi-calendar-check-fill" style="color: #f59e0b;"></i>
+                        style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,191,36,0.07));">
+                        <i class="bi bi-calendar-check-fill" style="color:#f59e0b;"></i>
                     </div>
                     <div class="sc-label">Member Since</div>
-                    <div class="sc-value" style="font-size: 1rem;">{{ user.date_joined|date:"M j, Y" }}</div>
+                    <div class="sc-value" style="font-size:1rem;">{{ user.date_joined|date:"M j, Y" }}</div>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-3">
-                <div class="stat-card">
+                <div class="stat-card reveal delay-4">
                     <div class="sc-icon"
-                        style="background: linear-gradient(135deg, rgba(114,9,183,0.15), rgba(155,47,224,0.07));">
-                        <i class="bi bi-shield-fill-check" style="color: var(--purple);"></i>
+                        style="background:linear-gradient(135deg,rgba(114,9,183,0.15),rgba(155,47,224,0.07));">
+                        <i class="bi bi-shield-fill-check" style="color:var(--purple);"></i>
                     </div>
                     <div class="sc-label">Role</div>
-                    <div class="sc-value" style="font-size: 1rem;">
-                        {% if user.is_superuser %}<span class="badge-staff">Superuser</span>
-                        {% elif user.is_staff %}<span class="badge-staff">Staff</span>
-                        {% else %}<span class="badge-active">Member</span>{% endif %}
+                    <div class="sc-value" style="font-size:1rem;">
+                        {% if user.role == 'admin' %}
+                        <span class="badge-staff">⭐ Admin</span>
+                        {% elif user.role == 'moderator' %}
+                        <span class="badge-staff">🛡️ Moderator</span>
+                        {% else %}
+                        <span class="badge-active">👤 Member</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Detail cards -->
-        <div class="row g-3" style="animation: fadeInUp 0.6s 0.2s ease both;">
+        <div class="row g-3">
             <div class="col-md-6">
-                <div class="info-card">
-                    <h5><i class="bi bi-person-circle me-2" style="color: var(--blue);"></i>Profile Details</h5>
+                <div class="info-card reveal">
+                    <h5><i class="bi bi-person-circle me-2" style="color:var(--blue);"></i>Profile Details</h5>
                     <div class="info-row">
                         <span class="ir-label">Username</span>
                         <span class="ir-value">{{ user.username }}</span>
@@ -213,46 +257,40 @@
                         <span class="ir-value">{{ user.last_login|date:"N j, Y g:i A"|default:"—" }}</span>
                     </div>
                     <div class="info-row">
-                        <span class="ir-label">Account Active</span>
+                        <span class="ir-label">Account Status</span>
                         <span class="ir-value">
-                            {% if user.is_active %}<span class="badge-active">Active</span>{% else %}<span
-                                class="badge-inactive">Inactive</span>{% endif %}
+                            {% if user.is_active %}
+                            <span class="badge-active">Active</span>
+                            {% else %}
+                            <span class="badge-inactive">Inactive</span>
+                            {% endif %}
                         </span>
                     </div>
                 </div>
             </div>
-
             <div class="col-md-6">
-                <div class="info-card">
-                    <h5><i class="bi bi-grid me-2" style="color: var(--orange);"></i>Quick Actions</h5>
+                <div class="info-card reveal delay-1">
+                    <h5><i class="bi bi-grid me-2" style="color:var(--orange);"></i>Quick Actions</h5>
                     <div class="d-flex flex-column gap-2">
                         {% if user.is_staff or user.is_superuser %}
-                        <a href="{% url 'admin_dashboard' %}"
-                            style="display: flex; align-items: center; gap: 10px; padding: 0.9rem 1rem; background: linear-gradient(135deg, rgba(67,97,238,0.06), rgba(114,9,183,0.04)); border: 1px solid rgba(67,97,238,0.15); border-radius: 12px; font-weight: 600; font-size: 0.88rem; color: var(--blue); text-decoration: none; transition: all 0.2s;"
-                            onmouseover="this.style.transform='translateX(4px)'"
-                            onmouseout="this.style.transform='translateX(0)'">
-                            <i class="bi bi-speedometer2" style="font-size: 1.1rem;"></i> Admin Dashboard
+                        <a href="{% url 'admin_dashboard' %}" class="quick-link quick-link-blue">
+                            <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i> Admin Dashboard
                         </a>
-                        <a href="/django-admin/" target="_blank"
-                            style="display: flex; align-items: center; gap: 10px; padding: 0.9rem 1rem; background: linear-gradient(135deg, rgba(114,9,183,0.06), rgba(67,97,238,0.04)); border: 1px solid rgba(114,9,183,0.15); border-radius: 12px; font-weight: 600; font-size: 0.88rem; color: var(--purple); text-decoration: none; transition: all 0.2s;"
-                            onmouseover="this.style.transform='translateX(4px)'"
-                            onmouseout="this.style.transform='translateX(0)'">
-                            <i class="bi bi-gear-fill" style="font-size: 1.1rem;"></i> Django Admin
+                        <a href="/django-admin/" target="_blank" class="quick-link quick-link-purple">
+                            <i class="bi bi-gear-fill" style="font-size:1.1rem;"></i> Django Admin
                         </a>
                         {% endif %}
                         <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
-                            <button type="submit"
-                                style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 0.9rem 1rem; background: #fef2f2; border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; font-weight: 600; font-size: 0.88rem; color: #dc2626; cursor: pointer; transition: all 0.2s; text-align: left;"
-                                onmouseover="this.style.transform='translateX(4px)'"
-                                onmouseout="this.style.transform='translateX(0)'">
-                                <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i> Sign Out
+                            <button type="submit" class="quick-link quick-link-red">
+                                <i class="bi bi-box-arrow-right" style="font-size:1.1rem;"></i> Sign Out
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 {% endblock %}

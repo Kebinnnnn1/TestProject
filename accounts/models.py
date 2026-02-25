@@ -4,9 +4,19 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
-    """Extended user model with email verification support."""
-    email = models.EmailField(unique=True)
+    """Extended user model with email verification and role support."""
+    MEMBER    = 'member'
+    MODERATOR = 'moderator'
+    ADMIN     = 'admin'
+    ROLE_CHOICES = [
+        (MEMBER,    'Member'),
+        (MODERATOR, 'Moderator'),
+        (ADMIN,     'Admin'),
+    ]
+
+    email      = models.EmailField(unique=True)
     is_verified = models.BooleanField(default=False)
+    role       = models.CharField(max_length=20, choices=ROLE_CHOICES, default=MEMBER)
 
     def __str__(self):
         return self.username
