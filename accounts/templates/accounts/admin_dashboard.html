@@ -172,7 +172,6 @@
         background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
     }
 
-    /* Table */
     .admin-table {
         border-collapse: collapse;
         width: 100%;
@@ -209,11 +208,10 @@
         transition: background 0.15s;
     }
 
-    /* Role selector */
     .role-select {
         border: 1.5px solid var(--border);
         border-radius: 8px;
-        padding: 0.3rem 0.6rem;
+        padding: 0.3rem 2rem 0.3rem 0.6rem;
         font-size: 0.78rem;
         font-weight: 600;
         background: var(--surface);
@@ -225,27 +223,26 @@
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23718096' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 8px center;
-        padding-right: 28px;
-    }
-
-    .role-select.role-member {
-        border-color: rgba(113, 128, 150, 0.3);
-    }
-
-    .role-select.role-moderator {
-        border-color: rgba(37, 99, 235, 0.4);
-        color: #2563eb;
-    }
-
-    .role-select.role-admin {
-        border-color: rgba(114, 9, 183, 0.4);
-        color: #7209b7;
     }
 
     .role-select:focus {
         outline: none;
         border-color: var(--blue);
         box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.12);
+    }
+
+    .role-member {
+        border-color: rgba(113, 128, 150, 0.3);
+    }
+
+    .role-moderator {
+        border-color: rgba(37, 99, 235, 0.4);
+        color: #2563eb;
+    }
+
+    .role-admin {
+        border-color: rgba(114, 9, 183, 0.4);
+        color: #7209b7;
     }
 </style>
 {% endblock %}
@@ -273,13 +270,13 @@
                         </div>
                         <div class="col-4">
                             <div class="stat-pill">
-                                <div class="sp-n" id="activeCount">—</div>
+                                <div class="sp-n" id="activeCount">0</div>
                                 <div class="sp-l">Active</div>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="stat-pill">
-                                <div class="sp-n" id="inactiveCount">—</div>
+                                <div class="sp-n" id="inactiveCount">0</div>
                                 <div class="sp-l">Inactive</div>
                             </div>
                         </div>
@@ -339,22 +336,24 @@
                             </td>
                             <td>
                                 {% if u != request.user %}
-                                <form method="post" action="{% url 'change_role' u.pk %}" class="role-form">
+                                <form method="post" action="{% url 'change_role' u.pk %}">
                                     {% csrf_token %}
                                     <select name="role" class="role-select role-{{ u.role }}"
-                                        onchange="this.form.submit()" title="Change role">
-                                        <option value="member" {% if u.role=='member' %}selected{% endif %}>👤 Member
-                                        </option>
-                                        <option value="moderator" {% if u.role=='moderator' %}selected{% endif %}>🛡️
-                                            Moderator</option>
-                                        <option value="admin" {% if u.role=='admin' %}selected{% endif %}>⭐ Admin
-                                        </option>
+                                        data-current="{{ u.role }}" onchange="this.form.submit()">
+                                        <option value="member">👤 Member</option>
+                                        <option value="moderator">🛡️ Moderator</option>
+                                        <option value="admin">⭐ Admin</option>
                                     </select>
                                 </form>
                                 {% else %}
                                 <span class="badge-staff">
-                                    {% if u.role == 'admin' %}⭐ Admin{% elif u.role == 'moderator' %}🛡️ Moderator{%
-                                    else %}👤 Member{% endif %}
+                                    {% if u.role == 'admin' %}
+                                    ⭐ Admin
+                                    {% elif u.role == 'moderator' %}
+                                    🛡️ Moderator
+                                    {% else %}
+                                    👤 Member
+                                    {% endif %}
                                 </span>
                                 {% endif %}
                             </td>
@@ -393,21 +392,24 @@
 </div>
 
 <script>
-    const rows = document.querySelectorAll('tr[data-active]');
-    let a = 0, ic = 0;
-    rows.forEach(r => { r.dataset.active === 'true' ? a++ : ic++; });
+    // Active / inactive count
+    var rows = document.querySelectorAll('tr[data-active]');
+    var a = 0, ic = 0;
+    rows.forEach(function (r) { r.dataset.active === 'true' ? a++ : ic++; });
     document.getElementById('activeCount').textContent = a;
     document.getElementById('inactiveCount').textContent = ic;
-    const colours = ['av-c0', 'av-c1', 'av-c2', 'av-c3', 'av-c4'];
-    document.querySelectorAll('.user-avatar[data-name]').forEach((el, i) => {
+
+    // Avatar colour + letter (no Django filters needed)
+    var colours = ['av-c0', 'av-c1', 'av-c2', 'av-c3', 'av-c4'];
+    document.querySelectorAll('.user-avatar[data-name]').forEach(function (el, i) {
         el.textContent = el.dataset.name.charAt(0).toUpperCase();
         el.classList.add(colours[i % colours.length]);
     });
-    // Update select colour class on change
-    document.querySelectorAll('.role-select').forEach(sel => {
-        sel.addEventListener('change', () => {
-            sel.className = 'role-select role-' + sel.value;
-        });
+
+    // Set selected option from data-current attribute (no Django if needed)
+    document.querySelectorAll('select[data-current]').forEach(function (sel) {
+        sel.value = sel.dataset.current;
+        sel.className = 'role-select role-' + sel.dataset.current;
     });
 </script>
 {% endblock %}
