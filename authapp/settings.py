@@ -1,16 +1,31 @@
 """
 Django settings for authapp project.
 """
+import os
 from pathlib import Path
 from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Detect if running on Vercel
+ON_VERCEL = os.environ.get('VERCEL', False)
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 # Also allow all Vercel preview/production domains automatically
 ALLOWED_HOSTS += ['.vercel.app']
+
+# CSRF: allow form submissions from Vercel HTTPS domains
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
+# Trust Vercel's HTTPS proxy
+if ON_VERCEL:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -53,10 +68,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'authapp.wsgi.application'
 
+# On Vercel the filesystem is read-only — use /tmp for SQLite
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': '/tmp/db.sqlite3' if ON_VERCEL else BASE_DIR / 'db.sqlite3',
     }
 }
 
