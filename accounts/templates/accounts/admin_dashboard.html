@@ -249,46 +249,68 @@
                     </thead>
                     <tbody>
                         {% for u in users %}
-                        <tr class="user-row" data-active="{{ u.is_active|lower }}" style="transition:background 0.15s;">
+                        <tr class="user-row" data-active="{{ u.is_active|lower }}">
                             <td class="td" style="color:var(--text-light);">{{ forloop.counter }}</td>
                             <td class="td">
                                 <div style="display:flex;align-items:center;gap:10px;">
                                     <div class="user-avatar" data-idx="{{ forloop.counter0 }}">{{
                                         u.username|slice:":1"|upper }}</div>
                                     <div style="font-size:0.88rem;font-weight:600;color:var(--text-dark);">
-                                        {{ u.username }}{% if u == request.user %} <span
-                                            style="font-size:0.7rem;color:var(--blue);">(you)</span>{% endif %}
+                                        {{ u.username }}
+                                        {% if u == request.user %}
+                                        <span style="font-size:0.7rem;color:var(--blue);">(you)</span>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </td>
                             <td class="td" style="color:var(--text-mid);">{{ u.email }}</td>
-                            <td class="td">{% if u.is_verified %}<span class="badge-verified">✓ Yes</span>{% else
-                                %}<span class="badge-unverified">✗ No</span>{% endif %}</td>
-                            <td class="td">{% if u.is_active %}<span class="badge-active">● Active</span>{% else %}<span
-                                    class="badge-inactive">● Inactive</span>{% endif %}</td>
                             <td class="td">
-                                {% if u.is_superuser %}<span class="badge-staff">Superuser</span>
-                                {% elif u.is_staff %}<span class="badge-staff">Staff</span>
-                                {% else %}<span style="font-size:0.82rem;color:var(--text-light);">Member</span>{% endif
-                                %}
+                                {% if u.is_verified %}
+                                <span class="badge-verified">✓ Verified</span>
+                                {% else %}
+                                <span class="badge-unverified">✗ Unverified</span>
+                                {% endif %}
+                            </td>
+                            <td class="td">
+                                {% if u.is_active %}
+                                <span class="badge-active">● Active</span>
+                                {% else %}
+                                <span class="badge-inactive">● Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td class="td">
+                                {% if u.is_superuser %}
+                                <span class="badge-staff">Superuser</span>
+                                {% elif u.is_staff %}
+                                <span class="badge-staff">Staff</span>
+                                {% else %}
+                                <span style="font-size:0.82rem;color:var(--text-light);">Member</span>
+                                {% endif %}
                             </td>
                             <td class="td" style="color:var(--text-light);">{{ u.date_joined|date:"M j, Y" }}</td>
                             <td class="td">
                                 {% if u != request.user %}
-                                <form method="post" action="{% url 'toggle_user_active' u.pk %}">{% csrf_token %}
-                                    {% if u.is_active %}<button type="submit" class="btn-deactivate"><i
+                                <form method="post" action="{% url 'toggle_user_active' u.pk %}">
+                                    {% csrf_token %}
+                                    {% if u.is_active %}
+                                    <button type="submit" class="btn-deactivate"><i
                                             class="bi bi-person-dash me-1"></i>Deactivate</button>
-                                    {% else %}<button type="submit" class="btn-activate"><i
-                                            class="bi bi-person-check me-1"></i>Activate</button>{% endif %}
+                                    {% else %}
+                                    <button type="submit" class="btn-activate"><i
+                                            class="bi bi-person-check me-1"></i>Activate</button>
+                                    {% endif %}
                                 </form>
-                                {% else %}<span style="font-size:0.8rem;color:var(--text-light);">—</span>{% endif %}
+                                {% else %}
+                                <span style="font-size:0.8rem;color:var(--text-light);">—</span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="8" style="text-align:center;padding:4rem;color:var(--text-light);"><i
-                                    class="bi bi-people"
-                                    style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>No users found.</td>
+                            <td colspan="8" style="text-align:center;padding:4rem;color:var(--text-light);">
+                                <i class="bi bi-people"
+                                    style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>No users found.
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -300,18 +322,15 @@
 </div>
 
 <script>
-    // Count active/inactive
     const rows = document.querySelectorAll('.user-row');
     let a = 0, ic = 0;
     rows.forEach(r => { r.dataset.active === 'true' ? a++ : ic++; });
     document.getElementById('activeCount').textContent = a;
     document.getElementById('inactiveCount').textContent = ic;
-    // Hover effect
     rows.forEach(r => {
         r.addEventListener('mouseenter', () => r.style.background = 'var(--surface-2)');
         r.addEventListener('mouseleave', () => r.style.background = '');
     });
-    // Colour avatars by index (no Django cycle tag needed)
     const colours = ['av-c0', 'av-c1', 'av-c2', 'av-c3', 'av-c4'];
     document.querySelectorAll('.user-avatar[data-idx]').forEach(el => {
         el.classList.add(colours[parseInt(el.dataset.idx) % colours.length]);
