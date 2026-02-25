@@ -1,129 +1,255 @@
 {% extends 'accounts/base.html' %}
-
 {% block title %}Dashboard — AuthApp{% endblock %}
 
+{% block extra_head %}
+<style>
+    .dash-wrap {
+        background: var(--surface-2);
+        min-height: calc(100vh - 70px);
+        padding: 2.5rem 0 4rem;
+    }
+
+    .dash-header {
+        background: linear-gradient(135deg, #4361ee, #7209b7);
+        border-radius: 20px;
+        padding: 2rem 2.5rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .dash-header::after {
+        content: '';
+        position: absolute;
+        right: -40px;
+        top: -40px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent 70%);
+        border-radius: 50%;
+    }
+
+    .dash-header h1 {
+        font-size: 1.7rem;
+        font-weight: 800;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .dash-header p {
+        margin: 0.3rem 0 0;
+        font-size: 0.9rem;
+        opacity: 0.8;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.25s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-card .sc-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .sc-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--text-dark);
+    }
+
+    .stat-card .sc-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+    }
+
+    .info-card h5 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.2rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.75rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-row .ir-label {
+        font-size: 0.82rem;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .info-row .ir-value {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container" style="padding: 3rem 1rem;">
-    <!-- Header -->
-    <div class="mb-5">
-        <div class="d-flex align-items-center gap-3 mb-2">
-            <div
-                style="width: 52px; height: 52px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <i class="bi bi-person-fill" style="font-size: 1.4rem; color: #fff;"></i>
-            </div>
-            <div>
-                <p style="color: #94a3b8; margin: 0; font-size: 0.88rem;">Logged in as</p>
-                <h1 style="font-size: 1.8rem; font-weight: 700; color: #fff; margin: 0;">{{ user.username }}</h1>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4">
-        <!-- Profile Card -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card-glass p-4 h-100">
-                <div class="d-flex align-items-center gap-2 mb-4">
-                    <i class="bi bi-person-circle" style="color: #a5b4fc; font-size: 1.2rem;"></i>
-                    <h5 style="color: #fff; margin: 0; font-weight: 600;">Profile</h5>
-                </div>
-                <div class="mb-3">
-                    <p
-                        style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        Username</p>
-                    <p style="color: #fff; font-weight: 500; margin: 0;">{{ user.username }}</p>
-                </div>
-                <div class="mb-3">
-                    <p
-                        style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        Email</p>
-                    <p style="color: #fff; font-weight: 500; margin: 0;">{{ user.email }}</p>
-                </div>
-                <div class="mb-3">
-                    <p
-                        style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        Status</p>
-                    {% if user.is_verified %}
-                    <span class="badge-verified"><i class="bi bi-patch-check-fill me-1"></i>Verified</span>
-                    {% else %}
-                    <span class="badge-unverified"><i class="bi bi-exclamation-circle me-1"></i>Unverified</span>
-                    {% endif %}
-                </div>
-                <div>
-                    <p
-                        style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        Member Since</p>
-                    <p style="color: #fff; font-weight: 500; margin: 0;">{{ user.date_joined|date:"N j, Y" }}</p>
-                </div>
-            </div>
+<div class="dash-wrap">
+    <div class="container">
+        <!-- Header banner -->
+        <div class="dash-header" style="animation: fadeInUp 0.6s ease both;">
+            <p style="font-size: 0.82rem; opacity: 0.7; margin-bottom: 0.2rem;">WELCOME BACK</p>
+            <h1>{{ user.username }} <span
+                    style="font-size: 1rem; opacity: 0.7; font-weight: 500; letter-spacing: 0;">👋</span></h1>
+            <p>Here's an overview of your account.</p>
         </div>
 
-        <!-- Account Info -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card-glass p-4 h-100">
-                <div class="d-flex align-items-center gap-2 mb-4">
-                    <i class="bi bi-shield-check" style="color: #a5b4fc; font-size: 1.2rem;"></i>
-                    <h5 style="color: #fff; margin: 0; font-weight: 600;">Account Security</h5>
+        <!-- Stat cards -->
+        <div class="row g-3 mb-4" style="animation: fadeInUp 0.6s 0.1s ease both;">
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="sc-icon"
+                        style="background: linear-gradient(135deg, rgba(67,97,238,0.15), rgba(94,122,245,0.07));">
+                        <i class="bi bi-person-fill" style="color: var(--blue);"></i>
+                    </div>
+                    <div class="sc-label">Account</div>
+                    <div class="sc-value" style="font-size: 1.1rem;">{{ user.username }}</div>
                 </div>
-                <div class="mb-3">
-                    <p
-                        style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        Account Active</p>
-                    {% if user.is_active %}
-                    <span class="badge-active"><i class="bi bi-check-circle-fill me-1"></i>Active</span>
-                    {% else %}
-                    <span class="badge-inactive"><i class="bi bi-x-circle-fill me-1"></i>Inactive</span>
-                    {% endif %}
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="sc-icon"
+                        style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(52,211,153,0.07));">
+                        <i class="bi bi-patch-check-fill" style="color: #10b981;"></i>
+                    </div>
+                    <div class="sc-label">Email Status</div>
+                    <div class="sc-value" style="font-size: 1rem;">
+                        {% if user.is_verified %}
+                        <span class="badge-verified">✓ Verified</span>
+                        {% else %}
+                        <span class="badge-unverified">✗ Unverified</span>
+                        {% endif %}
+                    </div>
                 </div>
-                {% if user.is_staff %}
-                <div class="mb-3">
-                    <p
-                        style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        Role</p>
-                    <span class="badge-staff"><i class="bi bi-star-fill me-1"></i>Staff / Admin</span>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="sc-icon"
+                        style="background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.07));">
+                        <i class="bi bi-calendar-check-fill" style="color: #f59e0b;"></i>
+                    </div>
+                    <div class="sc-label">Member Since</div>
+                    <div class="sc-value" style="font-size: 1rem;">{{ user.date_joined|date:"M j, Y" }}</div>
                 </div>
-                {% endif %}
-                <div class="mb-3">
-                    <p
-                        style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        Last Login</p>
-                    <p style="color: #fff; font-weight: 500; margin: 0;">{{ user.last_login|date:"N j, Y g:i A" }}</p>
-                </div>
-                <div>
-                    <p
-                        style="color: #64748b; font-size: 0.8rem; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        Password</p>
-                    <p style="color: #34d399; font-weight: 500; margin: 0;"><i class="bi bi-lock-fill me-1"></i>Hashed
-                        (PBKDF2)</p>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="sc-icon"
+                        style="background: linear-gradient(135deg, rgba(114,9,183,0.15), rgba(155,47,224,0.07));">
+                        <i class="bi bi-shield-fill-check" style="color: var(--purple);"></i>
+                    </div>
+                    <div class="sc-label">Role</div>
+                    <div class="sc-value" style="font-size: 1rem;">
+                        {% if user.is_superuser %}<span class="badge-staff">Superuser</span>
+                        {% elif user.is_staff %}<span class="badge-staff">Staff</span>
+                        {% else %}<span class="badge-active">Member</span>{% endif %}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="col-md-12 col-lg-4">
-            <div class="card-glass p-4 h-100">
-                <div class="d-flex align-items-center gap-2 mb-4">
-                    <i class="bi bi-grid" style="color: #a5b4fc; font-size: 1.2rem;"></i>
-                    <h5 style="color: #fff; margin: 0; font-weight: 600;">Quick Actions</h5>
+        <!-- Detail cards -->
+        <div class="row g-3" style="animation: fadeInUp 0.6s 0.2s ease both;">
+            <div class="col-md-6">
+                <div class="info-card">
+                    <h5><i class="bi bi-person-circle me-2" style="color: var(--blue);"></i>Profile Details</h5>
+                    <div class="info-row">
+                        <span class="ir-label">Username</span>
+                        <span class="ir-value">{{ user.username }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="ir-label">Email</span>
+                        <span class="ir-value">{{ user.email }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="ir-label">Last Login</span>
+                        <span class="ir-value">{{ user.last_login|date:"N j, Y g:i A"|default:"—" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="ir-label">Account Active</span>
+                        <span class="ir-value">
+                            {% if user.is_active %}<span class="badge-active">Active</span>{% else %}<span
+                                class="badge-inactive">Inactive</span>{% endif %}
+                        </span>
+                    </div>
                 </div>
-                <div class="d-flex flex-column gap-2">
-                    {% if user.is_staff or user.is_superuser %}
-                    <a href="{% url 'admin_dashboard' %}" class="btn"
-                        style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; border-radius: 10px; text-align: left; padding: 0.75rem 1rem; font-weight: 500; transition: background 0.2s;">
-                        <i class="bi bi-speedometer2 me-2"></i> Admin Dashboard
-                    </a>
-                    <a href="/django-admin/" class="btn"
-                        style="background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; border-radius: 10px; text-align: left; padding: 0.75rem 1rem; font-weight: 500; transition: background 0.2s;"
-                        target="_blank">
-                        <i class="bi bi-gear me-2"></i> Django Admin
-                    </a>
-                    {% endif %}
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn w-100"
-                            style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; border-radius: 10px; text-align: left; padding: 0.75rem 1rem; font-weight: 500; transition: background 0.2s;">
-                            <i class="bi bi-box-arrow-right me-2"></i> Sign Out
-                        </button>
-                    </form>
+            </div>
+
+            <div class="col-md-6">
+                <div class="info-card">
+                    <h5><i class="bi bi-grid me-2" style="color: var(--orange);"></i>Quick Actions</h5>
+                    <div class="d-flex flex-column gap-2">
+                        {% if user.is_staff or user.is_superuser %}
+                        <a href="{% url 'admin_dashboard' %}"
+                            style="display: flex; align-items: center; gap: 10px; padding: 0.9rem 1rem; background: linear-gradient(135deg, rgba(67,97,238,0.06), rgba(114,9,183,0.04)); border: 1px solid rgba(67,97,238,0.15); border-radius: 12px; font-weight: 600; font-size: 0.88rem; color: var(--blue); text-decoration: none; transition: all 0.2s;"
+                            onmouseover="this.style.transform='translateX(4px)'"
+                            onmouseout="this.style.transform='translateX(0)'">
+                            <i class="bi bi-speedometer2" style="font-size: 1.1rem;"></i> Admin Dashboard
+                        </a>
+                        <a href="/django-admin/" target="_blank"
+                            style="display: flex; align-items: center; gap: 10px; padding: 0.9rem 1rem; background: linear-gradient(135deg, rgba(114,9,183,0.06), rgba(67,97,238,0.04)); border: 1px solid rgba(114,9,183,0.15); border-radius: 12px; font-weight: 600; font-size: 0.88rem; color: var(--purple); text-decoration: none; transition: all 0.2s;"
+                            onmouseover="this.style.transform='translateX(4px)'"
+                            onmouseout="this.style.transform='translateX(0)'">
+                            <i class="bi bi-gear-fill" style="font-size: 1.1rem;"></i> Django Admin
+                        </a>
+                        {% endif %}
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit"
+                                style="width: 100%; display: flex; align-items: center; gap: 10px; padding: 0.9rem 1rem; background: #fef2f2; border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; font-weight: 600; font-size: 0.88rem; color: #dc2626; cursor: pointer; transition: all 0.2s; text-align: left;"
+                                onmouseover="this.style.transform='translateX(4px)'"
+                                onmouseout="this.style.transform='translateX(0)'">
+                                <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i> Sign Out
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

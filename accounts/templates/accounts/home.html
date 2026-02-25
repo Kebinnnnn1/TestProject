@@ -1,121 +1,876 @@
 {% extends 'accounts/base.html' %}
+{% block title %}AuthApp — Secure Authentication for Modern Teams{% endblock %}
 
-{% block title %}Home — AuthApp{% endblock %}
+{% block extra_head %}
+<style>
+    /* ─── Hero ─── */
+    .hero {
+        position: relative;
+        min-height: 92vh;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        background: #fff;
+        padding: 5rem 0 3rem;
+    }
+
+    /* Gradient blobs */
+    .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        animation: blobPulse 8s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .blob-1 {
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(255, 107, 53, 0.18), transparent 70%);
+        top: -150px;
+        right: -100px;
+        animation-delay: 0s;
+    }
+
+    .blob-2 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(67, 97, 238, 0.15), transparent 70%);
+        bottom: -100px;
+        left: -80px;
+        animation-delay: 3s;
+    }
+
+    .blob-3 {
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(114, 9, 183, 0.12), transparent 70%);
+        top: 40%;
+        left: 40%;
+        animation-delay: 5s;
+    }
+
+    /* Particles canvas */
+    #particles {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    /* Hero content */
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(67, 97, 238, 0.1));
+        border: 1px solid rgba(67, 97, 238, 0.2);
+        border-radius: 50px;
+        padding: 0.45rem 1.1rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--blue);
+        margin-bottom: 1.5rem;
+        animation: fadeInLeft 0.7s ease both;
+    }
+
+    .hero-badge .dot {
+        width: 8px;
+        height: 8px;
+        background: var(--orange);
+        border-radius: 50%;
+        animation: blobPulse 2s ease-in-out infinite;
+    }
+
+    .hero-title {
+        font-size: clamp(2.5rem, 5vw, 4.2rem);
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -2px;
+        color: var(--text-dark);
+        animation: fadeInLeft 0.8s 0.1s ease both;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-mid);
+        line-height: 1.7;
+        max-width: 480px;
+        animation: fadeInLeft 0.8s 0.2s ease both;
+        margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        animation: fadeInLeft 0.8s 0.3s ease both;
+        margin-bottom: 3rem;
+    }
+
+    .hero-trust {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: fadeInLeft 0.8s 0.4s ease both;
+    }
+
+    .trust-avatars {
+        display: flex;
+    }
+
+    .trust-avatars .av {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #fff;
+        margin-left: -8px;
+    }
+
+    .trust-avatars .av:first-child {
+        margin-left: 0;
+    }
+
+    .av-1 {
+        background: linear-gradient(135deg, #ff6b35, #ff8c5a);
+    }
+
+    .av-2 {
+        background: linear-gradient(135deg, #4361ee, #5e7af5);
+    }
+
+    .av-3 {
+        background: linear-gradient(135deg, #7209b7, #9b2fe0);
+    }
+
+    .av-4 {
+        background: linear-gradient(135deg, #10b981, #34d399);
+    }
+
+    /* Dashboard mockup */
+    .hero-visual {
+        position: relative;
+        animation: fadeInRight 0.9s 0.2s ease both;
+        z-index: 1;
+    }
+
+    .dashboard-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12), 0 4px 20px rgba(67, 97, 238, 0.1);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, #f8faff, #eff4ff);
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .dot-red {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ff5f57;
+    }
+
+    .dot-yellow {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ffbd2e;
+    }
+
+    .dot-green {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #28c840;
+    }
+
+    .dashboard-body {
+        padding: 1.5rem;
+    }
+
+    .stat-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-chip {
+        flex: 1;
+        background: var(--surface-2);
+        border-radius: 12px;
+        padding: 0.9rem;
+        border: 1px solid var(--border);
+    }
+
+    .stat-chip .label {
+        font-size: 0.7rem;
+        color: var(--text-light);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.3rem;
+    }
+
+    .stat-chip .value {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--text-dark);
+    }
+
+    .stat-chip .change {
+        font-size: 0.72rem;
+        font-weight: 600;
+        margin-top: 0.2rem;
+    }
+
+    .change-up {
+        color: #16a34a;
+    }
+
+    .change-down {
+        color: #dc2626;
+    }
+
+    /* Mini bar chart */
+    .mini-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 60px;
+        margin-top: 0.5rem;
+    }
+
+    .bar {
+        flex: 1;
+        border-radius: 4px 4px 0 0;
+        transition: opacity 0.2s;
+        background: linear-gradient(to top, var(--blue), var(--blue-light));
+        opacity: 0.7;
+    }
+
+    .bar:nth-child(even) {
+        opacity: 1;
+    }
+
+    .bar.accent {
+        background: linear-gradient(to top, var(--orange), var(--orange-light));
+    }
+
+    /* User row */
+    .user-row-mini {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.6rem;
+        border-radius: 10px;
+        background: var(--surface-2);
+        margin-top: 0.6rem;
+        border: 1px solid var(--border);
+    }
+
+    .user-av {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .user-row-mini .uname {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .user-row-mini .uemail {
+        font-size: 0.7rem;
+        color: var(--text-light);
+    }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    /* Floating cards */
+    .float-card {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 16px;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+        padding: 1rem 1.25rem;
+        z-index: 2;
+    }
+
+    .float-card-1 {
+        top: -20px;
+        left: -40px;
+        animation: floatY 5s ease-in-out infinite;
+        width: 180px;
+    }
+
+    .float-card-2 {
+        bottom: 20px;
+        right: -30px;
+        animation: floatY 6s 1.5s ease-in-out infinite;
+        width: 160px;
+    }
+
+    .float-card-3 {
+        top: 50%;
+        left: -50px;
+        transform: translateY(-50%);
+        animation: floatX 4s 0.5s ease-in-out infinite;
+        width: 150px;
+    }
+
+    .float-label {
+        font-size: 0.68rem;
+        color: var(--text-light);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .float-value {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0.15rem 0;
+    }
+
+    .float-sub {
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .float-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* ─── Feature strip ─── */
+    .feature-strip {
+        padding: 1.5rem 0;
+        background: var(--surface-2);
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .strip-inner {
+        display: flex;
+        gap: 3rem;
+        align-items: center;
+        white-space: nowrap;
+        animation: marquee 18s linear infinite;
+    }
+
+    @keyframes marquee {
+        from {
+            transform: translateX(0);
+        }
+
+        to {
+            transform: translateX(-50%);
+        }
+    }
+
+    .strip-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-mid);
+        flex-shrink: 0;
+    }
+
+    .strip-item i {
+        color: var(--blue);
+    }
+
+    /* ─── Features grid ─── */
+    .features-section {
+        padding: 6rem 0;
+    }
+
+    .feature-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 2rem;
+        transition: all 0.3s;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.04), rgba(67, 97, 238, 0.04));
+    }
+
+    .feature-card:hover::before {
+        opacity: 1;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 60px rgba(67, 97, 238, 0.12);
+        border-color: rgba(67, 97, 238, 0.2);
+    }
+
+    .feature-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-bottom: 1.25rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .feature-card h5 {
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin-bottom: 0.6rem;
+        color: var(--text-dark);
+        position: relative;
+        z-index: 1;
+    }
+
+    .feature-card p {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        line-height: 1.65;
+        position: relative;
+        z-index: 1;
+        margin: 0;
+    }
+
+    /* ─── CTA ─── */
+    .cta-section {
+        margin: 4rem 0;
+        background: linear-gradient(135deg, #4361ee, #7209b7);
+        border-radius: 28px;
+        padding: 5rem 3rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 70%);
+        animation: blobPulse 6s ease-in-out infinite;
+    }
+
+    .cta-section h2 {
+        color: #fff;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-section p {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.05rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-cta-white {
+        background: #fff;
+        color: var(--blue);
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 0.9rem 2.5rem;
+        font-size: 1rem;
+        transition: all 0.25s;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-cta-white:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+        color: var(--purple);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="d-flex align-items-center" style="min-height: 85vh; padding: 4rem 0;">
+
+<!-- Hero Section -->
+<section class="hero">
+    <!-- Blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <canvas id="particles"></canvas>
+
     <div class="container">
         <div class="row align-items-center g-5">
-            <!-- Left: Hero text -->
-            <div class="col-lg-6">
-                <div class="mb-3">
-                    <span
-                        style="background: rgba(99,102,241,0.15); color: #a5b4fc; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
-                        <i class="bi bi-lightning-charge-fill me-1"></i> Secure by Default
-                    </span>
+            <div class="col-lg-6 hero-content">
+                <div class="hero-badge">
+                    <span class="dot"></span>
+                    Now with Neon PostgreSQL • Always live
                 </div>
-                <h1 style="font-size: 3.5rem; font-weight: 800; line-height: 1.15; color: #fff;">
-                    Authenticate with
-                    <span
-                        style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        confidence.
-                    </span>
+                <h1 class="hero-title">
+                    Authentication<br>
+                    that <span class="text-grad">just works.</span>
                 </h1>
-                <p class="mt-4 mb-5" style="font-size: 1.15rem; color: #94a3b8; max-width: 480px; line-height: 1.7;">
-                    AuthApp provides rock-solid user authentication with email verification,
-                    secure password hashing, and a full admin dashboard — all out of the box.
+                <p class="hero-subtitle">
+                    AuthApp gives your team secure user registration, email verification, and role-based access —
+                    deployed in minutes.
                 </p>
-                <div class="d-flex flex-wrap gap-3">
-                    <a href="{% url 'register' %}" class="btn-primary-custom btn"
-                        style="font-size: 1rem; padding: 0.75rem 2rem;">
-                        <i class="bi bi-person-plus me-2"></i>Create Account
+                <div class="hero-actions">
+                    <a href="{% url 'register' %}" class="btn-primary-grad">
+                        <i class="bi bi-rocket-takeoff-fill"></i> Start for Free
                     </a>
-                    <a href="{% url 'login' %}" class="btn"
-                        style="border: 1px solid rgba(255,255,255,0.15); color: #e2e8f0; border-radius: 10px; padding: 0.75rem 2rem; font-weight: 600; transition: background 0.2s;">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    <a href="{% url 'login' %}" class="btn-secondary-outline">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In
                     </a>
+                </div>
+                <div class="hero-trust">
+                    <div class="trust-avatars">
+                        <div class="av av-1">JD</div>
+                        <div class="av av-2">AK</div>
+                        <div class="av av-3">SR</div>
+                        <div class="av av-4">TL</div>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-mid); margin: 0;">
+                        <strong style="color: var(--text-dark);">1,200+ teams</strong> trust AuthApp
+                    </p>
                 </div>
             </div>
 
-            <!-- Right: Feature cards -->
-            <div class="col-lg-6">
-                <div class="d-flex flex-column gap-3">
-                    {% for icon, title, desc in feature_items %}
-                    <div class="card-glass p-3 d-flex align-items-start gap-3" style="animation: fadeInUp 0.5s ease;">
-                        <div
-                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="{{ icon }}" style="font-size: 1.3rem; color: #a5b4fc;"></i>
+            <!-- Dashboard Mockup -->
+            <div class="col-lg-6 hero-content">
+                <div class="hero-visual" style="position: relative; padding: 40px 50px 40px 50px;">
+                    <!-- Floating card 1 -->
+                    <div class="float-card float-card-1">
+                        <div class="float-icon"
+                            style="background: linear-gradient(135deg, rgba(67,97,238,0.15), rgba(67,97,238,0.05));">
+                            <i class="bi bi-shield-check-fill" style="color: var(--blue);"></i>
                         </div>
-                        <div>
-                            <h6 style="font-weight: 600; color: #fff; margin-bottom: 0.2rem;">{{ title }}</h6>
-                            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0; line-height: 1.5;">{{ desc }}</p>
+                        <div class="float-label">Security</div>
+                        <div class="float-value" style="font-size: 0.95rem; color: #16a34a;">All Clear</div>
+                        <div class="float-sub" style="color: var(--text-light);">CSRF Protected</div>
+                    </div>
+                    <!-- Floating card 2 -->
+                    <div class="float-card float-card-2">
+                        <div class="float-icon"
+                            style="background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,107,53,0.05));">
+                            <i class="bi bi-envelope-check-fill" style="color: var(--orange);"></i>
+                        </div>
+                        <div class="float-label">Emails Sent</div>
+                        <div class="float-value">3,842</div>
+                        <div class="float-sub change-up"><i class="bi bi-arrow-up-short"></i>+12% today</div>
+                    </div>
+                    <!-- Floating card 3 -->
+                    <div class="float-card float-card-3">
+                        <div class="float-label">Active Users</div>
+                        <div class="float-value">1,247</div>
+                        <div class="float-sub change-up"><i class="bi bi-arrow-up-short"></i>+8.4%</div>
+                    </div>
+
+                    <!-- Main dashboard card -->
+                    <div class="dashboard-card">
+                        <div class="dashboard-header">
+                            <div class="dot-red"></div>
+                            <div class="dot-yellow"></div>
+                            <div class="dot-green"></div>
+                            <span
+                                style="margin-left: auto; font-size: 0.75rem; font-weight: 600; color: var(--text-light);">AuthApp
+                                Dashboard</span>
+                        </div>
+                        <div class="dashboard-body">
+                            <div class="stat-row">
+                                <div class="stat-chip">
+                                    <div class="label">Users</div>
+                                    <div class="value text-grad">1,247</div>
+                                    <div class="change change-up"><i class="bi bi-arrow-up-short"></i> +8.4%</div>
+                                </div>
+                                <div class="stat-chip">
+                                    <div class="label">Verified</div>
+                                    <div class="value">98.2%</div>
+                                    <div class="change change-up"><i class="bi bi-arrow-up-short"></i> +1.2%</div>
+                                </div>
+                                <div class="stat-chip">
+                                    <div class="label">Active</div>
+                                    <div class="value">1,189</div>
+                                    <div class="change change-down"><i class="bi bi-arrow-down-short"></i> 2</div>
+                                </div>
+                            </div>
+                            <!-- Mini bar chart -->
+                            <div
+                                style="font-size: 0.72rem; font-weight: 600; color: var(--text-light); margin-bottom: 0.3rem; text-transform: uppercase;">
+                                Registrations this week</div>
+                            <div class="mini-chart">
+                                <div class="bar" style="height: 30%;"></div>
+                                <div class="bar" style="height: 55%;"></div>
+                                <div class="bar accent" style="height: 70%;"></div>
+                                <div class="bar" style="height: 45%;"></div>
+                                <div class="bar" style="height: 80%;"></div>
+                                <div class="bar accent" style="height: 90%;"></div>
+                                <div class="bar" style="height: 65%;"></div>
+                            </div>
+                            <!-- Users -->
+                            <div
+                                style="font-size: 0.72rem; font-weight: 600; color: var(--text-light); margin: 1rem 0 0.3rem; text-transform: uppercase;">
+                                Recent Users</div>
+                            <div class="user-row-mini">
+                                <div class="user-av av-1">JD</div>
+                                <div>
+                                    <div class="uname">john_doe</div>
+                                    <div class="uemail">john@example.com</div>
+                                </div>
+                                <div class="status-dot" style="background: #22c55e; box-shadow: 0 0 4px #22c55e;"></div>
+                            </div>
+                            <div class="user-row-mini" style="margin-top: 0.4rem;">
+                                <div class="user-av av-2">AK</div>
+                                <div>
+                                    <div class="uname">alex_k</div>
+                                    <div class="uemail">alex@example.com</div>
+                                </div>
+                                <div class="status-dot" style="background: #22c55e; box-shadow: 0 0 4px #22c55e;"></div>
+                            </div>
                         </div>
                     </div>
-                    {% empty %}
-                    <!-- Static fallback if view doesn't pass feature_items -->
-                    <div class="card-glass p-3 d-flex align-items-start gap-3">
-                        <div
-                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="bi bi-envelope-check-fill" style="font-size: 1.3rem; color: #a5b4fc;"></i>
-                        </div>
-                        <div>
-                            <h6 style="font-weight: 600; color: #fff; margin-bottom: 0.2rem;">Email Verification</h6>
-                            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0;">Confirm identity before access is
-                                granted.</p>
-                        </div>
-                    </div>
-                    <div class="card-glass p-3 d-flex align-items-start gap-3">
-                        <div
-                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="bi bi-shield-lock-fill" style="font-size: 1.3rem; color: #a5b4fc;"></i>
-                        </div>
-                        <div>
-                            <h6 style="font-weight: 600; color: #fff; margin-bottom: 0.2rem;">Secure Password Hashing
-                            </h6>
-                            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0;">PBKDF2 password hashing via
-                                Django's auth system.</p>
-                        </div>
-                    </div>
-                    <div class="card-glass p-3 d-flex align-items-start gap-3">
-                        <div
-                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="bi bi-speedometer2" style="font-size: 1.3rem; color: #a5b4fc;"></i>
-                        </div>
-                        <div>
-                            <h6 style="font-weight: 600; color: #fff; margin-bottom: 0.2rem;">Admin Dashboard</h6>
-                            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0;">Manage users, activate/deactivate
-                                accounts with ease.</p>
-                        </div>
-                    </div>
-                    <div class="card-glass p-3 d-flex align-items-start gap-3">
-                        <div
-                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                            <i class="bi bi-key-fill" style="font-size: 1.3rem; color: #a5b4fc;"></i>
-                        </div>
-                        <div>
-                            <h6 style="font-weight: 600; color: #fff; margin-bottom: 0.2rem;">CSRF Protection</h6>
-                            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0;">All forms protected against
-                                cross-site request forgery.</p>
-                        </div>
-                    </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<style>
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
+<!-- Feature strip -->
+<div class="feature-strip">
+    <div class="strip-inner">
+        {% for item in ",,,,,,,,,,,,,,,,,,,,,,,,"|make_list %}
+        <span class="strip-item"><i class="bi bi-shield-lock-fill"></i> CSRF Protection</span>
+        <span class="strip-item"><i class="bi bi-envelope-check-fill"></i> Email Verification</span>
+        <span class="strip-item"><i class="bi bi-lock-fill"></i> Password Hashing</span>
+        <span class="strip-item"><i class="bi bi-people-fill"></i> Admin Dashboard</span>
+        <span class="strip-item"><i class="bi bi-cloud-check-fill"></i> Vercel Ready</span>
+        <span class="strip-item"><i class="bi bi-database-fill-check"></i> Neon PostgreSQL</span>
+        {% endfor %}
+    </div>
+</div>
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+<!-- Features Grid -->
+<section class="features-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="tag-gradient mb-3"><i class="bi bi-stars"></i> Everything you need</div>
+            <h2 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;">
+                Built for scale.<br><span class="text-grad">Secured by design.</span>
+            </h2>
+            <p style="color: var(--text-light); max-width: 480px; margin: 1rem auto 0; line-height: 1.7;">
+                Every feature you need to handle auth in a production app — out of the box.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,140,90,0.08));">
+                        <i class="bi bi-envelope-check-fill" style="color: var(--orange);"></i>
+                    </div>
+                    <h5>Email Verification</h5>
+                    <p>Secure UUID tokens delivered via SMTP. Accounts stay locked until verified, with a dev-mode
+                        fallback.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(67,97,238,0.15), rgba(94,122,245,0.08));">
+                        <i class="bi bi-lock-fill" style="color: var(--blue);"></i>
+                    </div>
+                    <h5>Secure Auth</h5>
+                    <p>PBKDF2 password hashing, CSRF protection on every form, and session-based auth via signed
+                        cookies.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(114,9,183,0.15), rgba(155,47,224,0.08));">
+                        <i class="bi bi-speedometer2" style="color: var(--purple);"></i>
+                    </div>
+                    <h5>Admin Dashboard</h5>
+                    <p>View all registered users, toggle account activation, and manage roles directly from the web
+                        interface.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(52,211,153,0.08));">
+                        <i class="bi bi-database-fill-check" style="color: #10b981;"></i>
+                    </div>
+                    <h5>Persistent Database</h5>
+                    <p>Neon PostgreSQL keeps your data safe across serverless instances. SQLite fallback for local
+                        development.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.08));">
+                        <i class="bi bi-cloud-upload-fill" style="color: #f59e0b;"></i>
+                    </div>
+                    <h5>Vercel Deploy</h5>
+                    <p>Push to GitHub and auto-deploy in seconds. WhiteNoise serves static files, migrations run on cold
+                        start.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(248,113,113,0.06));">
+                        <i class="bi bi-person-badge-fill" style="color: #ef4444;"></i>
+                    </div>
+                    <h5>Role System</h5>
+                    <p>Django's built-in superuser and staff roles keep your admin panel locked to authorized users
+                        only.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<div class="container">
+    <div class="cta-section">
+        <h2>Ready to ship secure auth?</h2>
+        <p>Join thousands of developers who trust AuthApp for their user authentication.</p>
+        <a href="{% url 'register' %}" class="btn-cta-white">
+            <i class="bi bi-rocket-takeoff-fill"></i> Create Free Account
+        </a>
+    </div>
+</div>
+
+<div style="padding-bottom: 4rem;"></div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Particle system
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = document.querySelector('.hero').offsetHeight;
+    }
+
+    class Particle {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.r = Math.random() * 3 + 1;
+            this.dx = (Math.random() - 0.5) * 0.4;
+            this.dy = (Math.random() - 0.5) * 0.4;
+            this.opacity = Math.random() * 0.5 + 0.1;
+            const colors = ['rgba(255,107,53,', 'rgba(67,97,238,', 'rgba(114,9,183,'];
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.fillStyle = this.color + this.opacity + ')';
+            ctx.fill();
+        }
+        update() {
+            this.x += this.dx; this.y += this.dy;
+            if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+            this.draw();
         }
     }
-</style>
+
+    resize();
+    for (let i = 0; i < 60; i++) particles.push(new Particle());
+    window.addEventListener('resize', () => { resize(); });
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => p.update());
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Parallax on scroll
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        const blobs = document.querySelectorAll('.blob');
+        blobs.forEach((b, i) => {
+            b.style.transform = `translateY(${scrollY * (0.08 + i * 0.04)}px)`;
+        });
+    });
+</script>
 {% endblock %}

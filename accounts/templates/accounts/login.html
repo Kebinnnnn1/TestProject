@@ -1,49 +1,114 @@
 {% extends 'accounts/base.html' %}
-
 {% block title %}Sign In — AuthApp{% endblock %}
-{% block meta_description %}Sign in to your AuthApp account.{% endblock %}
+
+{% block extra_head %}
+<style>
+    .login-wrap {
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+        background: var(--surface-2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-blob-1 {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(67, 97, 238, 0.1), transparent 70%);
+        top: -150px;
+        right: -100px;
+        border-radius: 50%;
+        animation: blobPulse 8s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .login-blob-2 {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 107, 53, 0.1), transparent 70%);
+        bottom: -100px;
+        left: -80px;
+        border-radius: 50%;
+        animation: blobPulse 10s 3s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 430px;
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.09);
+        padding: 3rem;
+        border: 1px solid var(--border);
+        position: relative;
+        z-index: 1;
+        animation: fadeInUp 0.7s ease both;
+    }
+
+    .login-logo {
+        width: 52px;
+        height: 52px;
+        background: var(--grad-main);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: #fff;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 480px) {
+        .login-card {
+            padding: 2rem 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 85vh; padding: 3rem 1rem;">
-    <div style="width: 100%; max-width: 420px;">
-        <div class="text-center mb-4">
-            <div
-                style="width: 56px; height: 56px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
-                <i class="bi bi-box-arrow-in-right" style="font-size: 1.5rem; color: #fff;"></i>
+<div class="login-wrap">
+    <div class="login-blob-1"></div>
+    <div class="login-blob-2"></div>
+
+    <div class="login-card">
+        <div class="login-logo"><i class="bi bi-shield-lock-fill"></i></div>
+        <h1
+            style="font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; color: var(--text-dark); margin-bottom: 0.3rem;">
+            Welcome back</h1>
+        <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 2rem;">
+            New here? <a href="{% url 'register' %}"
+                style="color: var(--blue); font-weight: 600; text-decoration: none;">Create a free account</a>
+        </p>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label"><i class="bi bi-person me-1"></i>Username</label>
+                {{ form.username }}
             </div>
-            <h1 style="font-size: 1.8rem; font-weight: 700; color: #fff;">Welcome back</h1>
-            <p style="color: #94a3b8; margin-top: 0.4rem;">New here? <a href="{% url 'register' %}"
-                    style="color: #a5b4fc; font-weight: 500;">Create an account</a></p>
-        </div>
 
-        <div class="card-glass p-4 p-md-5">
-            <form method="post" novalidate>
-                {% csrf_token %}
-
-                <div class="mb-4">
-                    <label for="{{ form.username.id_for_label }}" class="form-label">
-                        <i class="bi bi-person me-1"></i> Username
-                    </label>
-                    {{ form.username }}
-                </div>
-
-                <div class="mb-4">
-                    <label for="{{ form.password.id_for_label }}" class="form-label">
-                        <i class="bi bi-lock me-1"></i> Password
-                    </label>
-                    {{ form.password }}
-                </div>
-
-                <button type="submit" class="btn-primary-custom btn w-100">
-                    <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
-                </button>
-            </form>
-
-            <div class="text-center mt-4">
-                <a href="{% url 'register' %}" style="color: #64748b; font-size: 0.85rem;">
-                    Don't have an account? <span style="color: #a5b4fc;">Register here</span>
-                </a>
+            <div class="mb-4">
+                <label class="form-label"><i class="bi bi-lock me-1"></i>Password</label>
+                {{ form.password }}
             </div>
+
+            <button type="submit" class="btn-primary-grad w-100" style="justify-content: center;">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <a href="{% url 'register' %}" style="font-size: 0.83rem; color: var(--text-light); text-decoration: none;">
+                Don't have an account? <span style="color: var(--blue); font-weight: 600;">Register →</span>
+            </a>
         </div>
     </div>
 </div>

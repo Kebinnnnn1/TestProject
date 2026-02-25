@@ -1,150 +1,324 @@
 {% extends 'accounts/base.html' %}
-
 {% block title %}Admin Dashboard — AuthApp{% endblock %}
 
+{% block extra_head %}
+<style>
+    .admin-wrap {
+        background: var(--surface-2);
+        min-height: calc(100vh - 70px);
+        padding: 2.5rem 0 4rem;
+    }
+
+    .admin-header {
+        background: linear-gradient(135deg, #0d1117, #1a1a2e);
+        border-radius: 20px;
+        padding: 2rem 2.5rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .admin-header::before {
+        content: '';
+        position: absolute;
+        right: -30px;
+        top: -30px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 107, 53, 0.2), transparent 70%);
+        border-radius: 50%;
+        animation: blobPulse 6s ease-in-out infinite;
+    }
+
+    .admin-header::after {
+        content: '';
+        position: absolute;
+        left: 30%;
+        bottom: -40px;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(67, 97, 238, 0.2), transparent 70%);
+        border-radius: 50%;
+        animation: blobPulse 8s 2s ease-in-out infinite;
+    }
+
+    .admin-header h1 {
+        font-weight: 800;
+        font-size: 1.6rem;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .admin-header p {
+        opacity: 0.6;
+        font-size: 0.88rem;
+        margin: 0.3rem 0 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-pill {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 0.75rem 1.25rem;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-pill .sp-n {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .stat-pill .sp-l {
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.55);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.1rem;
+    }
+
+    .users-card {
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .users-card-header {
+        padding: 1.25rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .btn-deactivate {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 8px;
+        padding: 0.35rem 0.9rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-deactivate:hover {
+        background: #fee2e2;
+    }
+
+    .btn-activate {
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid rgba(34, 197, 94, 0.25);
+        border-radius: 8px;
+        padding: 0.35rem 0.9rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-activate:hover {
+        background: #dcfce7;
+    }
+
+    .user-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container" style="padding: 3rem 1rem;">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
-        <div>
-            <h1 style="font-size: 1.9rem; font-weight: 700; color: #fff; margin-bottom: 0.3rem;">
-                <i class="bi bi-speedometer2 me-2" style="color: #a5b4fc;"></i>Admin Dashboard
-            </h1>
-            <p style="color: #94a3b8; margin: 0;">Manage all registered users</p>
-        </div>
-        <div
-            style="background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3); border-radius: 12px; padding: 0.75rem 1.25rem;">
-            <span style="color: #a5b4fc; font-weight: 600; font-size: 1.5rem;">{{ users|length }}</span>
-            <span style="color: #64748b; font-size: 0.88rem; display: block; margin-top: -2px;">Total Users</span>
-        </div>
-    </div>
+<div class="admin-wrap">
+    <div class="container">
 
-    <!-- Stats row -->
-    <div class="row g-3 mb-5">
-        <div class="col-sm-4">
-            <div class="card-glass p-3 text-center">
-                <p style="font-size: 1.6rem; font-weight: 700; color: #34d399; margin: 0;">
-                    {{ users|length }}
-                </p>
-                <p style="color: #64748b; font-size: 0.82rem; margin: 0;">Registered</p>
-            </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="card-glass p-3 text-center">
-                <p style="font-size: 1.6rem; font-weight: 700; color: #a5b4fc; margin: 0;" id="activeCount">—</p>
-                <p style="color: #64748b; font-size: 0.82rem; margin: 0;">Active</p>
-            </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="card-glass p-3 text-center">
-                <p style="font-size: 1.6rem; font-weight: 700; color: #fbbf24; margin: 0;" id="inactiveCount">—</p>
-                <p style="color: #64748b; font-size: 0.82rem; margin: 0;">Inactive</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Users Table -->
-    <div class="table-dark-custom">
-        <table class="table mb-0">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>User</th>
-                    <th>Email</th>
-                    <th>Verified</th>
-                    <th>Status</th>
-                    <th>Role</th>
-                    <th>Joined</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="userTableBody">
-                {% for u in users %}
-                <tr class="user-row" data-active="{{ u.is_active|lower }}">
-                    <td style="color: #64748b; font-size: 0.85rem;">{{ forloop.counter }}</td>
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <div
-                                style="width: 34px; height: 34px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <span style="color: #fff; font-size: 0.78rem; font-weight: 700;">{{
-                                    u.username|slice:":1"|upper }}</span>
+        <!-- Header -->
+        <div class="admin-header" style="animation: fadeInUp 0.6s ease both;">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-6">
+                    <p
+                        style="font-size: 0.78rem; opacity: 0.5; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; position: relative; z-index:1;">
+                        Admin Panel</p>
+                    <h1><i class="bi bi-speedometer2 me-2" style="color: var(--orange);"></i>User Management</h1>
+                    <p>Manage all registered AuthApp users</p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row g-2" style="position: relative; z-index: 1;">
+                        <div class="col-4">
+                            <div class="stat-pill">
+                                <div class="sp-n">{{ users|length }}</div>
+                                <div class="sp-l">Total</div>
                             </div>
-                            <span style="font-weight: 500;">{{ u.username }}</span>
-                            {% if u == request.user %}
-                            <span style="font-size: 0.7rem; color: #a5b4fc;">(you)</span>
-                            {% endif %}
                         </div>
-                    </td>
-                    <td style="color: #94a3b8;">{{ u.email }}</td>
-                    <td>
-                        {% if u.is_verified %}
-                        <span class="badge-verified"><i class="bi bi-patch-check-fill me-1"></i>Yes</span>
-                        {% else %}
-                        <span class="badge-unverified"><i class="bi bi-x-circle me-1"></i>No</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if u.is_active %}
-                        <span class="badge-active"><i class="bi bi-circle-fill me-1"
-                                style="font-size: 0.5rem;"></i>Active</span>
-                        {% else %}
-                        <span class="badge-inactive"><i class="bi bi-circle-fill me-1"
-                                style="font-size: 0.5rem;"></i>Inactive</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if u.is_superuser %}
-                        <span class="badge-staff"><i class="bi bi-shield-fill-check me-1"></i>Superuser</span>
-                        {% elif u.is_staff %}
-                        <span class="badge-staff"><i class="bi bi-star-fill me-1"></i>Staff</span>
-                        {% else %}
-                        <span style="color: #64748b; font-size: 0.82rem;">User</span>
-                        {% endif %}
-                    </td>
-                    <td style="color: #64748b; font-size: 0.85rem;">{{ u.date_joined|date:"M j, Y" }}</td>
-                    <td>
-                        {% if u != request.user %}
-                        <form method="post" action="{% url 'toggle_user_active' u.pk %}" style="display: inline;">
-                            {% csrf_token %}
-                            {% if u.is_active %}
-                            <button type="submit" class="btn-danger-custom btn">
-                                <i class="bi bi-person-x me-1"></i>Deactivate
-                            </button>
-                            {% else %}
-                            <button type="submit" class="btn-success-custom btn">
-                                <i class="bi bi-person-check me-1"></i>Activate
-                            </button>
-                            {% endif %}
-                        </form>
-                        {% else %}
-                        <span style="color: #475569; font-size: 0.82rem;">—</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="8" class="text-center" style="color: #64748b; padding: 3rem;">
-                        <i class="bi bi-people" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
-                        No users found.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        <div class="col-4">
+                            <div class="stat-pill" id="activePill">
+                                <div class="sp-n" id="activeCount">—</div>
+                                <div class="sp-l">Active</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-pill">
+                                <div class="sp-n" id="inactiveCount">—</div>
+                                <div class="sp-l">Inactive</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="users-card" style="animation: fadeInUp 0.6s 0.1s ease both;">
+            <div class="users-card-header">
+                <span><i class="bi bi-people-fill me-2" style="color: var(--blue);"></i>All Users</span>
+                <span style="font-size: 0.78rem; color: var(--text-light); font-weight: 500;">{{ users|length }}
+                    total</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0" style="min-width: 700px;">
+                    <thead>
+                        <tr style="background: var(--surface-2);">
+                            <th
+                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
+                                #</th>
+                            <th
+                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
+                                User</th>
+                            <th
+                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
+                                Email</th>
+                            <th
+                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
+                                Verified</th>
+                            <th
+                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
+                                Status</th>
+                            <th
+                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
+                                Role</th>
+                            <th
+                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
+                                Joined</th>
+                            <th
+                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
+                                Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        {% for u in users %}
+                        <tr class="user-row" data-active="{{ u.is_active|lower }}"
+                            style="border-bottom: 1px solid var(--border); transition: background 0.15s;">
+                            <td style="padding: 1rem 1.25rem; font-size: 0.82rem; color: var(--text-light);">{{
+                                forloop.counter }}</td>
+                            <td style="padding: 1rem 1.25rem;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="user-avatar"
+                                        style="background: linear-gradient(135deg, {% cycle '#ff6b35' '#4361ee' '#7209b7' '#10b981' '#f59e0b' %}, {% cycle '#ff8c5a' '#5e7af5' '#9b2fe0' '#34d399' '#fbbf24' %});">
+                                        {{ u.username|slice:":1"|upper }}
+                                    </div>
+                                    <div>
+                                        <div style="font-size: 0.88rem; font-weight: 600; color: var(--text-dark);">
+                                            {{ u.username }}
+                                            {% if u == request.user %}<span
+                                                style="font-size: 0.7rem; color: var(--blue); font-weight: 500;">
+                                                (you)</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem 1.25rem; font-size: 0.85rem; color: var(--text-mid);">{{ u.email }}
+                            </td>
+                            <td style="padding: 1rem 1.25rem;">
+                                {% if u.is_verified %}
+                                <span class="badge-verified">✓ Yes</span>
+                                {% else %}
+                                <span class="badge-unverified">✗ No</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 1rem 1.25rem;">
+                                {% if u.is_active %}
+                                <span class="badge-active">● Active</span>
+                                {% else %}
+                                <span class="badge-inactive">● Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 1rem 1.25rem;">
+                                {% if u.is_superuser %}<span class="badge-staff">Superuser</span>
+                                {% elif u.is_staff %}<span class="badge-staff">Staff</span>
+                                {% else %}<span style="font-size: 0.82rem; color: var(--text-light);">Member</span>{%
+                                endif %}
+                            </td>
+                            <td style="padding: 1rem 1.25rem; font-size: 0.82rem; color: var(--text-light);">{{
+                                u.date_joined|date:"M j, Y" }}</td>
+                            <td style="padding: 1rem 1.25rem;">
+                                {% if u != request.user %}
+                                <form method="post" action="{% url 'toggle_user_active' u.pk %}">
+                                    {% csrf_token %}
+                                    {% if u.is_active %}
+                                    <button type="submit" class="btn-deactivate"><i
+                                            class="bi bi-person-dash me-1"></i>Deactivate</button>
+                                    {% else %}
+                                    <button type="submit" class="btn-activate"><i
+                                            class="bi bi-person-check me-1"></i>Activate</button>
+                                    {% endif %}
+                                </form>
+                                {% else %}
+                                <span style="font-size: 0.8rem; color: var(--text-light);">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 4rem; color: var(--text-light);">
+                                <i class="bi bi-people"
+                                    style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+                                No users found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
 {% block extra_scripts %}
 <script>
-    // Count active/inactive users and fill stats
     const rows = document.querySelectorAll('.user-row');
-    let active = 0, inactive = 0;
+    let a = 0, i = 0;
+    rows.forEach(r => { r.dataset.active === 'true' ? a++ : i++; });
+    document.getElementById('activeCount').textContent = a;
+    document.getElementById('inactiveCount').textContent = i;
+
+    // Row hover
     rows.forEach(r => {
-        if (r.dataset.active === 'true') active++;
-        else inactive++;
+        r.addEventListener('mouseenter', () => r.style.background = 'var(--surface-2)');
+        r.addEventListener('mouseleave', () => r.style.background = '');
     });
-    document.getElementById('activeCount').textContent = active;
-    document.getElementById('inactiveCount').textContent = inactive;
 </script>
 {% endblock %}
 {% endblock %}

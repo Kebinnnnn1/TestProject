@@ -6,283 +6,531 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}AuthApp{% endblock %}</title>
   <meta name="description"
-    content="{% block meta_description %}AuthApp — Secure user authentication platform.{% endblock %}">
+    content="{% block meta_description %}AuthApp — The modern authentication platform for your business.{% endblock %}">
 
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
 
   <style>
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --secondary: #8b5cf6;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --bg: #0f0f1a;
-      --surface: #1a1a2e;
-      --surface2: #252540;
-      --border: rgba(255, 255, 255, 0.08);
-      --text: #e2e8f0;
-      --text-muted: #94a3b8;
+      --orange: #ff6b35;
+      --orange-light: #ff8c5a;
+      --blue: #4361ee;
+      --blue-light: #5e7af5;
+      --purple: #7209b7;
+      --purple-light: #9b2fe0;
+      --grad-main: linear-gradient(135deg, #ff6b35, #4361ee);
+      --grad-warm: linear-gradient(135deg, #ff6b35, #7209b7);
+      --grad-cool: linear-gradient(135deg, #4361ee, #7209b7);
+      --text-dark: #0d1117;
+      --text-mid: #4a5568;
+      --text-light: #718096;
+      --surface: #ffffff;
+      --surface-2: #f7f9fc;
+      --surface-3: #eef2f7;
+      --border: rgba(0, 0, 0, 0.06);
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 8px 40px rgba(0, 0, 0, 0.10);
+      --shadow-lg: 0 24px 72px rgba(0, 0, 0, 0.14);
+      --radius: 16px;
+      --radius-sm: 10px;
     }
 
-    * {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
       font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      background: #ffffff;
+      color: var(--text-dark);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
-    /* ---- Navbar ---- */
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(var(--orange), var(--blue));
+      border-radius: 3px;
+    }
+
+    /* ─── Navbar ─── */
     .navbar {
-      background: rgba(26, 26, 46, 0.95);
-      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
-      padding: 0.8rem 1.5rem;
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: box-shadow 0.3s;
+    }
+
+    .navbar.scrolled {
+      box-shadow: var(--shadow-md);
     }
 
     .navbar-brand {
-      font-weight: 700;
+      font-weight: 800;
       font-size: 1.4rem;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: var(--grad-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .navbar-brand .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--grad-main);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-text-fill-color: white;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .nav-link {
+      color: var(--text-mid) !important;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+      padding: 0.4rem 0.8rem !important;
+    }
+
+    .nav-link:hover {
+      color: var(--blue) !important;
+    }
+
+    .btn-nav-outline {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-dark) !important;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 0.45rem 1.1rem;
+      background: transparent;
+      transition: all 0.2s;
+    }
+
+    .btn-nav-outline:hover {
+      border-color: var(--blue);
+      color: var(--blue) !important;
+    }
+
+    .btn-nav-primary {
+      background: var(--grad-main);
+      color: #fff !important;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 0.5rem 1.2rem;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-nav-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    }
+
+    /* ─── Buttons ─── */
+    .btn-primary-grad {
+      background: var(--grad-main);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.75rem 2rem;
+      font-size: 0.95rem;
+      transition: all 0.25s;
+      box-shadow: 0 6px 24px rgba(67, 97, 238, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .btn-primary-grad:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(67, 97, 238, 0.4);
+      color: #fff;
+    }
+
+    .btn-secondary-outline {
+      background: transparent;
+      color: var(--text-dark);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.75rem 2rem;
+      font-size: 0.95rem;
+      transition: all 0.25s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-secondary-outline:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      transform: translateY(-1px);
+    }
+
+    /* ─── Cards ─── */
+    .card-clean {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .card-clean:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ─── Forms ─── */
+    .form-control {
+      background: var(--surface-2) !important;
+      border: 1.5px solid var(--surface-3) !important;
+      color: var(--text-dark) !important;
+      border-radius: var(--radius-sm) !important;
+      padding: 0.75rem 1rem !important;
+      font-size: 0.92rem !important;
+      transition: border-color 0.2s, box-shadow 0.2s !important;
+    }
+
+    .form-control:focus {
+      border-color: var(--blue) !important;
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.12) !important;
+      background: #fff !important;
+    }
+
+    .form-control::placeholder {
+      color: #a0aec0 !important;
+    }
+
+    .form-label {
+      color: var(--text-mid);
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.45rem;
+    }
+
+    /* ─── Alerts / Messages ─── */
+    .messages-container {
+      position: relative;
+      z-index: 100;
+    }
+
+    .alert {
+      border-radius: 12px !important;
+      border: none !important;
+      font-weight: 500;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .alert-success {
+      background: #f0fdf4 !important;
+      color: #166534 !important;
+      border-left: 4px solid #22c55e !important;
+    }
+
+    .alert-danger {
+      background: #fef2f2 !important;
+      color: #991b1b !important;
+      border-left: 4px solid #ef4444 !important;
+    }
+
+    .alert-warning {
+      background: #fffbeb !important;
+      color: #92400e !important;
+      border-left: 4px solid #f59e0b !important;
+    }
+
+    .alert-info {
+      background: #eff6ff !important;
+      color: #1e3a8a !important;
+      border-left: 4px solid #3b82f6 !important;
+    }
+
+    .alert a {
+      color: inherit;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    /* ─── Tables ─── */
+    .table-modern {
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .table-modern thead th {
+      background: var(--surface-2);
+      color: var(--text-light);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      padding: 1rem 1.25rem;
+      border: none;
+    }
+
+    .table-modern tbody td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      vertical-align: middle;
+      background: #fff;
+    }
+
+    .table-modern tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table-modern tbody tr:hover td {
+      background: var(--surface-2);
+    }
+
+    /* ─── Badges ─── */
+    .badge-verified {
+      background: #f0fdf4;
+      color: #16a34a;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-unverified {
+      background: #fef2f2;
+      color: #dc2626;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-active {
+      background: #f0fdf4;
+      color: #16a34a;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-inactive {
+      background: #fffbeb;
+      color: #d97706;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-staff {
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    /* ─── Gradient Tag ─── */
+    .tag-gradient {
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.12), rgba(67, 97, 238, 0.12));
+      color: var(--blue);
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      background: var(--surface-2);
+      border-top: 1px solid var(--border);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.84rem;
+      margin-top: auto;
+    }
+
+    footer a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* ─── Utility ─── */
+    main {
+      flex: 1;
+    }
+
+    .text-grad {
+      background: var(--grad-main);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
-    .nav-link {
-      color: var(--text-muted) !important;
-      font-weight: 500;
-      transition: color 0.2s;
+    .text-grad-warm {
+      background: var(--grad-warm);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    .nav-link:hover {
-      color: var(--text) !important;
+    /* ─── Animations ─── */
+    @keyframes floatY {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-12px);
+      }
     }
 
-    .nav-link.active {
-      color: var(--primary) !important;
+    @keyframes floatX {
+
+      0%,
+      100% {
+        transform: translateX(0px);
+      }
+
+      50% {
+        transform: translateX(8px);
+      }
     }
 
-    .btn-nav-primary {
-      background: var(--primary);
-      color: #fff !important;
-      border-radius: 8px;
-      padding: 0.4rem 1rem;
-      font-weight: 500;
-      transition: background 0.2s, transform 0.1s;
+    @keyframes blobPulse {
+
+      0%,
+      100% {
+        transform: scale(1) rotate(0deg);
+      }
+
+      33% {
+        transform: scale(1.05) rotate(3deg);
+      }
+
+      66% {
+        transform: scale(0.97) rotate(-2deg);
+      }
     }
 
-    .btn-nav-primary:hover {
-      background: var(--primary-dark);
-      transform: translateY(-1px);
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    /* ---- Cards ---- */
-    .card-glass {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
-    /* ---- Buttons ---- */
-    .btn-primary-custom {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      border: none;
-      color: #fff;
-      font-weight: 600;
-      border-radius: 10px;
-      padding: 0.65rem 1.5rem;
-      transition: opacity 0.2s, transform 0.15s;
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
-    .btn-primary-custom:hover {
-      opacity: 0.9;
-      transform: translateY(-2px);
-      color: #fff;
+    @keyframes spin-slow {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
     }
 
-    .btn-danger-custom {
-      background: var(--danger);
-      border: none;
-      color: #fff;
-      border-radius: 8px;
-      padding: 0.4rem 0.9rem;
-      font-size: 0.85rem;
-      transition: opacity 0.2s;
-    }
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0.6;
+      }
 
-    .btn-danger-custom:hover {
-      opacity: 0.85;
-      color: #fff;
-    }
+      50% {
+        transform: translateY(-40px) translateX(20px) scale(1.2);
+        opacity: 1;
+      }
 
-    .btn-success-custom {
-      background: var(--success);
-      border: none;
-      color: #fff;
-      border-radius: 8px;
-      padding: 0.4rem 0.9rem;
-      font-size: 0.85rem;
-      transition: opacity 0.2s;
-    }
-
-    .btn-success-custom:hover {
-      opacity: 0.85;
-      color: #fff;
-    }
-
-    /* ---- Forms ---- */
-    .form-control {
-      background: var(--surface2) !important;
-      border: 1px solid var(--border) !important;
-      color: var(--text) !important;
-      border-radius: 10px !important;
-      padding: 0.75rem 1rem !important;
-    }
-
-    .form-control:focus {
-      border-color: var(--primary) !important;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
-    }
-
-    .form-control::placeholder {
-      color: var(--text-muted) !important;
-    }
-
-    .form-label {
-      color: var(--text-muted);
-      font-weight: 500;
-      font-size: 0.88rem;
-      margin-bottom: 0.4rem;
-    }
-
-    /* ---- Alerts / Messages ---- */
-    .alert {
-      border-radius: 12px !important;
-      border: none !important;
-      font-weight: 500;
-    }
-
-    .alert-success {
-      background: rgba(16, 185, 129, 0.15) !important;
-      color: #34d399 !important;
-    }
-
-    .alert-danger {
-      background: rgba(239, 68, 68, 0.15) !important;
-      color: #f87171 !important;
-    }
-
-    .alert-warning {
-      background: rgba(245, 158, 11, 0.15) !important;
-      color: #fbbf24 !important;
-    }
-
-    .alert-info {
-      background: rgba(99, 102, 241, 0.15) !important;
-      color: #a5b4fc !important;
-    }
-
-    /* ---- Tables ---- */
-    .table-dark-custom {
-      background: var(--surface);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .table-dark-custom thead th {
-      background: var(--surface2);
-      color: var(--text-muted);
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--border);
-      padding: 1rem;
-    }
-
-    .table-dark-custom tbody td {
-      border-bottom: 1px solid var(--border);
-      padding: 0.9rem 1rem;
-      color: var(--text);
-      vertical-align: middle;
-    }
-
-    .table-dark-custom tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    .table-dark-custom tbody tr:hover td {
-      background: var(--surface2);
-    }
-
-    /* ---- Badges ---- */
-    .badge-verified {
-      background: rgba(16, 185, 129, 0.2);
-      color: #34d399;
-      padding: 0.3rem 0.7rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-    }
-
-    .badge-unverified {
-      background: rgba(239, 68, 68, 0.2);
-      color: #f87171;
-      padding: 0.3rem 0.7rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-    }
-
-    .badge-active {
-      background: rgba(16, 185, 129, 0.2);
-      color: #34d399;
-      padding: 0.3rem 0.7rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-    }
-
-    .badge-inactive {
-      background: rgba(245, 158, 11, 0.2);
-      color: #fbbf24;
-      padding: 0.3rem 0.7rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-    }
-
-    .badge-staff {
-      background: rgba(99, 102, 241, 0.2);
-      color: #a5b4fc;
-      padding: 0.3rem 0.7rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-    }
-
-    /* ---- Footer ---- */
-    footer {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      padding: 1.5rem;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      margin-top: auto;
-    }
-
-    /* ---- Misc ---- */
-    main {
-      flex: 1;
+      100% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0.6;
+      }
     }
   </style>
 
@@ -292,52 +540,48 @@
 <body>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg">
+  <nav class="navbar navbar-expand-lg" id="mainNav">
     <div class="container">
       <a class="navbar-brand" href="{% url 'home' %}">
-        <i class="bi bi-shield-lock-fill me-2"></i>AuthApp
+        <div class="brand-icon"><i class="bi bi-shield-lock-fill"></i></div>
+        AuthApp
       </a>
       <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-        <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+        <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav ms-auto align-items-center gap-2">
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'home' %}"><i class="bi bi-house me-1"></i>Home</a>
-          </li>
+        <ul class="navbar-nav mx-auto align-items-center gap-1">
+          <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
           {% if user.is_authenticated %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-person-circle me-1"></i>Dashboard</a>
-          </li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
           {% if user.is_staff or user.is_superuser %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2 me-1"></i>Admin</a>
-          </li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}">Admin</a></li>
           {% endif %}
-          <li class="nav-item">
-            <form method="post" action="{% url 'logout' %}" class="d-inline">
-              {% csrf_token %}
-              <button type="submit" class="nav-link btn btn-link p-0" style="color: var(--text-muted) !important;">
-                <i class="bi bi-box-arrow-right me-1"></i>Logout
-              </button>
-            </form>
-          </li>
-          {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}">Login</a>
-          </li>
-          <li class="nav-item">
-            <a class="btn-nav-primary nav-link" href="{% url 'register' %}">Get Started</a>
-          </li>
           {% endif %}
         </ul>
+        <div class="d-flex align-items-center gap-2">
+          {% if user.is_authenticated %}
+          <span style="color: var(--text-mid); font-size: 0.88rem; font-weight: 500;">
+            <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+          </span>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-nav-outline nav-link btn">
+              <i class="bi bi-box-arrow-right me-1"></i>Sign Out
+            </button>
+          </form>
+          {% else %}
+          <a href="{% url 'login' %}" class="btn-nav-outline nav-link">Sign In</a>
+          <a href="{% url 'register' %}" class="btn-nav-primary nav-link">Get Started</a>
+          {% endif %}
+        </div>
       </div>
     </div>
   </nav>
 
   <!-- Flash Messages -->
   {% if messages %}
-  <div class="container mt-3">
+  <div class="messages-container container mt-3">
     {% for message in messages %}
     <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
       {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>{% endif %}
@@ -345,26 +589,32 @@
       {% if message.tags == 'warning' %}<i class="bi bi-exclamation-triangle-fill me-2"></i>{% endif %}
       {% if message.tags == 'info' %}<i class="bi bi-info-circle-fill me-2"></i>{% endif %}
       {{ message|urlize }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" style="filter: invert(1);"></button>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     {% endfor %}
   </div>
   {% endif %}
 
-  <!-- Main Content -->
   <main>
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Footer -->
   <footer>
-    <p class="mb-0">&copy; 2025 <strong>AuthApp</strong> &mdash; Secure authentication made simple.
-      <span class="mx-2">|</span> Need help? <a href="mailto:support@authapp.com"
-        style="color: var(--primary);">support@authapp.com</a>
+    <p style="margin:0;">&copy; 2025 <strong
+        style="background: var(--grad-main); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">AuthApp</strong>
+      — Secure authentication for modern teams.
+      &nbsp;|&nbsp; <a href="mailto:support@authapp.com">support@authapp.com</a>
     </p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Navbar scroll effect
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+  </script>
   {% block extra_scripts %}{% endblock %}
 </body>
 
