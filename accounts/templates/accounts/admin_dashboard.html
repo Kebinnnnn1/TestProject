@@ -148,6 +148,45 @@
         color: #fff;
         flex-shrink: 0;
     }
+
+    .av-c0 {
+        background: linear-gradient(135deg, #ff6b35, #ff8c5a);
+    }
+
+    .av-c1 {
+        background: linear-gradient(135deg, #4361ee, #5e7af5);
+    }
+
+    .av-c2 {
+        background: linear-gradient(135deg, #7209b7, #9b2fe0);
+    }
+
+    .av-c3 {
+        background: linear-gradient(135deg, #10b981, #34d399);
+    }
+
+    .av-c4 {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    }
+
+    .th {
+        padding: 0.9rem 1.25rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: none;
+        background: var(--surface-2);
+    }
+
+    .td {
+        padding: 0.95rem 1.25rem;
+        font-size: 0.88rem;
+        color: var(--text-dark);
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border);
+    }
 </style>
 {% endblock %}
 
@@ -155,18 +194,17 @@
 <div class="admin-wrap">
     <div class="container">
 
-        <!-- Header -->
         <div class="admin-header" style="animation: fadeInUp 0.6s ease both;">
             <div class="row align-items-center g-3">
                 <div class="col-lg-6">
                     <p
-                        style="font-size: 0.78rem; opacity: 0.5; margin-bottom: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; position: relative; z-index:1;">
+                        style="font-size:0.78rem;opacity:0.5;margin-bottom:0.2rem;text-transform:uppercase;letter-spacing:0.05em;position:relative;z-index:1;">
                         Admin Panel</p>
-                    <h1><i class="bi bi-speedometer2 me-2" style="color: var(--orange);"></i>User Management</h1>
+                    <h1><i class="bi bi-speedometer2 me-2" style="color:var(--orange);"></i>User Management</h1>
                     <p>Manage all registered AuthApp users</p>
                 </div>
                 <div class="col-lg-6">
-                    <div class="row g-2" style="position: relative; z-index: 1;">
+                    <div class="row g-2" style="position:relative;z-index:1;">
                         <div class="col-4">
                             <div class="stat-pill">
                                 <div class="sp-n">{{ users|length }}</div>
@@ -174,7 +212,7 @@
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="stat-pill" id="activePill">
+                            <div class="stat-pill">
                                 <div class="sp-n" id="activeCount">—</div>
                                 <div class="sp-l">Active</div>
                             </div>
@@ -190,135 +228,93 @@
             </div>
         </div>
 
-        <!-- Users Table -->
         <div class="users-card" style="animation: fadeInUp 0.6s 0.1s ease both;">
             <div class="users-card-header">
-                <span><i class="bi bi-people-fill me-2" style="color: var(--blue);"></i>All Users</span>
-                <span style="font-size: 0.78rem; color: var(--text-light); font-weight: 500;">{{ users|length }}
-                    total</span>
+                <span><i class="bi bi-people-fill me-2" style="color:var(--blue);"></i>All Users</span>
+                <span style="font-size:0.78rem;color:var(--text-light);font-weight:500;">{{ users|length }} total</span>
             </div>
             <div class="table-responsive">
-                <table class="table mb-0" style="min-width: 700px;">
+                <table class="table mb-0" style="min-width:720px;">
                     <thead>
-                        <tr style="background: var(--surface-2);">
-                            <th
-                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
-                                #</th>
-                            <th
-                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
-                                User</th>
-                            <th
-                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
-                                Email</th>
-                            <th
-                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
-                                Verified</th>
-                            <th
-                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
-                                Status</th>
-                            <th
-                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
-                                Role</th>
-                            <th
-                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
-                                Joined</th>
-                            <th
-                                style="padding: 0.9rem 1.25rem; font-size: 0.72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; border: none;">
-                                Action</th>
+                        <tr>
+                            <th class="th">#</th>
+                            <th class="th">User</th>
+                            <th class="th">Email</th>
+                            <th class="th">Verified</th>
+                            <th class="th">Status</th>
+                            <th class="th">Role</th>
+                            <th class="th">Joined</th>
+                            <th class="th">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="userTableBody">
+                    <tbody>
                         {% for u in users %}
-                        <tr class="user-row" data-active="{{ u.is_active|lower }}"
-                            style="border-bottom: 1px solid var(--border); transition: background 0.15s;">
-                            <td style="padding: 1rem 1.25rem; font-size: 0.82rem; color: var(--text-light);">{{
-                                forloop.counter }}</td>
-                            <td style="padding: 1rem 1.25rem;">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div class="user-avatar"
-                                        style="background: linear-gradient(135deg, {% cycle '#ff6b35' '#4361ee' '#7209b7' '#10b981' '#f59e0b' %}, {% cycle '#ff8c5a' '#5e7af5' '#9b2fe0' '#34d399' '#fbbf24' %});">
-                                        {{ u.username|slice:":1"|upper }}
-                                    </div>
-                                    <div>
-                                        <div style="font-size: 0.88rem; font-weight: 600; color: var(--text-dark);">
-                                            {{ u.username }}
-                                            {% if u == request.user %}<span
-                                                style="font-size: 0.7rem; color: var(--blue); font-weight: 500;">
-                                                (you)</span>{% endif %}
-                                        </div>
+                        <tr class="user-row" data-active="{{ u.is_active|lower }}" style="transition:background 0.15s;">
+                            <td class="td" style="color:var(--text-light);">{{ forloop.counter }}</td>
+                            <td class="td">
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="user-avatar" data-idx="{{ forloop.counter0 }}">{{
+                                        u.username|slice:":1"|upper }}</div>
+                                    <div style="font-size:0.88rem;font-weight:600;color:var(--text-dark);">
+                                        {{ u.username }}{% if u == request.user %} <span
+                                            style="font-size:0.7rem;color:var(--blue);">(you)</span>{% endif %}
                                     </div>
                                 </div>
                             </td>
-                            <td style="padding: 1rem 1.25rem; font-size: 0.85rem; color: var(--text-mid);">{{ u.email }}
-                            </td>
-                            <td style="padding: 1rem 1.25rem;">
-                                {% if u.is_verified %}
-                                <span class="badge-verified">✓ Yes</span>
-                                {% else %}
-                                <span class="badge-unverified">✗ No</span>
-                                {% endif %}
-                            </td>
-                            <td style="padding: 1rem 1.25rem;">
-                                {% if u.is_active %}
-                                <span class="badge-active">● Active</span>
-                                {% else %}
-                                <span class="badge-inactive">● Inactive</span>
-                                {% endif %}
-                            </td>
-                            <td style="padding: 1rem 1.25rem;">
+                            <td class="td" style="color:var(--text-mid);">{{ u.email }}</td>
+                            <td class="td">{% if u.is_verified %}<span class="badge-verified">✓ Yes</span>{% else
+                                %}<span class="badge-unverified">✗ No</span>{% endif %}</td>
+                            <td class="td">{% if u.is_active %}<span class="badge-active">● Active</span>{% else %}<span
+                                    class="badge-inactive">● Inactive</span>{% endif %}</td>
+                            <td class="td">
                                 {% if u.is_superuser %}<span class="badge-staff">Superuser</span>
                                 {% elif u.is_staff %}<span class="badge-staff">Staff</span>
-                                {% else %}<span style="font-size: 0.82rem; color: var(--text-light);">Member</span>{%
-                                endif %}
+                                {% else %}<span style="font-size:0.82rem;color:var(--text-light);">Member</span>{% endif
+                                %}
                             </td>
-                            <td style="padding: 1rem 1.25rem; font-size: 0.82rem; color: var(--text-light);">{{
-                                u.date_joined|date:"M j, Y" }}</td>
-                            <td style="padding: 1rem 1.25rem;">
+                            <td class="td" style="color:var(--text-light);">{{ u.date_joined|date:"M j, Y" }}</td>
+                            <td class="td">
                                 {% if u != request.user %}
-                                <form method="post" action="{% url 'toggle_user_active' u.pk %}">
-                                    {% csrf_token %}
-                                    {% if u.is_active %}
-                                    <button type="submit" class="btn-deactivate"><i
+                                <form method="post" action="{% url 'toggle_user_active' u.pk %}">{% csrf_token %}
+                                    {% if u.is_active %}<button type="submit" class="btn-deactivate"><i
                                             class="bi bi-person-dash me-1"></i>Deactivate</button>
-                                    {% else %}
-                                    <button type="submit" class="btn-activate"><i
-                                            class="bi bi-person-check me-1"></i>Activate</button>
-                                    {% endif %}
+                                    {% else %}<button type="submit" class="btn-activate"><i
+                                            class="bi bi-person-check me-1"></i>Activate</button>{% endif %}
                                 </form>
-                                {% else %}
-                                <span style="font-size: 0.8rem; color: var(--text-light);">—</span>
-                                {% endif %}
+                                {% else %}<span style="font-size:0.8rem;color:var(--text-light);">—</span>{% endif %}
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="8" style="text-align: center; padding: 4rem; color: var(--text-light);">
-                                <i class="bi bi-people"
-                                    style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
-                                No users found.
-                            </td>
+                            <td colspan="8" style="text-align:center;padding:4rem;color:var(--text-light);"><i
+                                    class="bi bi-people"
+                                    style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>No users found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
+
     </div>
 </div>
 
-{% block extra_scripts %}
 <script>
+    // Count active/inactive
     const rows = document.querySelectorAll('.user-row');
-    let a = 0, i = 0;
-    rows.forEach(r => { r.dataset.active === 'true' ? a++ : i++; });
+    let a = 0, ic = 0;
+    rows.forEach(r => { r.dataset.active === 'true' ? a++ : ic++; });
     document.getElementById('activeCount').textContent = a;
-    document.getElementById('inactiveCount').textContent = i;
-
-    // Row hover
+    document.getElementById('inactiveCount').textContent = ic;
+    // Hover effect
     rows.forEach(r => {
         r.addEventListener('mouseenter', () => r.style.background = 'var(--surface-2)');
         r.addEventListener('mouseleave', () => r.style.background = '');
     });
+    // Colour avatars by index (no Django cycle tag needed)
+    const colours = ['av-c0', 'av-c1', 'av-c2', 'av-c3', 'av-c4'];
+    document.querySelectorAll('.user-avatar[data-idx]').forEach(el => {
+        el.classList.add(colours[parseInt(el.dataset.idx) % colours.length]);
+    });
 </script>
-{% endblock %}
 {% endblock %}
