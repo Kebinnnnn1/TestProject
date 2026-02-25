@@ -254,6 +254,7 @@ def setup_admin(request):
             user.is_superuser = True
             user.is_verified = True
             user.is_active = True
+            user.role = 'admin'
             user.save()
             promoted = True
         except CustomUser.DoesNotExist:
