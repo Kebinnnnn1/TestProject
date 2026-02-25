@@ -94,7 +94,12 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Use CompressedStaticFilesStorage (not Manifest) so it works without a manifest file
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# Sessions: use signed cookies so they work across serverless instances on Vercel
+# (DB-backed sessions break when /tmp is not shared between function invocations)
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

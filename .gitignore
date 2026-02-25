@@ -22,7 +22,7 @@ lib64/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-staticfiles/
+# staticfiles/ is intentionally committed so Vercel can serve static assets
 
 # Environment
 .env
