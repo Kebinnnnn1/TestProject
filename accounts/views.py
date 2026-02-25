@@ -196,6 +196,11 @@ def change_role(request, pk):
         messages.warning(request, "You cannot change your own role.")
         return redirect('admin_dashboard')
 
+    # Protect existing admins — their role cannot be changed
+    if target.role == CustomUser.ADMIN:
+        messages.error(request, f"'{target.username}' is an Admin and cannot be modified.")
+        return redirect('admin_dashboard')
+
     new_role = request.POST.get('role', '').strip()
     valid_roles = [CustomUser.MEMBER, CustomUser.MODERATOR, CustomUser.ADMIN]
     if new_role not in valid_roles:

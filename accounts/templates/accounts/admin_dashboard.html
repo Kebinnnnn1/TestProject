@@ -335,26 +335,28 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if u != request.user %}
+                                {% if u == request.user %}
+                                <span class="badge-staff">
+                                    {% if u.role == 'admin' %}⭐ Admin{% elif u.role == 'moderator' %}🛡️ Moderator{%
+                                    else %}👤 Member{% endif %}
+                                </span>
+                                {% elif u.role == 'admin' %}
+                                <span
+                                    style="display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:600;color:#7209b7;background:rgba(114,9,183,0.1);border:1px solid rgba(114,9,183,0.25);padding:0.3rem 0.75rem;border-radius:20px;"
+                                    title="Admins cannot be modified">
+                                    <i class="bi bi-shield-lock-fill"></i> Admin
+                                </span>
+                                {% else %}
                                 <form method="post" action="{% url 'change_role' u.pk %}">
                                     {% csrf_token %}
                                     <select name="role" class="role-select role-{{ u.role }}"
-                                        data-current="{{ u.role }}" onchange="this.form.submit()">
+                                        data-current="{{ u.role }}" data-username="{{ u.username }}"
+                                        onchange="handleRoleChange(this)">
                                         <option value="member">👤 Member</option>
                                         <option value="moderator">🛡️ Moderator</option>
                                         <option value="admin">⭐ Admin</option>
                                     </select>
                                 </form>
-                                {% else %}
-                                <span class="badge-staff">
-                                    {% if u.role == 'admin' %}
-                                    ⭐ Admin
-                                    {% elif u.role == 'moderator' %}
-                                    🛡️ Moderator
-                                    {% else %}
-                                    👤 Member
-                                    {% endif %}
-                                </span>
                                 {% endif %}
                             </td>
                             <td style="color:var(--text-light);">{{ u.date_joined|date:"M j, Y" }}</td>
@@ -411,5 +413,28 @@
         sel.value = sel.dataset.current;
         sel.className = 'role-select role-' + sel.dataset.current;
     });
+
+    // Handle role change: confirm before promoting to Admin, then submit
+    function handleRoleChange(sel) {
+        var newRole = sel.value;
+        sel.className = 'role-select role-' + newRole;
+        if (newRole === 'admin') {
+            var username = sel.dataset.username || 'this user';
+            var ok = confirm(
+                '⚠️ Promote "' + username + '" to Admin?\n\n' +
+                'This grants full superuser access including:\n' +
+                '• Access to admin dashboard\n' +
+                '• Ability to activate/deactivate users\n' +
+                '• Ability to change roles\n\n' +
+                'This action cannot be undone from the panel. Are you sure?'
+            );
+            if (!ok) {
+                sel.value = sel.dataset.current;
+                sel.className = 'role-select role-' + sel.dataset.current;
+                return;
+            }
+        }
+        sel.form.submit();
+    }
 </script>
 {% endblock %}
