@@ -1,17 +1,17 @@
-{% extends 'accounts/base.html' %}
-{% block title %}File Converter — Convertly{% endblock %}
+﻿{% extends 'accounts/base.html' %}
+{% block title %}File Converter â€” Convertly{% endblock %}
 {% block meta_description %}Free online file converter by Convertly. Convert images, PDFs and text files instantly in
 your browser. No uploads, no limits.{% endblock %}
 
 {% block extra_head %}
 <style>
-    /* ─── Page shell ─── */
+    /* â”€â”€â”€ Page shell â”€â”€â”€ */
     .cv-page {
         background: var(--surface);
         min-height: 100vh;
     }
 
-    /* ─── Hero ─── */
+    /* â”€â”€â”€ Hero â”€â”€â”€ */
     .cv-hero {
         position: relative;
         overflow: hidden;
@@ -92,7 +92,7 @@ your browser. No uploads, no limits.{% endblock %}
         margin-bottom: 2rem;
     }
 
-    /* ─── Floating format chips ─── */
+    /* â”€â”€â”€ Floating format chips â”€â”€â”€ */
     .fmt-chips {
         display: flex;
         flex-wrap: wrap;
@@ -154,7 +154,7 @@ your browser. No uploads, no limits.{% endblock %}
         animation-delay: 2.5s;
     }
 
-    /* ─── Converter card ─── */
+    /* â”€â”€â”€ Converter card â”€â”€â”€ */
     .cv-card {
         background: var(--surface-2);
         border: 1px solid var(--border);
@@ -165,7 +165,7 @@ your browser. No uploads, no limits.{% endblock %}
         z-index: 1;
     }
 
-    /* ─── Drop zone ─── */
+    /* â”€â”€â”€ Drop zone â”€â”€â”€ */
     .drop-zone {
         border: 2.5px dashed rgba(67, 97, 238, .35);
         border-radius: 20px;
@@ -272,7 +272,7 @@ your browser. No uploads, no limits.{% endblock %}
         color: #dc2626;
     }
 
-    /* ─── Format selector ─── */
+    /* â”€â”€â”€ Format selector â”€â”€â”€ */
     .format-row {
         display: flex;
         align-items: center;
@@ -343,7 +343,7 @@ your browser. No uploads, no limits.{% endblock %}
         border-color: var(--blue);
     }
 
-    /* ─── Convert button ─── */
+    /* â”€â”€â”€ Convert button â”€â”€â”€ */
     .btn-convert {
         width: 100%;
         margin-top: 1.5rem;
@@ -374,7 +374,7 @@ your browser. No uploads, no limits.{% endblock %}
         transform: none;
     }
 
-    /* ─── Download banner ─── */
+    /* â”€â”€â”€ Download banner â”€â”€â”€ */
     .download-banner {
         display: none;
         margin-top: 1.2rem;
@@ -412,7 +412,7 @@ your browser. No uploads, no limits.{% endblock %}
         transform: translateY(-1px);
     }
 
-    /* ─── Progress bar ─── */
+    /* â”€â”€â”€ Progress bar â”€â”€â”€ */
     .progress-wrap {
         display: none;
         margin-top: 1rem;
@@ -437,7 +437,7 @@ your browser. No uploads, no limits.{% endblock %}
         transition: width .3s;
     }
 
-    /* ─── Supported formats section ─── */
+    /* â”€â”€â”€ Supported formats section â”€â”€â”€ */
     .formats-section {
         padding: 5rem 0;
     }
@@ -483,7 +483,7 @@ your browser. No uploads, no limits.{% endblock %}
         margin-top: .2rem;
     }
 
-    /* ─── Steps section ─── */
+    /* â”€â”€â”€ Steps section â”€â”€â”€ */
     .steps-section {
         padding: 5rem 0;
         background: var(--surface-2);
@@ -541,7 +541,7 @@ your browser. No uploads, no limits.{% endblock %}
         z-index: 2;
     }
 
-    /* ─── Security section ─── */
+    /* â”€â”€â”€ Security section â”€â”€â”€ */
     .security-section {
         padding: 5rem 0;
     }
@@ -607,7 +607,7 @@ your browser. No uploads, no limits.{% endblock %}
 {% block content %}
 <div class="cv-page">
 
-    <!-- ─── Hero ─── -->
+    <!-- â”€â”€â”€ Hero â”€â”€â”€ -->
     <section class="cv-hero">
         <div class="blob b1"></div>
         <div class="blob b2"></div>
@@ -615,17 +615,22 @@ your browser. No uploads, no limits.{% endblock %}
         <div class="container">
             <div class="row align-items-center g-5">
                 <div class="col-lg-5">
-                    <div class="cv-badge reveal"><span class="dot"></span> 100% Free · No Signup Required</div>
+                    <div class="cv-badge reveal"><span class="dot"></span> 100% Free Â· No Signup Required</div>
                     <h1 class="cv-title reveal delay-1">Convert any file<br><span class="text-grad">instantly.</span>
                     </h1>
                     <p class="cv-sub reveal delay-2">Drag and drop your file. Choose a format. Download in seconds.
-                        Everything runs in your browser — your files never leave your device.</p>
+                        Everything runs in your browser â€” your files never leave your device.</p>
                     <div class="fmt-chips reveal delay-3">
                         <span class="fmt-chip pdf"><i class="bi bi-file-earmark-pdf-fill"></i> PDF</span>
                         <span class="fmt-chip png"><i class="bi bi-file-earmark-image-fill"></i> PNG</span>
                         <span class="fmt-chip jpg"><i class="bi bi-image-fill"></i> JPG</span>
                         <span class="fmt-chip webp"><i class="bi bi-file-earmark-richtext-fill"></i> WEBP</span>
-                        <span class="fmt-chip doc"><i class="bi bi-file-earmark-word-fill"></i> DOC</span>
+                        <span class="fmt-chip txt"
+                            style="color:#e74c3c;border-color:rgba(231,76,60,.3);background:rgba(231,76,60,.08);"><i
+                                class="bi bi-file-earmark-play-fill"></i> GIF</span>
+                        <span class="fmt-chip doc"
+                            style="color:#06b6d4;border-color:rgba(6,182,212,.3);background:rgba(6,182,212,.08);"><i
+                                class="bi bi-vector-pen"></i> SVG</span>
                         <span class="fmt-chip txt"><i class="bi bi-file-earmark-text-fill"></i> TXT</span>
                     </div>
                 </div>
@@ -634,15 +639,16 @@ your browser. No uploads, no limits.{% endblock %}
                     <div class="cv-card">
                         <!-- Drop Zone -->
                         <div class="drop-zone" id="dropZone">
-                            <input type="file" class="drop-input" id="fileInput" accept="image/*,.pdf,.txt,.csv,.md">
-                            <span class="drop-icon">📂</span>
+                            <input type="file" class="drop-input" id="fileInput"
+                                accept="image/*,.pdf,.txt,.csv,.md,.svg">
+                            <span class="drop-icon">ðŸ“‚</span>
                             <div class="drop-title">Drop your file here</div>
-                            <div class="drop-sub">or click to browse — PNG, JPG, WEBP, PDF, TXT supported</div>
+                            <div class="drop-sub">PNG, JPG, WEBP, BMP, GIF, SVG, PDF, TXT, CSV, MD</div>
                         </div>
 
                         <!-- File preview -->
                         <div class="file-preview" id="filePreview">
-                            <div class="fp-icon" id="fpIcon">📄</div>
+                            <div class="fp-icon" id="fpIcon">ðŸ“„</div>
                             <div>
                                 <div class="fp-name" id="fpName">filename.png</div>
                                 <div class="fp-size" id="fpSize">0 KB</div>
@@ -669,9 +675,34 @@ your browser. No uploads, no limits.{% endblock %}
                             </div>
                         </div>
 
+                        <!-- PDF page options (shown only for PDF â†’ image) -->
+                        <div id="pdfPageOptions"
+                            style="display:none;margin-top:1rem;padding:1rem;border-radius:12px;background:var(--surface);border:1.5px solid rgba(67,97,238,.2);">
+                            <div
+                                style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-light);margin-bottom:.7rem;">
+                                ðŸ“„ PDF Page Options</div>
+                            <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+                                <label
+                                    style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:.88rem;font-weight:600;">
+                                    <input type="radio" name="pdfPages" id="pdfFirst" value="first" checked
+                                        style="accent-color:var(--blue);width:15px;height:15px;">
+                                    ðŸ—Ž First page only
+                                </label>
+                                <label
+                                    style="display:flex;align-items:center;gap:7px;cursor:pointer;font-size:.88rem;font-weight:600;">
+                                    <input type="radio" name="pdfPages" id="pdfAll" value="all"
+                                        style="accent-color:var(--blue);width:15px;height:15px;">
+                                    ðŸ“¦ All pages (ZIP)
+                                </label>
+                            </div>
+                            <div id="pdfPageCount" style="font-size:.75rem;color:var(--text-light);margin-top:.5rem;">
+                            </div>
+                        </div>
+
                         <!-- Progress -->
                         <div class="progress-wrap" id="progressWrap">
-                            <div style="font-size:.78rem;color:var(--text-light);margin-bottom:.4rem;">Converting…</div>
+                            <div style="font-size:.78rem;color:var(--text-light);margin-bottom:.4rem;"
+                                id="progressLabel">Convertingâ€¦</div>
                             <div class="progress-bar-bg">
                                 <div class="progress-bar-fill" id="progressFill"></div>
                             </div>
@@ -698,7 +729,7 @@ your browser. No uploads, no limits.{% endblock %}
         </div>
     </section>
 
-    <!-- ─── Supported Formats ─── -->
+    <!-- â”€â”€â”€ Supported Formats â”€â”€â”€ -->
     <section class="formats-section">
         <div class="container">
             <div class="text-center reveal">
@@ -708,42 +739,52 @@ your browser. No uploads, no limits.{% endblock %}
             </div>
             <div class="fmt-grid">
                 <div class="fmt-card reveal delay-1">
-                    <div class="fc-icon">🖼️</div>
+                    <div class="fc-icon">ðŸ–¼ï¸</div>
                     <div class="fc-name">JPG</div>
                     <div class="fc-desc">JPEG images</div>
                 </div>
                 <div class="fmt-card reveal delay-1">
-                    <div class="fc-icon">📸</div>
+                    <div class="fc-icon">ðŸ“¸</div>
                     <div class="fc-name">PNG</div>
                     <div class="fc-desc">Lossless images</div>
                 </div>
                 <div class="fmt-card reveal delay-2">
-                    <div class="fc-icon">🌐</div>
+                    <div class="fc-icon">ðŸŒ</div>
                     <div class="fc-name">WEBP</div>
                     <div class="fc-desc">Modern web format</div>
                 </div>
                 <div class="fmt-card reveal delay-2">
-                    <div class="fc-icon">🖼</div>
+                    <div class="fc-icon">ðŸ–¼</div>
                     <div class="fc-name">BMP</div>
                     <div class="fc-desc">Bitmap image</div>
                 </div>
                 <div class="fmt-card reveal delay-3">
-                    <div class="fc-icon">📄</div>
-                    <div class="fc-name">PDF</div>
-                    <div class="fc-desc">Images → PDF</div>
+                    <div class="fc-icon">ðŸŽžï¸</div>
+                    <div class="fc-name">GIF</div>
+                    <div class="fc-desc">Animated image</div>
                 </div>
                 <div class="fmt-card reveal delay-3">
-                    <div class="fc-icon">📝</div>
+                    <div class="fc-icon">âœï¸</div>
+                    <div class="fc-name">SVG</div>
+                    <div class="fc-desc">Vector graphic</div>
+                </div>
+                <div class="fmt-card reveal delay-4">
+                    <div class="fc-icon">ðŸ“„</div>
+                    <div class="fc-name">PDF</div>
+                    <div class="fc-desc">Multi-page doc</div>
+                </div>
+                <div class="fmt-card reveal delay-4">
+                    <div class="fc-icon">ðŸ“</div>
                     <div class="fc-name">TXT</div>
                     <div class="fc-desc">Plain text</div>
                 </div>
-                <div class="fmt-card reveal delay-4">
-                    <div class="fc-icon">📊</div>
+                <div class="fmt-card reveal delay-5">
+                    <div class="fc-icon">ðŸ“Š</div>
                     <div class="fc-name">CSV</div>
                     <div class="fc-desc">Spreadsheet data</div>
                 </div>
-                <div class="fmt-card reveal delay-4">
-                    <div class="fc-icon">📋</div>
+                <div class="fmt-card reveal delay-5">
+                    <div class="fc-icon">ðŸ“‹</div>
                     <div class="fc-name">MD</div>
                     <div class="fc-desc">Markdown</div>
                 </div>
@@ -751,7 +792,7 @@ your browser. No uploads, no limits.{% endblock %}
         </div>
     </section>
 
-    <!-- ─── 3-Step Process ─── -->
+    <!-- â”€â”€â”€ 3-Step Process â”€â”€â”€ -->
     <section class="steps-section">
         <div class="container">
             <div class="text-center reveal mb-5">
@@ -763,7 +804,7 @@ your browser. No uploads, no limits.{% endblock %}
                 <div class="col-md-4">
                     <div class="step-card reveal delay-1">
                         <div class="step-num"
-                            style="background:linear-gradient(135deg,rgba(67,97,238,.15),rgba(67,97,238,.05));">📂</div>
+                            style="background:linear-gradient(135deg,rgba(67,97,238,.15),rgba(67,97,238,.05));">ðŸ“‚</div>
                         <h5>Upload</h5>
                         <p>Drag & drop your file or click to browse. We support images, PDFs, and text files.</p>
                     </div>
@@ -771,17 +812,17 @@ your browser. No uploads, no limits.{% endblock %}
                 <div class="col-md-4">
                     <div class="step-card reveal delay-2">
                         <div class="step-num"
-                            style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.05));">⚙️
+                            style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.05));">âš™ï¸
                         </div>
                         <h5>Convert</h5>
-                        <p>Pick your target format and hit Convert. It all happens in your browser — instant and
+                        <p>Pick your target format and hit Convert. It all happens in your browser â€” instant and
                             private.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="step-card reveal delay-3">
                         <div class="step-num"
-                            style="background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.05));">⬇️
+                            style="background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(16,185,129,.05));">â¬‡ï¸
                         </div>
                         <h5>Download</h5>
                         <p>Your converted file is ready. One click to save it wherever you need it.</p>
@@ -791,7 +832,7 @@ your browser. No uploads, no limits.{% endblock %}
         </div>
     </section>
 
-    <!-- ─── Security section ─── -->
+    <!-- â”€â”€â”€ Security section â”€â”€â”€ -->
     <section class="security-section">
         <div class="container">
             <div class="sec-card reveal">
@@ -824,24 +865,26 @@ your browser. No uploads, no limits.{% endblock %}
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- jsPDF for image→PDF -->
+<!-- jsPDF for imageâ†’PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- PDF.js for PDF→image -->
+<!-- PDF.js for PDFâ†’image -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- JSZip for all-pages ZIP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
-    // ─── Format definitions ───────────────────────────────────────────────────
+    // â”€â”€â”€ Format definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const FORMAT_MAP = {
         image: {
             label: 'Image',
-            detect: ['image/jpeg', 'image/png', 'image/webp', 'image/bmp', 'image/gif'],
-            ext: ['jpg', 'png', 'webp', 'bmp'],
+            detect: ['image/jpeg', 'image/png', 'image/webp', 'image/bmp', 'image/gif', 'image/svg+xml'],
+            ext: ['jpg', 'png', 'webp', 'bmp', 'gif', 'svg'],
             outputs: [
-                { value: 'jpg', label: 'JPG — JPEG image' },
-                { value: 'png', label: 'PNG — Lossless image' },
-                { value: 'webp', label: 'WEBP — Web image' },
-                { value: 'bmp', label: 'BMP — Bitmap image' },
-                { value: 'pdf', label: 'PDF — Document' },
+                { value: 'jpg', label: 'JPG â€” JPEG image' },
+                { value: 'png', label: 'PNG â€” Lossless image' },
+                { value: 'webp', label: 'WEBP â€” Web image' },
+                { value: 'bmp', label: 'BMP â€” Bitmap image' },
+                { value: 'pdf', label: 'PDF â€” Document' },
             ]
         },
         pdf: {
@@ -849,8 +892,8 @@ your browser. No uploads, no limits.{% endblock %}
             detect: ['application/pdf'],
             ext: ['pdf'],
             outputs: [
-                { value: 'png', label: 'PNG — Image (first page)' },
-                { value: 'jpg', label: 'JPG — Image (first page)' },
+                { value: 'png', label: 'PNG â€” Image' },
+                { value: 'jpg', label: 'JPG â€” Image' },
             ]
         },
         text: {
@@ -858,20 +901,20 @@ your browser. No uploads, no limits.{% endblock %}
             detect: ['text/plain', 'text/csv', 'text/markdown'],
             ext: ['txt', 'csv', 'md'],
             outputs: [
-                { value: 'txt', label: 'TXT — Plain text' },
-                { value: 'csv', label: 'CSV — Comma separated' },
-                { value: 'md', label: 'MD — Markdown' },
+                { value: 'txt', label: 'TXT â€” Plain text' },
+                { value: 'csv', label: 'CSV â€” Comma separated' },
+                { value: 'md', label: 'MD â€” Markdown' },
             ]
         }
     };
 
-    // ─── State ────────────────────────────────────────────────────────────────
+    // â”€â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     let currentFile = null;
     let currentType = null;
     let downloadURL = null;
     let downloadName = null;
 
-    // ─── DOM refs ─────────────────────────────────────────────────────────────
+    // â”€â”€â”€ DOM refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const filePreview = document.getElementById('filePreview');
@@ -881,20 +924,21 @@ your browser. No uploads, no limits.{% endblock %}
     const fpRemove = document.getElementById('fpRemove');
     const fromFormat = document.getElementById('fromFormat');
     const toFormat = document.getElementById('toFormat');
-    const swapBtn = document.getElementById('swapBtn');
     const convertBtn = document.getElementById('convertBtn');
     const progressWrap = document.getElementById('progressWrap');
     const progressFill = document.getElementById('progressFill');
+    const progressLabel = document.getElementById('progressLabel');
     const dlBanner = document.getElementById('downloadBanner');
     const dlInfo = document.getElementById('downloadInfo');
     const dlBtn = document.getElementById('downloadBtn');
+    const pdfPageOpts = document.getElementById('pdfPageOptions');
+    const pdfPageCount = document.getElementById('pdfPageCount');
 
-    // ─── Drag & Drop ──────────────────────────────────────────────────────────
+    // â”€â”€â”€ Drag & Drop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
     dropZone.addEventListener('drop', e => {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
+        e.preventDefault(); dropZone.classList.remove('drag-over');
         const f = e.dataTransfer.files[0];
         if (f) loadFile(f);
     });
@@ -903,28 +947,25 @@ your browser. No uploads, no limits.{% endblock %}
     function loadFile(file) {
         currentFile = file;
         currentType = detectType(file);
-
-        // Preview
         fpName.textContent = file.name;
         fpSize.textContent = formatSize(file.size);
         fpIcon.textContent = typeIcon(currentType);
         filePreview.classList.add('show');
         dropZone.classList.add('has-file');
-
-        // From dropdown
         fromFormat.innerHTML = `<option value="${currentType}">${FORMAT_MAP[currentType]?.label || currentType} (auto-detected)</option>`;
-
-        // To dropdown
         populateOutputs(currentType);
         resetResult();
+        // Pre-read page count for PDF
+        if (currentType === 'pdf') prefetchPdfPageCount(file);
     }
 
     function detectType(file) {
+        if (file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) return 'image';
         if (FORMAT_MAP.image.detect.includes(file.type)) return 'image';
         if (FORMAT_MAP.pdf.detect.includes(file.type)) return 'pdf';
         if (FORMAT_MAP.text.detect.includes(file.type)) return 'text';
         const ext = file.name.split('.').pop().toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif'].includes(ext)) return 'image';
+        if (['jpg', 'jpeg', 'png', 'webp', 'bmp', 'gif', 'svg'].includes(ext)) return 'image';
         if (ext === 'pdf') return 'pdf';
         if (['txt', 'csv', 'md'].includes(ext)) return 'text';
         return 'text';
@@ -937,30 +978,50 @@ your browser. No uploads, no limits.{% endblock %}
         checkReady();
     }
 
-    toFormat.addEventListener('change', checkReady);
+    // â”€â”€â”€ PDF page options visibility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    toFormat.addEventListener('change', () => {
+        const showPdfOpts = currentType === 'pdf' && ['png', 'jpg'].includes(toFormat.value);
+        pdfPageOpts.style.display = showPdfOpts ? 'block' : 'none';
+        checkReady();
+    });
+
+    // â”€â”€â”€ Pre-fetch PDF page count â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    let cachedPdfDoc = null;
+    async function prefetchPdfPageCount(file) {
+        try {
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            const ab = await file.arrayBuffer();
+            cachedPdfDoc = await pdfjsLib.getDocument({ data: ab }).promise;
+            pdfPageCount.textContent = `ðŸ“„ ${cachedPdfDoc.numPages} page${cachedPdfDoc.numPages > 1 ? 's' : ''} detected`;
+        } catch (e) { pdfPageCount.textContent = ''; }
+    }
 
     function checkReady() {
         convertBtn.disabled = !(currentFile && toFormat.value);
     }
 
-    // ─── Remove file ──────────────────────────────────────────────────────────
+    // â”€â”€â”€ Remove file â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     fpRemove.addEventListener('click', () => {
-        currentFile = null; currentType = null;
+        currentFile = null; currentType = null; cachedPdfDoc = null;
         filePreview.classList.remove('show');
         dropZone.classList.remove('has-file');
         fileInput.value = '';
         fromFormat.innerHTML = '<option value="">Auto-detect</option>';
         toFormat.innerHTML = '<option value="">Select output format</option>';
+        pdfPageOpts.style.display = 'none';
+        pdfPageCount.textContent = '';
+        document.getElementById('pdfFirst').checked = true;
         resetResult();
         convertBtn.disabled = true;
     });
 
-    // ─── Helpers ──────────────────────────────────────────────────────────────
-    function typeIcon(t) { return { image: '🖼️', pdf: '📄', text: '📝' }[t] || '📄'; }
+    // â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    function typeIcon(t) { return { image: 'ðŸ–¼ï¸', pdf: 'ðŸ“„', text: 'ðŸ“' }[t] || 'ðŸ“„'; }
     function formatSize(b) {
         if (b < 1024) return b + ' B';
-        if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
-        return (b / 1024 / 1024).toFixed(2) + ' MB';
+        if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+        return (b / 1048576).toFixed(2) + ' MB';
     }
     function resetResult() {
         dlBanner.classList.remove('show');
@@ -968,9 +1029,10 @@ your browser. No uploads, no limits.{% endblock %}
         progressFill.style.width = '0%';
         if (downloadURL) { URL.revokeObjectURL(downloadURL); downloadURL = null; }
     }
-    function setProgress(pct) {
+    function setProgress(pct, label) {
         progressWrap.classList.add('show');
         progressFill.style.width = pct + '%';
+        if (label) progressLabel.textContent = label;
     }
     function showDownload(url, name) {
         downloadURL = url; downloadName = name;
@@ -979,32 +1041,28 @@ your browser. No uploads, no limits.{% endblock %}
         progressWrap.classList.remove('show');
     }
 
-    // ─── Download button ──────────────────────────────────────────────────────
+    // â”€â”€â”€ Download button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     dlBtn.addEventListener('click', () => {
         if (!downloadURL) return;
         const a = document.createElement('a');
         a.href = downloadURL; a.download = downloadName; a.click();
     });
 
-    // ─── Convert ──────────────────────────────────────────────────────────────
+    // â”€â”€â”€ Convert dispatcher â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     convertBtn.addEventListener('click', async () => {
         if (!currentFile || !toFormat.value) return;
         convertBtn.disabled = true;
         resetResult();
-        setProgress(10);
-
+        setProgress(5, 'Startingâ€¦');
         try {
             const out = toFormat.value;
             const baseName = currentFile.name.replace(/\.[^.]+$/, '');
-
             if (currentType === 'image') {
-                if (out === 'pdf') {
-                    await imgToPdf(currentFile, baseName);
-                } else {
-                    await imgToImg(currentFile, out, baseName);
-                }
+                out === 'pdf' ? await imgToPdf(currentFile, baseName) : await imgToImg(currentFile, out, baseName);
             } else if (currentType === 'pdf') {
-                await pdfToImg(currentFile, out, baseName);
+                const mode = document.querySelector('input[name="pdfPages"]:checked')?.value || 'first';
+                mode === 'all' ? await pdfToImgAll(currentFile, out, baseName)
+                    : await pdfToImgSingle(currentFile, out, baseName, 1);
             } else {
                 await textToText(currentFile, out, baseName);
             }
@@ -1015,103 +1073,116 @@ your browser. No uploads, no limits.{% endblock %}
         }
     });
 
-    // ─── Image → Image ────────────────────────────────────────────────────────
+    // â”€â”€â”€ Image â†’ Image (Canvas API â€” handles JPG/PNG/WEBP/BMP/GIF/SVG) â”€â”€â”€â”€â”€â”€
     function imgToImg(file, outFmt, baseName) {
         return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = new Image();
-                img.onload = () => {
-                    setProgress(60);
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
-                    const ctx = canvas.getContext('2d');
-                    if (outFmt === 'jpg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
-                    ctx.drawImage(img, 0, 0);
-                    setProgress(90);
-                    const mimeMap = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', bmp: 'image/bmp' };
-                    const quality = outFmt === 'jpg' ? 0.95 : undefined;
-                    canvas.toBlob(blob => {
-                        if (!blob) return reject(new Error('Canvas conversion failed'));
-                        const url = URL.createObjectURL(blob);
-                        showDownload(url, `${baseName}.${outFmt}`);
-                        convertBtn.disabled = false;
-                        resolve();
-                    }, mimeMap[outFmt] || 'image/png', quality);
-                };
-                img.onerror = () => reject(new Error('Failed to load image'));
-                img.src = e.target.result;
+            const url = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = () => {
+                setProgress(60, 'Renderingâ€¦');
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                if (outFmt === 'jpg') { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+                ctx.drawImage(img, 0, 0);
+                URL.revokeObjectURL(url);
+                setProgress(90, 'Encodingâ€¦');
+                const mimeMap = { jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', bmp: 'image/bmp' };
+                canvas.toBlob(blob => {
+                    if (!blob) return reject(new Error('Canvas conversion failed'));
+                    showDownload(URL.createObjectURL(blob), `${baseName}.${outFmt}`);
+                    convertBtn.disabled = false;
+                    resolve();
+                }, mimeMap[outFmt] || 'image/png', outFmt === 'jpg' ? 0.95 : undefined);
             };
-            reader.onerror = () => reject(new Error('Failed to read file'));
-            reader.readAsDataURL(file);
+            img.onerror = () => reject(new Error('Failed to load image â€” SVG may need width/height attributes'));
+            img.src = url;
         });
     }
 
-    // ─── Image → PDF ──────────────────────────────────────────────────────────
+    // â”€â”€â”€ Image â†’ PDF â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     async function imgToPdf(file, baseName) {
         const { jsPDF } = window.jspdf;
-        const reader = new FileReader();
-        const dataUrl = await new Promise((res, rej) => {
-            reader.onload = e => res(e.target.result);
-            reader.onerror = rej;
-            reader.readAsDataURL(file);
-        });
-        setProgress(50);
+        const dataUrl = await fileToDataUrl(file);
+        setProgress(50, 'Building PDFâ€¦');
         const img = new Image();
         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
-        setProgress(70);
+        setProgress(75, 'Encodingâ€¦');
         const w = img.naturalWidth, h = img.naturalHeight;
-        const orientation = w > h ? 'l' : 'p';
-        const pdf = new jsPDF({ orientation, unit: 'px', format: [w, h] });
+        const pdf = new jsPDF({ orientation: w > h ? 'l' : 'p', unit: 'px', format: [w, h] });
         pdf.addImage(dataUrl, 'JPEG', 0, 0, w, h);
-        setProgress(95);
-        const blob = pdf.output('blob');
-        const url = URL.createObjectURL(blob);
-        showDownload(url, `${baseName}.pdf`);
+        setProgress(95, 'Finalisingâ€¦');
+        showDownload(URL.createObjectURL(pdf.output('blob')), `${baseName}.pdf`);
         convertBtn.disabled = false;
     }
 
-    // ─── PDF → Image ──────────────────────────────────────────────────────────
-    async function pdfToImg(file, outFmt, baseName) {
+    // â”€â”€â”€ PDF â†’ Image: single page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    async function pdfToImgSingle(file, outFmt, baseName, pageNum) {
+        const pdfDoc = await loadPdf(file);
+        setProgress(30, `Rendering page ${pageNum}â€¦`);
+        const blob = await renderPdfPage(pdfDoc, pageNum, outFmt);
+        setProgress(95, 'Done!');
+        showDownload(URL.createObjectURL(blob), `${baseName}_p${pageNum}.${outFmt}`);
+        convertBtn.disabled = false;
+    }
+
+    // â”€â”€â”€ PDF â†’ Image: ALL pages â†’ ZIP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    async function pdfToImgAll(file, outFmt, baseName) {
+        const pdfDoc = await loadPdf(file);
+        const total = pdfDoc.numPages;
+        const zip = new JSZip();
+        for (let i = 1; i <= total; i++) {
+            setProgress(Math.round(10 + (i / total) * 80), `Rendering page ${i} of ${total}â€¦`);
+            const blob = await renderPdfPage(pdfDoc, i, outFmt);
+            const pad = String(i).padStart(String(total).length, '0');
+            zip.file(`${baseName}_p${pad}.${outFmt}`, blob);
+        }
+        setProgress(95, 'Creating ZIPâ€¦');
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        showDownload(URL.createObjectURL(zipBlob), `${baseName}_all_pages.zip`);
+        convertBtn.disabled = false;
+    }
+
+    // â”€â”€â”€ PDF helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    async function loadPdf(file) {
         pdfjsLib.GlobalWorkerOptions.workerSrc =
             'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const arrayBuffer = await file.arrayBuffer();
-        setProgress(20);
-        const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        setProgress(40);
-        const page = await pdfDoc.getPage(1);
+        if (cachedPdfDoc) return cachedPdfDoc;
+        setProgress(10, 'Loading PDFâ€¦');
+        const ab = await file.arrayBuffer();
+        setProgress(20, 'Parsingâ€¦');
+        return pdfjsLib.getDocument({ data: ab }).promise;
+    }
+
+    async function renderPdfPage(pdfDoc, pageNum, outFmt) {
+        const page = await pdfDoc.getPage(pageNum);
         const viewport = page.getViewport({ scale: 2 });
         const canvas = document.createElement('canvas');
-        canvas.width = viewport.width; canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
         await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-        setProgress(85);
         const mimeMap = { png: 'image/png', jpg: 'image/jpeg' };
-        const blob = await new Promise(res => canvas.toBlob(res, mimeMap[outFmt] || 'image/png', 0.95));
-        const url = URL.createObjectURL(blob);
-        showDownload(url, `${baseName}_page1.${outFmt}`);
-        convertBtn.disabled = false;
+        return new Promise(res => canvas.toBlob(res, mimeMap[outFmt] || 'image/png', 0.95));
     }
 
-    // ─── Text → Text ──────────────────────────────────────────────────────────
+    // â”€â”€â”€ Text â†’ Text â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     async function textToText(file, outFmt, baseName) {
-        setProgress(50);
+        setProgress(50, 'Readingâ€¦');
         const text = await file.text();
-        setProgress(80);
+        setProgress(90, 'Savingâ€¦');
         const mimeMap = { txt: 'text/plain', csv: 'text/csv', md: 'text/markdown' };
-        const blob = new Blob([text], { type: mimeMap[outFmt] || 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        setProgress(100);
-        showDownload(url, `${baseName}.${outFmt}`);
+        showDownload(URL.createObjectURL(new Blob([text], { type: mimeMap[outFmt] || 'text/plain' })), `${baseName}.${outFmt}`);
         convertBtn.disabled = false;
     }
 
-    // ─── Swap button (swap from↔to where possible) ───────────────────────────
-    swapBtn.addEventListener('click', () => {
-        if (!currentFile) return;
-        const cur = toFormat.value;
-        if (!cur) return;
-        // Just reset — the reverse isn't always possible from state, so just clear
-        fpRemove.click();
-    });
+    // â”€â”€â”€ Utility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    function fileToDataUrl(file) {
+        return new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onload = e => res(e.target.result);
+            r.onerror = rej;
+            r.readAsDataURL(file);
+        });
+    }
 </script>
 {% endblock %}
