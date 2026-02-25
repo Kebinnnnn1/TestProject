@@ -1,0 +1,50 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Sign In — AuthApp{% endblock %}
+{% block meta_description %}Sign in to your AuthApp account.{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 85vh; padding: 3rem 1rem;">
+    <div style="width: 100%; max-width: 420px;">
+        <div class="text-center mb-4">
+            <div
+                style="width: 56px; height: 56px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <i class="bi bi-box-arrow-in-right" style="font-size: 1.5rem; color: #fff;"></i>
+            </div>
+            <h1 style="font-size: 1.8rem; font-weight: 700; color: #fff;">Welcome back</h1>
+            <p style="color: #94a3b8; margin-top: 0.4rem;">New here? <a href="{% url 'register' %}"
+                    style="color: #a5b4fc; font-weight: 500;">Create an account</a></p>
+        </div>
+
+        <div class="card-glass p-4 p-md-5">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        <i class="bi bi-person me-1"></i> Username
+                    </label>
+                    {{ form.username }}
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.password.id_for_label }}" class="form-label">
+                        <i class="bi bi-lock me-1"></i> Password
+                    </label>
+                    {{ form.password }}
+                </div>
+
+                <button type="submit" class="btn-primary-custom btn w-100">
+                    <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'register' %}" style="color: #64748b; font-size: 0.85rem;">
+                    Don't have an account? <span style="color: #a5b4fc;">Register here</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

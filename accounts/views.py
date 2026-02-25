@@ -1,0 +1,186 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.http import require_POST
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.core.exceptions import ValidationError
+
+from .forms import RegistrationForm, LoginForm
+from .models import CustomUser, EmailVerificationToken
+from .tokens import generate_token, send_verification_email
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def redirect_if_logged_in(view_func):
+    """Redirect already-authenticated users away from public auth pages."""
+    def wrapper(request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('dashboard')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def is_staff_user(user):
+    return user.is_active and (user.is_staff or user.is_superuser)
+
+
+# ---------------------------------------------------------------------------
+# Public pages
+# ---------------------------------------------------------------------------
+
+class HomeView(View):
+    def get(self, request):
+        return render(request, 'accounts/home.html')
+
+
+# ---------------------------------------------------------------------------
+# Registration
+# ---------------------------------------------------------------------------
+
+@method_decorator(redirect_if_logged_in, name='dispatch')
+class RegisterView(View):
+    template_name = 'accounts/register.html'
+
+    def get(self, request):
+        form = RegistrationForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_verified = False
+            user.is_active = True
+            user.save()
+
+            token = generate_token(user)
+            send_verification_email(request, user, token)
+
+            messages.success(
+                request,
+                'Account created! Please check your email for a verification link.'
+            )
+            return redirect('login')
+
+        return render(request, self.template_name, {'form': form})
+
+
+# ---------------------------------------------------------------------------
+# Email Verification
+# ---------------------------------------------------------------------------
+
+class VerifyEmailView(View):
+    def get(self, request):
+        token_value = request.GET.get('token')
+        if not token_value:
+            messages.error(request, 'Invalid verification link.')
+            return redirect('login')
+
+        try:
+            token_obj = EmailVerificationToken.objects.filter(token=token_value).first()
+        except (ValidationError, ValueError):
+            token_obj = None
+
+        if not token_obj:
+            messages.error(request, 'Verification link is invalid or has already been used.')
+            return redirect('login')
+
+        user = token_obj.user
+        user.is_verified = True
+        user.save()
+        token_obj.delete()
+
+        messages.success(request, 'Email verified! You can now log in.')
+        return redirect('login')
+
+
+# ---------------------------------------------------------------------------
+# Login / Logout
+# ---------------------------------------------------------------------------
+
+@method_decorator(redirect_if_logged_in, name='dispatch')
+class CustomLoginView(View):
+    template_name = 'accounts/login.html'
+
+    def get(self, request):
+        form = LoginForm()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+
+            if user is None:
+                messages.error(request, 'Invalid username or password.')
+                return render(request, self.template_name, {'form': form})
+
+            if not user.is_verified:
+                messages.warning(
+                    request,
+                    'Please verify your email before logging in. '
+                    'Check your inbox for the verification link.'
+                )
+                return render(request, self.template_name, {'form': form})
+
+            if not user.is_active:
+                messages.error(request, 'Your account has been deactivated. Contact support.')
+                return render(request, self.template_name, {'form': form})
+
+            login(request, user)
+            messages.success(request, f'Welcome back, {user.username}!')
+            return redirect('dashboard')
+
+        return render(request, self.template_name, {'form': form})
+
+
+class LogoutView(View):
+    def post(self, request):
+        logout(request)
+        messages.info(request, 'You have been logged out.')
+        return redirect('home')
+
+
+# ---------------------------------------------------------------------------
+# User Dashboard
+# ---------------------------------------------------------------------------
+
+@method_decorator(login_required, name='dispatch')
+class DashboardView(View):
+    def get(self, request):
+        return render(request, 'accounts/dashboard.html', {'user': request.user})
+
+
+# ---------------------------------------------------------------------------
+# Admin Dashboard
+# ---------------------------------------------------------------------------
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(is_staff_user, login_url='/login/'), name='dispatch')
+class AdminDashboardView(View):
+    def get(self, request):
+        users = CustomUser.objects.all().order_by('date_joined')
+        return render(request, 'accounts/admin_dashboard.html', {'users': users})
+
+
+@login_required
+@user_passes_test(is_staff_user, login_url='/login/')
+@require_POST
+def toggle_user_active(request, pk):
+    """Flip a user's is_active status. Staff cannot deactivate themselves."""
+    target = get_object_or_404(CustomUser, pk=pk)
+    if target == request.user:
+        messages.warning(request, "You cannot deactivate your own account.")
+    else:
+        target.is_active = not target.is_active
+        target.save()
+        state = 'activated' if target.is_active else 'deactivated'
+        messages.success(request, f"User '{target.username}' has been {state}.")
+    return redirect('admin_dashboard')

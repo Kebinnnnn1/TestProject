@@ -1,0 +1,88 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Create Account — AuthApp{% endblock %}
+{% block meta_description %}Create your AuthApp account securely.{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 85vh; padding: 3rem 1rem;">
+    <div style="width: 100%; max-width: 460px;">
+        <div class="text-center mb-4">
+            <div
+                style="width: 56px; height: 56px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <i class="bi bi-person-plus-fill" style="font-size: 1.5rem; color: #fff;"></i>
+            </div>
+            <h1 style="font-size: 1.8rem; font-weight: 700; color: #fff;">Create your account</h1>
+            <p style="color: #94a3b8; margin-top: 0.4rem;">Already have one? <a href="{% url 'login' %}"
+                    style="color: #a5b4fc; font-weight: 500;">Sign in</a></p>
+        </div>
+
+        <div class="card-glass p-4 p-md-5">
+            <form method="post" id="registerForm" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        <i class="bi bi-person me-1"></i> Username
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                    <div class="mt-1" style="color: #f87171; font-size: 0.83rem;">
+                        {% for error in form.username.errors %}<div>{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                        <i class="bi bi-envelope me-1"></i> Email Address
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div class="mt-1" style="color: #f87171; font-size: 0.83rem;">
+                        {% for error in form.email.errors %}<div>{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">
+                        <i class="bi bi-lock me-1"></i> Password
+                    </label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                    <div class="mt-1" style="color: #f87171; font-size: 0.83rem;">
+                        {% for error in form.password1.errors %}<div>{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">
+                        <i class="bi bi-lock-fill me-1"></i> Confirm Password
+                    </label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                    <div class="mt-1" style="color: #f87171; font-size: 0.83rem;">
+                        {% for error in form.password2.errors %}<div>{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger mb-3">
+                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn-primary-custom btn w-100 mt-2">
+                    <i class="bi bi-person-plus me-2"></i> Create Account
+                </button>
+            </form>
+
+            <p class="text-center mt-4" style="color: #64748b; font-size: 0.82rem;">
+                By registering, a verification email will be sent to confirm your address.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

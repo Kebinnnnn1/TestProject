@@ -1,0 +1,121 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Home — AuthApp{% endblock %}
+
+{% block content %}
+<section class="d-flex align-items-center" style="min-height: 85vh; padding: 4rem 0;">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <!-- Left: Hero text -->
+            <div class="col-lg-6">
+                <div class="mb-3">
+                    <span
+                        style="background: rgba(99,102,241,0.15); color: #a5b4fc; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                        <i class="bi bi-lightning-charge-fill me-1"></i> Secure by Default
+                    </span>
+                </div>
+                <h1 style="font-size: 3.5rem; font-weight: 800; line-height: 1.15; color: #fff;">
+                    Authenticate with
+                    <span
+                        style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        confidence.
+                    </span>
+                </h1>
+                <p class="mt-4 mb-5" style="font-size: 1.15rem; color: #94a3b8; max-width: 480px; line-height: 1.7;">
+                    AuthApp provides rock-solid user authentication with email verification,
+                    secure password hashing, and a full admin dashboard — all out of the box.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{% url 'register' %}" class="btn-primary-custom btn"
+                        style="font-size: 1rem; padding: 0.75rem 2rem;">
+                        <i class="bi bi-person-plus me-2"></i>Create Account
+                    </a>
+                    <a href="{% url 'login' %}" class="btn"
+                        style="border: 1px solid rgba(255,255,255,0.15); color: #e2e8f0; border-radius: 10px; padding: 0.75rem 2rem; font-weight: 600; transition: background 0.2s;">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: Feature cards -->
+            <div class="col-lg-6">
+                <div class="d-flex flex-column gap-3">
+                    {% for icon, title, desc in feature_items %}
+                    <div class="card-glass p-3 d-flex align-items-start gap-3" style="animation: fadeInUp 0.5s ease;">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="{{ icon }}" style="font-size: 1.3rem; color: #a5b4fc;"></i>
+                        </div>
+                        <div>
+                            <h6 style="font-weight: 600; color: #fff; margin-bottom: 0.2rem;">{{ title }}</h6>
+                            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0; line-height: 1.5;">{{ desc }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <!-- Static fallback if view doesn't pass feature_items -->
+                    <div class="card-glass p-3 d-flex align-items-start gap-3">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-envelope-check-fill" style="font-size: 1.3rem; color: #a5b4fc;"></i>
+                        </div>
+                        <div>
+                            <h6 style="font-weight: 600; color: #fff; margin-bottom: 0.2rem;">Email Verification</h6>
+                            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0;">Confirm identity before access is
+                                granted.</p>
+                        </div>
+                    </div>
+                    <div class="card-glass p-3 d-flex align-items-start gap-3">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-shield-lock-fill" style="font-size: 1.3rem; color: #a5b4fc;"></i>
+                        </div>
+                        <div>
+                            <h6 style="font-weight: 600; color: #fff; margin-bottom: 0.2rem;">Secure Password Hashing
+                            </h6>
+                            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0;">PBKDF2 password hashing via
+                                Django's auth system.</p>
+                        </div>
+                    </div>
+                    <div class="card-glass p-3 d-flex align-items-start gap-3">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-speedometer2" style="font-size: 1.3rem; color: #a5b4fc;"></i>
+                        </div>
+                        <div>
+                            <h6 style="font-weight: 600; color: #fff; margin-bottom: 0.2rem;">Admin Dashboard</h6>
+                            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0;">Manage users, activate/deactivate
+                                accounts with ease.</p>
+                        </div>
+                    </div>
+                    <div class="card-glass p-3 d-flex align-items-start gap-3">
+                        <div
+                            style="background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2)); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-key-fill" style="font-size: 1.3rem; color: #a5b4fc;"></i>
+                        </div>
+                        <div>
+                            <h6 style="font-weight: 600; color: #fff; margin-bottom: 0.2rem;">CSRF Protection</h6>
+                            <p style="color: #94a3b8; font-size: 0.88rem; margin: 0;">All forms protected against
+                                cross-site request forgery.</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
