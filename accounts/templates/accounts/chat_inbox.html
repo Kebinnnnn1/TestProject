@@ -87,12 +87,18 @@
 
   {% if people_with_convos %}
   <div class="inbox-section-title">Conversations</div>
-  {% for user in people_with_convos %}
-  <a href="{% url 'chat_conversation' user.username %}" class="user-row">
-    <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
-    <span class="name">{{ user.username }}</span>
-    <span class="role-tag">{{ user.role|capfirst }}</span>
-    <i class="bi bi-chevron-right" style="color:var(--text-light);"></i>
+  {% for item in people_with_convos %}
+  <a href="{% url 'chat_conversation' item.user.username %}" class="user-row">
+    <div class="avatar">{{ item.user.username|slice:":1"|upper }}</div>
+    <span class="name">{{ item.user.username }}</span>
+    {% if item.unread %}
+    <span style="background:var(--grad-main);color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto;margin-right:4px;">
+      {% if item.unread > 9 %}9+{% else %}{{ item.unread }}{% endif %}
+    </span>
+    {% else %}
+    <span class="role-tag">{{ item.user.role|capfirst }}</span>
+    {% endif %}
+    <i class="bi bi-chevron-right" style="color:var(--text-light);{% if item.unread %}margin-left:0;{% endif %}"></i>
   </a>
   {% endfor %}
   {% endif %}

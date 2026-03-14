@@ -210,6 +210,150 @@
       background: var(--surface-3);
     }
 
+    /* ─── Hamburger Button ─── */
+    .hamburger-btn {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1.2rem;
+    }
+    .hamburger-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--surface-3);
+    }
+    .hamburger-dot {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid var(--surface-2);
+      animation: pulse-dot 1.8s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    /* ─── Slide Menu ─── */
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1998;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(2px);
+      animation: fadeIn 0.2s ease;
+    }
+    .menu-overlay.open { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .slide-menu {
+      position: fixed;
+      top: 0;
+      right: -320px;
+      width: 290px;
+      height: 100vh;
+      background: var(--card-bg);
+      border-left: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      z-index: 1999;
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      overflow-y: auto;
+    }
+    .slide-menu.open { right: 0; }
+
+    .slide-menu-header {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .slide-menu-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .slide-menu-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--grad-main);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .slide-menu-username {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+    }
+    .slide-menu-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: var(--text-light);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 8px;
+      transition: color 0.2s;
+    }
+    .slide-menu-close:hover { color: var(--text-dark); }
+
+    .slide-menu-links {
+      flex: 1;
+      padding: 0.75rem 0;
+    }
+    .slide-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.75rem 1.25rem;
+      color: var(--text-mid);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.92rem;
+      transition: background 0.15s, color 0.15s;
+      position: relative;
+    }
+    .slide-nav-link:hover {
+      background: var(--surface-2);
+      color: var(--blue);
+    }
+    .slide-nav-link i { font-size: 1rem; width: 20px; text-align: center; }
+    .slide-notif-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-left: auto;
+      flex-shrink: 0;
+      animation: pulse-dot 1.8s infinite;
+    }
+    .slide-menu-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+
     /* ─── Buttons ─── */
     .btn-primary-grad {
       background: var(--grad-main);
@@ -695,55 +839,66 @@
 
 <body>
 
+  <!-- Slide Menu Overlay -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+
+  <!-- Slide Menu Panel -->
+  <div class="slide-menu" id="slideMenu">
+    <div class="slide-menu-header">
+      {% if user.is_authenticated %}
+      <div class="slide-menu-user">
+        <div class="slide-menu-avatar">{{ user.username|slice:":1"|upper }}</div>
+        <span class="slide-menu-username">{{ user.username }}</span>
+      </div>
+      {% else %}
+      <span style="font-weight:700;font-size:1rem;">Menu</span>
+      {% endif %}
+      <button class="slide-menu-close" id="menuClose"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <nav class="slide-menu-links">
+      <a class="slide-nav-link" href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a>
+      <a class="slide-nav-link" href="{% url 'converter' %}"><i class="bi bi-arrow-left-right"></i> Converter</a>
+      {% if user.is_authenticated %}
+      <a class="slide-nav-link" href="{% url 'dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a>
+      <a class="slide-nav-link" href="{% url 'chat_inbox' %}">
+        <i class="bi bi-chat-dots"></i> Messages
+        {% if unread_dm_count %}<span class="slide-notif-dot"></span>{% endif %}
+      </a>
+      {% if user.is_staff or user.is_superuser %}
+      <a class="slide-nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-shield-check"></i> Admin</a>
+      {% endif %}
+      {% endif %}
+    </nav>
+    <div class="slide-menu-footer">
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" style="width:100%;display:flex;align-items:center;gap:10px;padding:0.7rem 1rem;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);font-weight:500;font-size:0.92rem;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-mid)'">
+          <i class="bi bi-box-arrow-right"></i> Sign Out
+        </button>
+      </form>
+      {% else %}
+      <a href="{% url 'login' %}" class="btn-nav-outline nav-link" style="display:block;text-align:center;margin-bottom:0.5rem;">Sign In</a>
+      <a href="{% url 'register' %}" class="btn-nav-primary nav-link" style="display:block;text-align:center;">Get Started</a>
+      {% endif %}
+    </div>
+  </div>
+
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg" id="mainNav">
-    <div class="container">
+  <nav class="navbar" id="mainNav">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
       <a class="navbar-brand" href="{% url 'home' %}">
         <div class="brand-icon"><i class="bi bi-arrow-repeat"></i></div>
         Convertly
       </a>
-      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navMenu">
-        <ul class="navbar-nav mx-auto align-items-center gap-1">
-          <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'converter' %}">Converter</a></li>
-          {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'chat_inbox' %}" style="display:flex;align-items:center;gap:6px;">
-              Messages
-              {% if unread_dm_count %}
-              <span style="background:var(--grad-main);color:#fff;font-size:0.68rem;font-weight:700;padding:1px 7px;border-radius:20px;line-height:1.6;">{{ unread_dm_count }}</span>
-              {% endif %}
-            </a>
-          </li>
-          {% if user.is_staff or user.is_superuser %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}">Admin</a></li>
-          {% endif %}
-          {% endif %}
-        </ul>
-        <div class="d-flex align-items-center gap-2">
-          <!-- Dark mode toggle -->
-          <button class="btn-theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
-            <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
-          </button>
-          {% if user.is_authenticated %}
-          <span style="color: var(--text-mid); font-size: 0.88rem; font-weight: 500;">
-            <i class="bi bi-person-circle me-1"></i>{{ user.username }}
-          </span>
-          <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn-nav-outline nav-link btn">
-              <i class="bi bi-box-arrow-right me-1"></i>Sign Out
-            </button>
-          </form>
-          {% else %}
-          <a href="{% url 'login' %}" class="btn-nav-outline nav-link">Sign In</a>
-          <a href="{% url 'register' %}" class="btn-nav-primary nav-link">Get Started</a>
-          {% endif %}
-        </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn-theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+          <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+        </button>
+        <button class="hamburger-btn" id="menuToggle" aria-label="Open menu">
+          <i class="bi bi-list"></i>
+          {% if unread_dm_count %}<span class="hamburger-dot"></span>{% endif %}
+        </button>
       </div>
     </div>
   </nav>
@@ -802,6 +957,26 @@
     window.addEventListener('scroll', () => {
       nav.classList.toggle('scrolled', window.scrollY > 20);
     });
+
+    // ─── Hamburger Slide Menu ───
+    const menuToggle  = document.getElementById('menuToggle');
+    const menuClose   = document.getElementById('menuClose');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const slideMenu   = document.getElementById('slideMenu');
+
+    function openMenu() {
+      slideMenu.classList.add('open');
+      menuOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMenu() {
+      slideMenu.classList.remove('open');
+      menuOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    if (menuToggle)  menuToggle.addEventListener('click', openMenu);
+    if (menuClose)   menuClose.addEventListener('click', closeMenu);
+    if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
 
     // ─── Global Scroll-Reveal (Intersection Observer) ───
     const revealObs = new IntersectionObserver((entries) => {

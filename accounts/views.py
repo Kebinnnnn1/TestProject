@@ -341,7 +341,19 @@ class ChatInboxView(View):
             ids.add(r)
         ids.discard(me.pk)
 
-        people_with_convos = CustomUser.objects.filter(pk__in=ids)
+        # Unread counts per sender
+        from django.db.models import Count
+        unread_map = {
+            item['sender_id']: item['cnt']
+            for item in DirectMessage.objects.filter(
+                recipient=me, is_read=False
+            ).values('sender_id').annotate(cnt=Count('id'))
+        }
+
+        people_with_convos = [
+            {'user': u, 'unread': unread_map.get(u.pk, 0)}
+            for u in CustomUser.objects.filter(pk__in=ids)
+        ]
         all_others = CustomUser.objects.exclude(pk=me.pk).exclude(pk__in=ids)
 
         return render(request, 'accounts/chat_inbox.html', {
