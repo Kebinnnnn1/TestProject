@@ -47,6 +47,7 @@ class DirectMessage(models.Model):
     )
     content   = models.TextField(max_length=2000)
     timestamp = models.DateTimeField(default=timezone.now)
+    is_read   = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['timestamp']

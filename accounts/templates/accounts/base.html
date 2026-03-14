@@ -708,14 +708,15 @@
       <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav mx-auto align-items-center gap-1">
           <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'converter' %}"
-              style="display:flex;align-items:center;gap:5px;"><i class="bi bi-arrow-left-right"
-                style="color:var(--blue);font-size:0.8rem;"></i>Converter</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'converter' %}">Converter</a></li>
           {% if user.is_authenticated %}
           <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'chat_inbox' %}" style="display:flex;align-items:center;gap:5px;">
-              <i class="bi bi-chat-dots-fill" style="color:var(--blue);font-size:0.8rem;"></i>Messages
+            <a class="nav-link" href="{% url 'chat_inbox' %}" style="display:flex;align-items:center;gap:6px;">
+              Messages
+              {% if unread_dm_count %}
+              <span style="background:var(--grad-main);color:#fff;font-size:0.68rem;font-weight:700;padding:1px 7px;border-radius:20px;line-height:1.6;">{{ unread_dm_count }}</span>
+              {% endif %}
             </a>
           </li>
           {% if user.is_staff or user.is_superuser %}

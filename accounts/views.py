@@ -364,6 +364,11 @@ class ConversationView(View):
             (Q(sender=other) & Q(recipient=me))
         ).order_by('timestamp')
 
+        # Mark incoming messages from other user as read
+        DirectMessage.objects.filter(
+            sender=other, recipient=me, is_read=False
+        ).update(is_read=True)
+
         return render(request, 'accounts/chat_conversation.html', {
             'other': other,
             'messages_history': msgs,
