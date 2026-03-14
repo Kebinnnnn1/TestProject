@@ -18,9 +18,13 @@
     align-items: center;
     gap: 14px;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1.5px solid var(--border);
     background: var(--card-bg);
     flex-shrink: 0;
+  }
+  [data-theme="light"] .chat-header {
+    background: #f0f4fb;
+    border-bottom-color: #c5cfe0;
   }
   .chat-header .avatar {
     width: 42px; height: 42px;
@@ -123,8 +127,12 @@
   .chat-input-area {
     padding: 0.9rem 1.25rem;
     background: var(--card-bg);
-    border-top: 1px solid var(--border);
+    border-top: 1.5px solid var(--border);
     flex-shrink: 0;
+  }
+  [data-theme="light"] .chat-input-area {
+    background: #f0f4fb;
+    border-top-color: #c5cfe0;
   }
   .chat-form {
     display: flex;
