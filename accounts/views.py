@@ -6,9 +6,12 @@ from django.views.decorators.http import require_POST
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.core.exceptions import ValidationError
+from django.http import JsonResponse
+from django.db.models import Q
+from django.conf import settings as django_settings
 
 from .forms import RegistrationForm, LoginForm
-from .models import CustomUser, EmailVerificationToken
+from .models import CustomUser, EmailVerificationToken, DirectMessage
 from .tokens import generate_token, send_verification_email
 
 
@@ -298,4 +301,126 @@ def setup_admin(request):
         'username': username,
         'error': error,
     })
+
+
+# ---------------------------------------------------------------------------
+# Chat — Private DMs via Pusher
+# ---------------------------------------------------------------------------
+
+def _pusher_client():
+    import pusher
+    return pusher.Pusher(
+        app_id=django_settings.PUSHER_APP_ID,
+        key=django_settings.PUSHER_KEY,
+        secret=django_settings.PUSHER_SECRET,
+        cluster=django_settings.PUSHER_CLUSTER,
+        ssl=True,
+    )
+
+
+def _dm_channel(user_a, user_b):
+    """Deterministic private channel name for two users (sorted by pk)."""
+    ids = sorted([user_a.pk, user_b.pk])
+    return f'dm-{ids[0]}-{ids[1]}'
+
+
+@method_decorator(login_required(login_url='/login/'), name='dispatch')
+class ChatInboxView(View):
+    """List of all other users the current user can DM."""
+    def get(self, request):
+        me = request.user
+        # Users who have sent or received a message with me
+        talked_to_ids = DirectMessage.objects.filter(
+            Q(sender=me) | Q(recipient=me)
+        ).values_list('sender_id', 'recipient_id')
+
+        # Flatten and deduplicate, excluding self
+        ids = set()
+        for s, r in talked_to_ids:
+            ids.add(s)
+            ids.add(r)
+        ids.discard(me.pk)
+
+        people_with_convos = CustomUser.objects.filter(pk__in=ids)
+        all_others = CustomUser.objects.exclude(pk=me.pk).exclude(pk__in=ids)
+
+        return render(request, 'accounts/chat_inbox.html', {
+            'people_with_convos': people_with_convos,
+            'all_others': all_others,
+        })
+
+
+@method_decorator(login_required(login_url='/login/'), name='dispatch')
+class ConversationView(View):
+    """Show DM thread between current user and another user."""
+    def get(self, request, username):
+        me = request.user
+        other = get_object_or_404(CustomUser, username=username)
+        if other == me:
+            return redirect('chat_inbox')
+
+        msgs = DirectMessage.objects.filter(
+            (Q(sender=me) & Q(recipient=other)) |
+            (Q(sender=other) & Q(recipient=me))
+        ).order_by('timestamp')
+
+        return render(request, 'accounts/chat_conversation.html', {
+            'other': other,
+            'messages_history': msgs,
+            'pusher_key': django_settings.PUSHER_KEY,
+            'pusher_cluster': django_settings.PUSHER_CLUSTER,
+            'channel': _dm_channel(me, other),
+            'me_username': me.username,
+        })
+
+
+@login_required(login_url='/login/')
+@require_POST
+def send_dm(request, username):
+    """Save a DM and trigger a Pusher event."""
+    me = request.user
+    other = get_object_or_404(CustomUser, username=username)
+    content = request.POST.get('content', '').strip()
+
+    if not content:
+        return JsonResponse({'ok': False, 'error': 'Empty message.'}, status=400)
+
+    msg = DirectMessage.objects.create(sender=me, recipient=other, content=content)
+
+    # Trigger Pusher
+    try:
+        pc = _pusher_client()
+        pc.trigger(_dm_channel(me, other), 'new-message', {
+            'id': msg.pk,
+            'sender': me.username,
+            'content': content,
+            'timestamp': msg.timestamp.strftime('%H:%M'),
+        })
+    except Exception:
+        pass  # Don't fail if Pusher is not configured yet
+
+    return JsonResponse({'ok': True})
+
+
+@login_required(login_url='/login/')
+def message_history(request, username):
+    """Return past messages as JSON (for initial page load)."""
+    me = request.user
+    other = get_object_or_404(CustomUser, username=username)
+
+    msgs = DirectMessage.objects.filter(
+        (Q(sender=me) & Q(recipient=other)) |
+        (Q(sender=other) & Q(recipient=me))
+    ).order_by('timestamp').values('id', 'sender__username', 'content', 'timestamp')
+
+    data = [
+        {
+            'id': m['id'],
+            'sender': m['sender__username'],
+            'content': m['content'],
+            'timestamp': m['timestamp'].strftime('%H:%M'),
+        }
+        for m in msgs
+    ]
+    return JsonResponse({'messages': data})
 

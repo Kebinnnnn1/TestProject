@@ -3,3 +3,4 @@ python-decouple
 whitenoise
 dj-database-url
 psycopg2-binary
+pusher

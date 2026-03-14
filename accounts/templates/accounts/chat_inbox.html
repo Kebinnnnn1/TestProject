@@ -1,0 +1,119 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Messages — Convertly{% endblock %}
+
+{% block extra_head %}
+<style>
+  .chat-inbox-wrap {
+    max-width: 700px;
+    margin: 3rem auto;
+    padding: 0 1rem;
+  }
+  .inbox-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .inbox-header .icon-wrap {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: var(--grad-cool);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .inbox-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin: 1.5rem 0 0.75rem;
+  }
+  .user-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0.85rem 1.1rem;
+    border-radius: 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+  }
+  .user-row:hover {
+    border-color: var(--blue);
+    box-shadow: 0 4px 16px rgba(67,97,238,0.12);
+    transform: translateY(-1px);
+    color: var(--text-dark);
+  }
+  .avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--grad-main);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .user-row .name { font-weight: 600; font-size: 0.95rem; }
+  .user-row .role-tag {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-left: auto;
+    background: var(--surface-3);
+    padding: 2px 10px;
+    border-radius: 20px;
+  }
+  .empty-state {
+    text-align: center;
+    color: var(--text-light);
+    padding: 2rem;
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-inbox-wrap">
+  <div class="inbox-header">
+    <div class="icon-wrap"><i class="bi bi-chat-dots-fill"></i></div>
+    <div>
+      <h1 style="font-size:1.6rem;font-weight:800;margin:0;">Messages</h1>
+      <p style="color:var(--text-light);font-size:0.88rem;margin:0;">Your private conversations</p>
+    </div>
+  </div>
+
+  {% if people_with_convos %}
+  <div class="inbox-section-title">Conversations</div>
+  {% for user in people_with_convos %}
+  <a href="{% url 'chat_conversation' user.username %}" class="user-row">
+    <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
+    <span class="name">{{ user.username }}</span>
+    <span class="role-tag">{{ user.role|capfirst }}</span>
+    <i class="bi bi-chevron-right" style="color:var(--text-light);"></i>
+  </a>
+  {% endfor %}
+  {% endif %}
+
+  {% if all_others %}
+  <div class="inbox-section-title">Start a new conversation</div>
+  {% for user in all_others %}
+  <a href="{% url 'chat_conversation' user.username %}" class="user-row">
+    <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
+    <span class="name">{{ user.username }}</span>
+    <span class="role-tag">{{ user.role|capfirst }}</span>
+    <i class="bi bi-plus" style="color:var(--text-light);font-size:1.2rem;"></i>
+  </a>
+  {% endfor %}
+  {% endif %}
+
+  {% if not people_with_convos and not all_others %}
+  <div class="empty-state">
+    <i class="bi bi-people" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+    No other users yet.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

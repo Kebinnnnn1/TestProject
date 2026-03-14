@@ -30,6 +30,12 @@ if ON_VERCEL:
 # Secret key for the temporary /setup-admin/ endpoint (remove after use)
 ADMIN_SETUP_KEY = config('ADMIN_SETUP_KEY', default='')
 
+# Pusher — real-time messaging
+PUSHER_APP_ID  = config('PUSHER_APP_ID',  default='')
+PUSHER_KEY     = config('PUSHER_KEY',     default='')
+PUSHER_SECRET  = config('PUSHER_SECRET',  default='')
+PUSHER_CLUSTER = config('PUSHER_CLUSTER', default='mt1')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

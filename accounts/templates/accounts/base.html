@@ -713,6 +713,11 @@
                 style="color:var(--blue);font-size:0.8rem;"></i>Converter</a></li>
           {% if user.is_authenticated %}
           <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'chat_inbox' %}" style="display:flex;align-items:center;gap:5px;">
+              <i class="bi bi-chat-dots-fill" style="color:var(--blue);font-size:0.8rem;"></i>Messages
+            </a>
+          </li>
           {% if user.is_staff or user.is_superuser %}
           <li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}">Admin</a></li>
           {% endif %}

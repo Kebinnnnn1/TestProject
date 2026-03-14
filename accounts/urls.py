@@ -14,4 +14,9 @@ urlpatterns = [
     path('converter/', views.converter, name='converter'),
     # Temporary — remove after creating your superuser
     path('setup-admin/', views.setup_admin, name='setup_admin'),
+    # Chat
+    path('chat/', views.ChatInboxView.as_view(), name='chat_inbox'),
+    path('chat/<str:username>/', views.ConversationView.as_view(), name='chat_conversation'),
+    path('chat/<str:username>/send/', views.send_dm, name='send_dm'),
+    path('chat/<str:username>/history/', views.message_history, name='message_history'),
 ]
