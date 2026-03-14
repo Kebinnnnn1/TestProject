@@ -15,9 +15,18 @@ class CustomUser(AbstractUser):
         (ADMIN,     'Admin'),
     ]
 
-    email      = models.EmailField(unique=True)
-    is_verified = models.BooleanField(default=False)
-    role       = models.CharField(max_length=20, choices=ROLE_CHOICES, default=MEMBER)
+    UNIVERSITY_CHOICES = [
+        ('CTU', 'CTU - Cebu Technological University'),
+        ('CEC', 'CEC - Cebu Eastern College'),
+        ('SWU', 'SWU - Southwestern University'),
+        ('ACT', 'ACT - Asian College of Technology'),
+        ('UV',  'UV - University of the Visayas'),
+    ]
+
+    email        = models.EmailField(unique=True)
+    is_verified  = models.BooleanField(default=False)
+    role         = models.CharField(max_length=20, choices=ROLE_CHOICES, default=MEMBER)
+    university   = models.CharField(max_length=10, blank=True, default='', choices=UNIVERSITY_CHOICES)
 
     def __str__(self):
         return self.username

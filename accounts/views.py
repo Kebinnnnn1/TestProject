@@ -445,3 +445,37 @@ def message_history(request, username):
     ]
     return JsonResponse({'messages': data})
 
+
+@login_required(login_url='/login/')
+@require_POST
+def update_university(request):
+    """Save the user's university from the dashboard."""
+    uni = request.POST.get('university', '').strip()
+    valid = [c[0] for c in CustomUser.UNIVERSITY_CHOICES]
+    if uni in valid:
+        request.user.university = uni
+        request.user.save(update_fields=['university'])
+        messages.success(request, f'University updated to {uni}!')
+    else:
+        messages.error(request, 'Invalid university selection.')
+    return redirect('dashboard')
+
+
+@login_required(login_url='/login/')
+def random_chat(request):
+    """Redirect to a random user from the chosen university."""
+    import random as _random
+    uni = request.GET.get('university', '').strip()
+    valid = [c[0] for c in CustomUser.UNIVERSITY_CHOICES]
+    if uni not in valid:
+        return JsonResponse({'ok': False, 'error': 'Invalid university.'}, status=400)
+
+    candidates = list(
+        CustomUser.objects.filter(university=uni, is_active=True)
+        .exclude(pk=request.user.pk)
+    )
+    if not candidates:
+        return JsonResponse({'ok': False, 'error': f'No users found from {uni}.'}, status=404)
+
+    pick = _random.choice(candidates)
+    return JsonResponse({'ok': True, 'redirect': f'/chat/{pick.username}/'})

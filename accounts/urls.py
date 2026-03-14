@@ -16,7 +16,10 @@ urlpatterns = [
     path('setup-admin/', views.setup_admin, name='setup_admin'),
     # Chat
     path('chat/', views.ChatInboxView.as_view(), name='chat_inbox'),
+    path('chat/random/', views.random_chat, name='random_chat'),
     path('chat/<str:username>/', views.ConversationView.as_view(), name='chat_conversation'),
     path('chat/<str:username>/send/', views.send_dm, name='send_dm'),
     path('chat/<str:username>/history/', views.message_history, name='message_history'),
+    # Profile
+    path('dashboard/university/', views.update_university, name='update_university'),
 ]
