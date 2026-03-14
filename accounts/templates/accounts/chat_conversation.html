@@ -47,8 +47,12 @@
     padding: 1.5rem 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
     background: var(--surface-2);
+  }
+  /* Darken in light mode so it's not blindingly white */
+  [data-theme="light"] .messages-area {
+    background: #e8edf5;
   }
 
   /* Bubbles */
@@ -75,11 +79,11 @@
   .msg-row.mine .bubble-avatar { background: var(--grad-cool); }
 
   .bubble {
-    max-width: 65%;
-    padding: 0.6rem 0.95rem;
-    border-radius: 18px;
-    font-size: 0.92rem;
-    line-height: 1.5;
+    max-width: 62%;
+    padding: 0.45rem 0.8rem;
+    border-radius: 16px;
+    font-size: 0.87rem;
+    line-height: 1.45;
     word-break: break-word;
     position: relative;
   }
@@ -89,15 +93,20 @@
     border-bottom-left-radius: 4px;
     color: var(--text-dark);
   }
+  /* Light mode: give theirs-bubbles a slightly off-white so they don't vanish */
+  [data-theme="light"] .msg-row.theirs .bubble {
+    background: #ffffff;
+    border-color: #d0d8e8;
+  }
   .msg-row.mine .bubble {
     background: var(--grad-main);
     color: #fff;
     border-bottom-right-radius: 4px;
   }
   .bubble .ts {
-    font-size: 0.68rem;
-    opacity: 0.62;
-    margin-top: 4px;
+    font-size: 0.65rem;
+    opacity: 0.55;
+    margin-top: 3px;
     display: block;
     text-align: right;
   }

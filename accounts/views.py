@@ -413,6 +413,10 @@ def send_dm(request, username):
             'content': content,
             'timestamp': msg.timestamp.strftime('%H:%M'),
         })
+        # Also notify the recipient's personal channel so their badge updates live
+        pc.trigger(f'user-notif-{other.pk}', 'new-dm', {
+            'sender': me.username,
+        })
     except Exception:
         pass  # Don't fail if Pusher is not configured yet
 

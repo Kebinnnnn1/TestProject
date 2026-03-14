@@ -995,6 +995,41 @@
     }
     initReveal();
     setTimeout(initReveal, 250);
+
+    // ─── Live DM badge via Pusher ───
+    {% if user.is_authenticated and pusher_key %}
+    (function() {
+      const PK = "{{ pusher_key }}";
+      const PC = "{{ pusher_cluster }}";
+      const UID = "{{ user.pk }}";
+      if (!PK) return;
+
+      const _p = new Pusher(PK, { cluster: PC });
+      const _ch = _p.subscribe('user-notif-' + UID);
+      const hamburgerBtn = document.getElementById('menuToggle');
+
+      _ch.bind('new-dm', function() {
+        // Show red dot on hamburger if not already there
+        if (hamburgerBtn && !hamburgerBtn.querySelector('.hamburger-dot')) {
+          const dot = document.createElement('span');
+          dot.className = 'hamburger-dot';
+          hamburgerBtn.appendChild(dot);
+        }
+        // Show red dot in slide menu Messages link if not already there
+        const msgLink = document.querySelector('.slide-menu-links .slide-notif-dot');
+        if (!msgLink) {
+          const links = document.querySelectorAll('.slide-nav-link');
+          links.forEach(function(l) {
+            if (l.textContent.trim().startsWith('Messages') && !l.querySelector('.slide-notif-dot')) {
+              const d = document.createElement('span');
+              d.className = 'slide-notif-dot';
+              l.appendChild(d);
+            }
+          });
+        }
+      });
+    })();
+    {% endif %}
   </script>
   {% block extra_scripts %}{% endblock %}
 </body>
