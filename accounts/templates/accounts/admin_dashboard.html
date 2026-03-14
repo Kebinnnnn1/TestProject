@@ -322,9 +322,9 @@
                             <td style="color:var(--text-mid);">{{ u.email }}</td>
                             <td>
                                 {% if u.is_verified %}
-                                <span class="badge-verified">✓ Verified</span>
+                                <span class="badge-verified">Verified</span>
                                 {% else %}
-                                <span class="badge-unverified">✗ Unverified</span>
+                                <span class="badge-unverified">Unverified</span>
                                 {% endif %}
                             </td>
                             <td>
@@ -338,11 +338,11 @@
                                 {% if u == request.user %}
                                 <span class="badge-staff">
                                     {% if u.role == 'admin' %}
-                                    ⭐ Admin
+                                    Admin
                                     {% elif u.role == 'moderator' %}
-                                    🛡️ Moderator
+                                    Moderator
                                     {% else %}
-                                    👤 Member
+                                    Member
                                     {% endif %}
                                 </span>
                                 {% elif u.role == 'admin' %}
@@ -357,17 +357,17 @@
                                     <select name="role" class="role-select role-{{ u.role }}"
                                         data-current="{{ u.role }}" data-username="{{ u.username }}"
                                         onchange="handleRoleChange(this)">
-                                        <option value="member">👤 Member</option>
-                                        <option value="moderator">🛡️ Moderator</option>
-                                        <option value="admin">⭐ Admin</option>
+                                        <option value="member">Member</option>
+                                        <option value="moderator">Moderator</option>
+                                        <option value="admin">Admin</option>
                                     </select>
                                 </form>
                                 {% else %}
                                 <span class="badge-staff">
                                     {% if u.role == 'moderator' %}
-                                    🛡️ Moderator
+                                    Moderator
                                     {% else %}
-                                    👤 Member
+                                    Member
                                     {% endif %}
                                 </span>
                                 {% endif %}

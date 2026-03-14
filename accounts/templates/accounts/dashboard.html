@@ -179,7 +179,7 @@
 
         <div class="dash-header reveal">
             <p style="font-size:0.82rem;opacity:0.7;margin-bottom:0.2rem;">WELCOME BACK</p>
-            <h1>{{ user.username }} <span style="font-size:1rem;opacity:0.7;font-weight:500;">👋</span></h1>
+            <h1>{{ user.username }}</h1>
             <p>Here's an overview of your account.</p>
         </div>
 
@@ -203,9 +203,9 @@
                     <div class="sc-label">Email Status</div>
                     <div class="sc-value" style="font-size:1rem;">
                         {% if user.is_verified %}
-                        <span class="badge-verified">✓ Verified</span>
+                        <span class="badge-verified">Verified</span>
                         {% else %}
-                        <span class="badge-unverified">✗ Unverified</span>
+                        <span class="badge-unverified">Unverified</span>
                         {% endif %}
                     </div>
                 </div>
@@ -229,11 +229,11 @@
                     <div class="sc-label">Role</div>
                     <div class="sc-value" style="font-size:1rem;">
                         {% if user.role == 'admin' %}
-                        <span class="badge-staff">⭐ Admin</span>
+                        <span class="badge-staff">Admin</span>
                         {% elif user.role == 'moderator' %}
-                        <span class="badge-staff">🛡️ Moderator</span>
+                        <span class="badge-staff">Moderator</span>
                         {% else %}
-                        <span class="badge-active">👤 Member</span>
+                        <span class="badge-active">Member</span>
                         {% endif %}
                     </div>
                 </div>
