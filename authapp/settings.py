@@ -53,11 +53,13 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',          # must be before staticfiles
     'django.contrib.staticfiles',
-    'cloudinary_storage',
     'cloudinary',
     'accounts',
 ]
+
+MEDIA_URL = '/media/'  # Required by django-cloudinary-storage
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

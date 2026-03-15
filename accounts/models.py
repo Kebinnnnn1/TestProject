@@ -2,6 +2,7 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
+from cloudinary.models import CloudinaryField
 
 
 class CustomUser(AbstractUser):
@@ -71,7 +72,7 @@ class Post(models.Model):
         'CustomUser', on_delete=models.CASCADE, related_name='posts'
     )
     content   = models.TextField(max_length=3000)
-    image     = models.ImageField(upload_to='wall/', blank=True, null=True)
+    image     = CloudinaryField('image', blank=True, null=True)
     tags      = models.CharField(max_length=200, blank=True, default='',
                                  help_text='Comma-separated tags, e.g. django,python')
     university = models.CharField(max_length=10, blank=True, default='')
