@@ -499,7 +499,7 @@
   {% if posts %}
   <div id="wall-feed">
     {% for post in posts %}
-    <div class="post-card">
+    <div class="post-card" id="post-{{ post.pk }}">
       <!-- Header -->
       <div class="post-header">
         <div class="post-avatar">{{ post.author.username|slice:":1"|upper }}</div>
@@ -578,9 +578,17 @@
       <!-- Comments section -->
       <div class="comments-section" id="comments-{{ post.pk }}" style="display:none;">
         {% for comment in post.comments.all %}
-        <div class="comment-item" id="comment-{{ comment.pk }}">
+        <div class="comment-item {% if comment.is_reply %}is-reply{% endif %}" id="comment-{{ comment.pk }}">
           <div class="comment-avatar">{{ comment.author.username|slice:":1"|upper }}</div>
           <div class="comment-bubble" style="flex:1;">
+            {% if comment.is_reply %}
+            <div class="reply-quote">
+              <i class="bi bi-reply-fill"></i>
+              {% with mention=comment.content|slice:"1:" %}
+              Replying to <strong>@{{ mention|truncatewords:1 }}</strong>
+              {% endwith %}
+            </div>
+            {% endif %}
             <div class="comment-author">
               {{ comment.author.username }}
               <span class="comment-time">· {{ comment.timestamp|timesince }} ago</span>

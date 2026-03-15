@@ -687,7 +687,10 @@ def add_comment(request, pk):
         return redirect('wall')
     # Detect reply: content starts with @username
     is_reply = content.startswith('@')
-    comment = PostComment.objects.create(post=post, author=request.user, content=content)
+    # Save is_reply to DB so it persists on page refresh
+    comment = PostComment.objects.create(
+        post=post, author=request.user, content=content, is_reply=is_reply
+    )
     pusher_payload = {
         'post_pk':    post.pk,
         'pk':         comment.pk,
@@ -700,7 +703,10 @@ def add_comment(request, pk):
         pc = _pusher_client()
         # Broadcast to all users on the wall feed
         pc.trigger('wall', 'new-comment', pusher_payload)
-        # Notify the post author privately (if it's not their own comment)
+
+        notified_pks = set()
+
+        # Notify the post author (if it's not their own comment)
         if post.author != request.user:
             pc.trigger(f'user-notif-{post.author.pk}', 'wall-reply', {
                 'post_pk':  post.pk,
@@ -708,6 +714,26 @@ def add_comment(request, pk):
                 'preview':  comment.content[:60],
                 'is_reply': is_reply,
             })
+            notified_pks.add(post.author.pk)
+
+        # Also notify the @mentioned user (if they're a different person)
+        if is_reply:
+            import re
+            match = re.match(r'^@(\S+)', content)
+            if match:
+                mentioned_username = match.group(1)
+                try:
+                    from .models import CustomUser
+                    mentioned_user = CustomUser.objects.get(username__iexact=mentioned_username)
+                    if mentioned_user != request.user and mentioned_user.pk not in notified_pks:
+                        pc.trigger(f'user-notif-{mentioned_user.pk}', 'wall-reply', {
+                            'post_pk':  post.pk,
+                            'author':   request.user.username,
+                            'preview':  comment.content[:60],
+                            'is_reply': True,
+                        })
+                except Exception:
+                    pass
     except Exception:
         pass
     if is_ajax:

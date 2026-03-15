@@ -99,6 +99,7 @@ class PostComment(models.Model):
     )
     content   = models.TextField(max_length=1000)
     timestamp = models.DateTimeField(default=timezone.now)
+    is_reply  = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['timestamp']
