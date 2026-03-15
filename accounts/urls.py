@@ -27,6 +27,7 @@ urlpatterns = [
     # Knowledge Wall
     path('wall/', views.WallView.as_view(), name='wall'),
     path('wall/create/', views.create_post, name='create_post'),
+    path('wall/posts/', views.wall_posts, name='wall_posts'),
     path('wall/<int:pk>/delete/', views.delete_post, name='delete_post'),
     path('wall/<int:pk>/like/', views.like_post, name='like_post'),
     path('wall/<int:pk>/comment/', views.add_comment, name='add_comment'),

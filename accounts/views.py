@@ -540,26 +540,85 @@ def random_chat(request):
 # Knowledge Wall
 # ---------------------------------------------------------------------------
 
+PAGE_SIZE = 10
+
 @method_decorator(login_required(login_url='/login/'), name='dispatch')
 class WallView(View):
-    """Main knowledge wall feed."""
+    """Main knowledge wall feed — initial load only (first PAGE_SIZE posts)."""
     def get(self, request):
         tag_filter = request.GET.get('tag', '').strip()
         uni_filter = request.GET.get('university', '').strip()
-        posts = Post.objects.select_related('author').prefetch_related('likes', 'comments__author')
+        qs = Post.objects.select_related('author').prefetch_related(
+            'likes', 'comments__author', 'extra_images'
+        )
         if tag_filter:
-            posts = posts.filter(tags__icontains=tag_filter)
+            qs = qs.filter(tags__icontains=tag_filter)
         if uni_filter:
-            posts = posts.filter(university=uni_filter)
+            qs = qs.filter(university=uni_filter)
+        qs = qs.order_by('-timestamp')
+        total   = qs.count()
+        posts   = qs[:PAGE_SIZE]
+        has_more = total > PAGE_SIZE
         return render(request, 'accounts/wall.html', {
-            'posts': posts,
-            'tag_filter': tag_filter,
-            'uni_filter': uni_filter,
+            'posts':              posts,
+            'tag_filter':         tag_filter,
+            'uni_filter':         uni_filter,
             'university_choices': CustomUser.UNIVERSITY_CHOICES,
-            'me': request.user,
-            'pusher_key':     django_settings.PUSHER_KEY,
-            'pusher_cluster': django_settings.PUSHER_CLUSTER,
+            'me':                 request.user,
+            'pusher_key':         django_settings.PUSHER_KEY,
+            'pusher_cluster':     django_settings.PUSHER_CLUSTER,
+            'has_more':           has_more,
+            'next_offset':        PAGE_SIZE,
         })
+
+
+@login_required(login_url='/login/')
+def wall_posts(request):
+    """AJAX endpoint returning the next batch of posts as JSON for infinite scroll."""
+    offset     = int(request.GET.get('offset', 0))
+    tag_filter = request.GET.get('tag', '').strip()
+    uni_filter = request.GET.get('university', '').strip()
+    qs = Post.objects.select_related('author').prefetch_related(
+        'likes', 'comments__author', 'extra_images'
+    )
+    if tag_filter:
+        qs = qs.filter(tags__icontains=tag_filter)
+    if uni_filter:
+        qs = qs.filter(university=uni_filter)
+    qs      = qs.order_by('-timestamp')
+    total   = qs.count()
+    batch   = qs[offset: offset + PAGE_SIZE]
+    me      = request.user
+
+    def serialize_post(p):
+        imgs = list(p.extra_images.all())
+        image_urls = [pi.image.url for pi in imgs]
+        if p.image:
+            image_urls.insert(0, p.image.url)
+        return {
+            'pk':         p.pk,
+            'author':     p.author.username,
+            'university': p.university or '',
+            'content':    p.content,
+            'tags':       p.tag_list,
+            'timestamp':  p.timestamp.isoformat(),
+            'image_url':  p.image.url if p.image else '',
+            'image_urls': image_urls,
+            'like_count': p.likes.count(),
+            'liked':      me in p.likes.all(),
+            'can_delete': p.author == me or me.is_staff,
+            'delete_url': f'/wall/{p.pk}/delete/',
+            'like_url':   f'/wall/{p.pk}/like/',
+            'comment_url':f'/wall/{p.pk}/comment/',
+            'comment_count': p.comments.count(),
+        }
+
+    return JsonResponse({
+        'posts':      [serialize_post(p) for p in batch],
+        'has_more':   (offset + PAGE_SIZE) < total,
+        'next_offset': offset + PAGE_SIZE,
+    })
+
 
 
 @login_required(login_url='/login/')

@@ -434,6 +434,35 @@
   }
   .wall-empty i { font-size: 3rem; margin-bottom: 1rem; display: block; }
 
+  /* ── Infinite Scroll ── */
+  #scroll-sentinel { height: 1px; }
+  #wall-loader {
+    display: none;
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+  }
+  #wall-loader.active { display: flex; }
+  .wall-spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #wall-end-msg {
+    display: none;
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-light);
+    font-size: 0.8rem;
+  }
+
   /* ── Dark Mode ── */
   [data-theme="dark"] .create-card,
   [data-theme="dark"] .post-card { box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
@@ -637,6 +666,11 @@
   {% endif %}
 
 </div>
+
+<!-- Infinite scroll sentinel -->
+<div id="wall-loader"><div class="wall-spinner"></div> Loading more posts…</div>
+<div id="wall-end-msg">You've reached the end of the wall 🎉</div>
+<div id="scroll-sentinel"></div>
 
 <!-- ── Post Modal ── -->
 <div id="postModalBackdrop" class="post-modal-backdrop" style="display:none;" onclick="closeModalOnBackdrop(event)">
@@ -1195,5 +1229,71 @@ function bumpWallBadge() {
 
 // Clear wall badge when on wall page
 try { localStorage.setItem('wall_unseen', '0'); } catch(e) {}
-</script>
+
+// ─── Infinite Scroll ───────────────────────────────────────────────────────
+(function () {
+  let nextOffset   = {{ next_offset|default:10 }};
+  let hasMore      = {{ has_more|yesno:"true,false" }};
+  let loading      = false;
+  const loader     = document.getElementById('wall-loader');
+  const endMsg     = document.getElementById('wall-end-msg');
+  const sentinel   = document.getElementById('scroll-sentinel');
+  const tagFilter  = '{{ tag_filter|escapejs }}';
+  const uniFilter  = '{{ uni_filter|escapejs }}';
+
+  if (!hasMore) {
+    if (sentinel) sentinel.remove();
+  }
+
+  async function loadMore() {
+    if (loading || !hasMore) return;
+    loading = true;
+    if (loader) loader.classList.add('active');
+
+    try {
+      let url = `/wall/posts/?offset=${nextOffset}`;
+      if (tagFilter) url += `&tag=${encodeURIComponent(tagFilter)}`;
+      if (uniFilter) url += `&university=${encodeURIComponent(uniFilter)}`;
+
+      const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      const data = await res.json();
+
+      const feed = document.getElementById('wall-feed');
+      if (feed && data.posts.length) {
+        data.posts.forEach(p => {
+          const el = document.createElement('div');
+          el.innerHTML = buildPostCard(p);
+          const card = el.firstElementChild;
+          feed.appendChild(card);
+          // Bind interactive elements on new cards
+          bindCommentForm(card.querySelector('.ajax-comment-form'));
+          bindLikeBtn(card.querySelector('.like-btn'));
+          card.querySelectorAll('.reply-form.ajax-comment-form').forEach(bindCommentForm);
+        });
+      }
+
+      nextOffset = data.next_offset;
+      hasMore    = data.has_more;
+
+      if (!hasMore) {
+        if (loader)  loader.classList.remove('active');
+        if (endMsg)  endMsg.style.display = 'block';
+        if (sentinel) sentinel.remove();
+      }
+    } catch (err) {
+      console.error('Infinite scroll error:', err);
+    } finally {
+      loading = false;
+      if (loader) loader.classList.remove('active');
+    }
+  }
+
+  if (sentinel && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) loadMore();
+    }, { rootMargin: '200px' });
+    observer.observe(sentinel);
+  }
+})();
+
 {% endblock %}
