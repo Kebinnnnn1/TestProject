@@ -558,13 +558,14 @@ def create_post(request):
     """Create a new wall post. Returns JSON for AJAX calls."""
     content = request.POST.get('content', '').strip()
     tags    = request.POST.get('tags', '').strip()
-    image   = request.FILES.get('image')
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if not content:
         if is_ajax:
             return JsonResponse({'ok': False, 'error': 'Post content cannot be empty.'}, status=400)
         messages.error(request, 'Post content cannot be empty.')
         return redirect('wall')
+    # Only attempt image upload if Cloudinary is configured
+    image = request.FILES.get('image') if django_settings.CLOUDINARY_STORAGE.get('CLOUD_NAME') else None
     post = Post.objects.create(
         author=request.user,
         content=content,
