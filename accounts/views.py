@@ -11,7 +11,7 @@ from django.db.models import Q
 from django.conf import settings as django_settings
 
 from .forms import RegistrationForm, LoginForm
-from .models import CustomUser, EmailVerificationToken, DirectMessage, Post, PostComment
+from .models import CustomUser, EmailVerificationToken, DirectMessage, Post, PostComment, PostImage
 from .tokens import generate_token, send_verification_email
 
 
@@ -574,15 +574,35 @@ def create_post(request):
             return JsonResponse({'ok': False, 'error': 'Post content cannot be empty.'}, status=400)
         messages.error(request, 'Post content cannot be empty.')
         return redirect('wall')
-    # Only attempt image upload if Cloudinary is configured
-    image = request.FILES.get('image') if django_settings.CLOUDINARY_STORAGE.get('CLOUD_NAME') else None
+
+    cloudinary_ok = django_settings.CLOUDINARY_STORAGE.get('CLOUD_NAME')
+
+    # Support both old single-file 'image' and new multi-file 'images'
+    files = request.FILES.getlist('images') if cloudinary_ok else []
+    if not files and cloudinary_ok:
+        single = request.FILES.get('image')
+        if single:
+            files = [single]
+
+    # Use first file as the legacy Post.image for backward compat
+    primary_image = files[0] if files else None
+
     post = Post.objects.create(
         author=request.user,
         content=content,
         tags=tags,
-        image=image,
+        image=primary_image,
         university=request.user.university,
     )
+
+    # Save remaining images as PostImage records
+    extra_urls = []
+    for i, f in enumerate(files[1:], start=1):
+        pi = PostImage.objects.create(post=post, image=f, order=i)
+        extra_urls.append(pi.image.url)
+
+    image_urls = ([post.image.url] if post.image else []) + extra_urls
+
     # Broadcast to all users on the wall channel
     pusher_payload = {
         'pk':         post.pk,
@@ -591,6 +611,7 @@ def create_post(request):
         'tags':       post.tag_list(),
         'university': post.university,
         'image_url':  post.image.url if post.image else '',
+        'image_urls': image_urls,
         'delete_url': f'/wall/{post.pk}/delete/',
         'like_url':   f'/wall/{post.pk}/like/',
         'comment_url':f'/wall/{post.pk}/comment/',
@@ -609,13 +630,13 @@ def create_post(request):
                 'tags':       post.tag_list(),
                 'university': post.university,
                 'image_url':  post.image.url if post.image else '',
+                'image_urls': image_urls,
                 'can_delete': True,
                 'delete_url': f'/wall/{post.pk}/delete/',
                 'like_url':   f'/wall/{post.pk}/like/',
                 'comment_url':f'/wall/{post.pk}/comment/',
             }
         })
-    # Non-AJAX: also broadcast (shouldn't normally happen but safe fallback)
     return redirect('wall')
 
 

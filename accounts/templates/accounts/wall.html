@@ -67,6 +67,18 @@
   }
   .file-label:hover { border-color: var(--blue); color: var(--blue); }
   .file-label input { display: none; }
+  .file-preview-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 0.5rem;
+  }
+  .file-preview-grid img {
+    width: 60px; height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+  }
 
   /* ── Filters Bar ── */
   .filters-bar {
@@ -250,6 +262,108 @@
   }
   .comment-form input:focus { outline: none; border-color: var(--blue); }
 
+  /* ── Image Grid (multi-image posts) ── */
+  .post-image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-bottom: 0.85rem;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .post-image-grid.single { grid-template-columns: 1fr; }
+  .post-image-grid img {
+    width: 100%; height: 200px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .post-image-grid img:hover { opacity: 0.9; }
+  .post-image-grid.single img { height: 340px; max-height: 400px; }
+  .img-more-overlay {
+    position: relative;
+    cursor: pointer;
+  }
+  .img-more-overlay .overlay-count {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.5rem; font-weight: 800;
+  }
+
+  /* ── Post Card clickable ── */
+  .post-content-area { cursor: pointer; }
+  .post-content-area:hover .post-content { color: var(--blue); }
+
+  /* ── Comment badge ── */
+  .comment-new-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #22c55e;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    border-radius: 50px;
+    padding: 1px 6px;
+    margin-left: 5px;
+    animation: pulse 1.5s ease infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.7; transform: scale(1.1); }
+  }
+
+  /* ── Post Modal ── */
+  .post-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .post-modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  }
+  @keyframes slideUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+  .post-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: var(--card-bg);
+    border-radius: 20px 20px 0 0;
+    z-index: 1;
+  }
+  .post-modal-body { padding: 1.4rem; }
+  .post-modal-close {
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    width: 34px; height: 34px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-mid);
+    font-size: 1.1rem;
+    transition: all 0.2s;
+  }
+  .post-modal-close:hover { background: var(--border); color: var(--text-dark); }
+
   /* ── Empty State ── */
   .wall-empty {
     text-align: center;
@@ -289,14 +403,15 @@
       <input type="text" name="tags" placeholder="#tags  (e.g. django, python, math)">
       <div class="create-actions">
         <label class="file-label">
-          <i class="bi bi-image"></i> Add Photo
-          <input type="file" name="image" accept="image/*" id="imgInput">
+          <i class="bi bi-image"></i> Add Photos / GIF
+          <input type="file" name="images" accept="image/*,.gif" id="imgInput" multiple>
         </label>
         <span id="imgName" style="font-size:0.8rem;color:var(--text-light);"></span>
         <button type="submit" class="btn-primary-grad" style="margin-left:auto;">
           <i class="bi bi-send-fill"></i> Post
         </button>
       </div>
+      <div class="file-preview-grid" id="imgPreviewGrid"></div>
     </form>
   </div>
 
@@ -341,13 +456,30 @@
         {% endif %}
       </div>
 
-      <!-- Content -->
-      <div class="post-content">{{ post.content }}</div>
+      <!-- Content (clickable → opens modal) -->
+      <div class="post-content-area" onclick="openPostModal('{{ post.pk }}')">
+        <div class="post-content">{{ post.content }}</div>
 
-      <!-- Image -->
-      {% if post.image %}
-      <img src="{{ post.image.url }}" alt="Post image" class="post-image">
-      {% endif %}
+        <!-- Image Grid -->
+        {% with imgs=post.extra_images.all %}
+        {% if post.image or imgs %}
+        <div class="post-image-grid {% if not imgs and post.image %}single{% endif %}" onclick="openPostModal('{{ post.pk }}')">
+          {% if post.image %}
+          <img src="{{ post.image.url }}" alt="Post image" loading="lazy">
+          {% endif %}
+          {% for pi in imgs|slice:":3" %}
+          <img src="{{ pi.image.url }}" alt="Post image" loading="lazy">
+          {% endfor %}
+          {% if imgs|length > 3 %}
+          <div class="img-more-overlay">
+            <img src="{{ imgs.3.image.url }}" alt="More images" loading="lazy">
+            <div class="overlay-count">+{{ imgs|length|add:"-3" }}</div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+        {% endwith %}
+      </div>
 
       <!-- Tags -->
       {% if post.tag_list %}
@@ -369,9 +501,12 @@
         </button>
 
         <!-- Comment toggle -->
-        <button class="action-btn comment-toggle" onclick="toggleComments('{{ post.pk }}')">
+        <button class="action-btn comment-toggle" id="comment-toggle-{{ post.pk }}" onclick="toggleComments('{{ post.pk }}')">
           <i class="bi bi-chat"></i> {{ post.comments.count }}
           {% if post.comments.count == 1 %}comment{% else %}comments{% endif %}
+        </button>
+        <button class="action-btn" onclick="openPostModal('{{ post.pk }}')" style="border-color:var(--blue);color:var(--blue);">
+          <i class="bi bi-arrows-fullscreen"></i> Open
         </button>
       </div>
 
@@ -421,6 +556,36 @@
   {% endif %}
 
 </div>
+
+<!-- ── Post Modal ── -->
+<div id="postModalBackdrop" class="post-modal-backdrop" style="display:none;" onclick="closeModalOnBackdrop(event)">
+  <div class="post-modal" id="postModal">
+    <div class="post-modal-header">
+      <div style="display:flex;align-items:center;gap:0.6rem;">
+        <div class="post-avatar" id="modalAvatar"></div>
+        <div>
+          <div class="post-author" id="modalAuthor"></div>
+          <div class="post-sub" id="modalMeta"></div>
+        </div>
+      </div>
+      <button class="post-modal-close" onclick="closePostModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="post-modal-body">
+      <div class="post-content" id="modalContent" style="margin-bottom:1rem;"></div>
+      <div id="modalImages" style="margin-bottom:1rem;"></div>
+      <div id="modalTags" style="margin-bottom:1rem;"></div>
+      <div style="border-top:1px solid var(--border);padding-top:1rem;">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--text-light);margin-bottom:0.75rem;">Comments</div>
+        <div id="modalComments"></div>
+        <form class="comment-form" id="modalCommentForm" style="margin-top:0.75rem;">
+          <input type="hidden" name="csrfmiddlewaretoken" id="modalCsrf">
+          <input type="text" name="content" placeholder="Write a comment…" required id="modalCommentInput">
+          <button type="submit" class="action-btn" style="flex-shrink:0;"><i class="bi bi-send"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -428,16 +593,150 @@
 const ME = "{{ me.username }}";
 const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-// ── Image filename preview ──
+// ── Multi-image preview thumbnails ──
 document.getElementById('imgInput').addEventListener('change', function () {
-  document.getElementById('imgName').textContent = this.files[0]?.name ? `📎 ${this.files[0].name}` : '';
+  const grid = document.getElementById('imgPreviewGrid');
+  const label = document.getElementById('imgName');
+  grid.innerHTML = '';
+  const files = Array.from(this.files);
+  if (!files.length) { label.textContent = ''; return; }
+  label.textContent = `📎 ${files.length} file${files.length > 1 ? 's' : ''} selected`;
+  files.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      grid.appendChild(img);
+    };
+    reader.readAsDataURL(f);
+  });
 });
 
 // ── Toggle comments ──
 function toggleComments(pk) {
   const el = document.getElementById('comments-' + pk);
-  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  // Clear comment badge when opening
+  if (!isOpen) {
+    const btn = document.getElementById('comment-toggle-' + pk);
+    if (btn) { const b = btn.querySelector('.comment-new-badge'); if (b) b.remove(); }
+  }
 }
+
+// ─────────────────────────────────────────────
+// POST MODAL
+// ─────────────────────────────────────────────
+let modalPostPk = null;
+
+function openPostModal(pk) {
+  const card = document.getElementById('post-' + pk);
+  if (!card) return;
+  modalPostPk = pk;
+
+  // Populate header
+  const author = card.querySelector('.post-author')?.textContent || '';
+  const meta   = card.querySelector('.post-sub')?.innerHTML || '';
+  document.getElementById('modalAvatar').textContent = author[0]?.toUpperCase() || '?';
+  document.getElementById('modalAuthor').textContent = author;
+  document.getElementById('modalMeta').innerHTML = meta;
+
+  // Populate content
+  document.getElementById('modalContent').textContent =
+    card.querySelector('.post-content')?.textContent || '';
+
+  // Populate images (clone grid)
+  const imgEl = document.getElementById('modalImages');
+  imgEl.innerHTML = '';
+  const srcGrid = card.querySelector('.post-image-grid');
+  if (srcGrid) {
+    const clone = srcGrid.cloneNode(true);
+    clone.style.cursor = 'default';
+    clone.querySelectorAll('img').forEach(i => i.style.cursor = 'default');
+    imgEl.appendChild(clone);
+  }
+
+  // Populate tags
+  const tagsEl = document.getElementById('modalTags');
+  tagsEl.innerHTML = card.querySelector('.post-tags')?.outerHTML || '';
+
+  // Populate comments (clone existing)
+  const modalComments = document.getElementById('modalComments');
+  modalComments.innerHTML = '';
+  const section = document.getElementById('comments-' + pk);
+  if (section) {
+    section.querySelectorAll('.comment-item').forEach(ci => {
+      modalComments.appendChild(ci.cloneNode(true));
+    });
+    const placeholder = section.querySelector('p');
+    if (placeholder && !section.querySelector('.comment-item')) {
+      modalComments.innerHTML = placeholder.outerHTML;
+    }
+  }
+  if (!modalComments.innerHTML.trim()) {
+    modalComments.innerHTML = '<p style="color:var(--text-light);font-size:0.85rem;text-align:center;">No comments yet. Be the first!</p>';
+  }
+
+  // Wire comment form
+  document.getElementById('modalCsrf').value = CSRF();
+  document.getElementById('modalCommentInput').value = '';
+
+  document.getElementById('postModalBackdrop').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closePostModal() {
+  document.getElementById('postModalBackdrop').style.display = 'none';
+  document.body.style.overflow = '';
+  modalPostPk = null;
+}
+
+function closeModalOnBackdrop(e) {
+  if (e.target === document.getElementById('postModalBackdrop')) closePostModal();
+}
+
+// Esc key closes modal
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePostModal(); });
+
+// Modal comment form submit
+document.getElementById('modalCommentForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  if (!modalPostPk) return;
+  const input = document.getElementById('modalCommentInput');
+  if (!input.value.trim()) return;
+  const fd = new FormData();
+  fd.append('content', input.value.trim());
+  fd.append('csrfmiddlewaretoken', CSRF());
+  try {
+    const res = await fetch(`/wall/${modalPostPk}/comment/`, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd,
+    });
+    const data = await res.json();
+    if (data.ok) {
+      const modalComments = document.getElementById('modalComments');
+      const p = modalComments.querySelector('p');
+      if (p) p.remove();
+      modalComments.insertAdjacentHTML('beforeend', buildCommentHTML(data.comment));
+      input.value = '';
+      // Also update card inline
+      const section = document.getElementById('comments-' + modalPostPk);
+      if (section) {
+        const sp = section.querySelector('p'); if (sp) sp.remove();
+        const form = section.querySelector('.ajax-comment-form');
+        if (form) form.insertAdjacentHTML('beforebegin', buildCommentHTML(data.comment));
+        else section.insertAdjacentHTML('beforeend', buildCommentHTML(data.comment));
+      }
+      const toggleBtn = document.getElementById('comment-toggle-' + modalPostPk);
+      if (toggleBtn) {
+        const count = (section ? section.querySelectorAll('.comment-item').length : 1);
+        toggleBtn.innerHTML = `<i class="bi bi-chat"></i> ${count} ${count === 1 ? 'comment' : 'comments'}`;
+      }
+    }
+  } catch (err) { console.error(err); }
+});
 
 // ─────────────────────────────────────────────
 // BUILD POST CARD HTML from JSON data
@@ -453,7 +752,14 @@ function buildPostCard(p) {
       </button>
     </form>` : '';
   const tagsHtml = p.tags.length ? `<div class="post-tags">${p.tags.map(t => `<a href="?tag=${t}" class="tag-chip">#${t}</a>`).join('')}</div>` : '';
-  const imageHtml = p.image_url ? `<img src="${p.image_url}" alt="Post image" class="post-image">` : '';
+  const urls = p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []);
+  const isSingle = urls.length === 1;
+  const imagesHtml = urls.length ? `
+    <div class="post-image-grid ${isSingle ? 'single' : ''}" onclick="openPostModal('${p.pk}')">
+      ${urls.slice(0, 4).map((u, i) => i === 3 && urls.length > 4
+        ? `<div class="img-more-overlay"><img src="${u}" alt="more"><div class="overlay-count">+${urls.length - 3}</div></div>`
+        : `<img src="${u}" alt="Post image" loading="lazy">`).join('')}
+    </div>` : '';
 
   return `
   <div class="post-card" id="post-${p.pk}" style="animation:fadeInUp 0.4s ease both;">
@@ -465,15 +771,20 @@ function buildPostCard(p) {
       </div>
       ${deleteBtn}
     </div>
-    <div class="post-content">${p.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
-    ${imageHtml}
+    <div class="post-content-area" onclick="openPostModal('${p.pk}')">
+      <div class="post-content">${p.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      ${imagesHtml}
+    </div>
     ${tagsHtml}
     <div class="post-actions">
       <button class="action-btn like-btn" data-post="${p.pk}" data-liked="0">
         <i class="bi bi-heart"></i><span class="like-count">0</span>
       </button>
-      <button class="action-btn comment-toggle" onclick="toggleComments('${p.pk}')">
+      <button class="action-btn comment-toggle" id="comment-toggle-${p.pk}" onclick="toggleComments('${p.pk}')">
         <i class="bi bi-chat"></i> 0 comments
+      </button>
+      <button class="action-btn" onclick="openPostModal('${p.pk}')" style="border-color:var(--blue);color:var(--blue);">
+        <i class="bi bi-arrows-fullscreen"></i> Open
       </button>
     </div>
     <div class="comments-section" id="comments-${p.pk}" style="display:none;">
@@ -504,7 +815,12 @@ document.getElementById('createPostForm').addEventListener('submit', async funct
     });
     const data = await res.json();
     if (data.ok) {
-      const feed = document.getElementById('wall-feed');
+      let feed = document.getElementById('wall-feed');
+      if (!feed) {
+        feed = document.createElement('div');
+        feed.id = 'wall-feed';
+        document.querySelector('.filters-bar').insertAdjacentElement('afterend', feed);
+      }
       const emptyState = document.getElementById('wall-empty');
       if (emptyState) emptyState.remove();
       feed.insertAdjacentHTML('afterbegin', buildPostCard(data.post));
@@ -512,6 +828,7 @@ document.getElementById('createPostForm').addEventListener('submit', async funct
       bindCommentForm(feed.querySelector(`#post-${data.post.pk} .ajax-comment-form`));
       form.reset();
       document.getElementById('imgName').textContent = '';
+      document.getElementById('imgPreviewGrid').innerHTML = '';
     } else {
       alert(data.error || 'Could not create post.');
     }
@@ -564,18 +881,20 @@ function bindCommentForm(form) {
       const data = await res.json();
       if (data.ok) {
         const section = document.getElementById('comments-' + postPk);
-        // Remove "no comments yet" placeholder if present
         const placeholder = section.querySelector('p');
         if (placeholder) placeholder.remove();
-        // Insert new comment before the form
         this.insertAdjacentHTML('beforebegin', buildCommentHTML(data.comment));
-        // Update comment count button
-        const toggleBtn = document.querySelector(`#post-${postPk} .comment-toggle`);
+        const toggleBtn = document.getElementById('comment-toggle-' + postPk);
         if (toggleBtn) {
           const count = section.querySelectorAll('.comment-item').length;
           toggleBtn.innerHTML = `<i class="bi bi-chat"></i> ${count} ${count === 1 ? 'comment' : 'comments'}`;
         }
         input.value = '';
+        // Sync with modal if open
+        if (modalPostPk === postPk) {
+          const mc = document.getElementById('modalComments');
+          if (mc) { const p = mc.querySelector('p'); if(p) p.remove(); mc.insertAdjacentHTML('beforeend', buildCommentHTML(data.comment)); }
+        }
       }
     } catch (err) { console.error(err); }
   });
@@ -616,43 +935,35 @@ document.querySelectorAll('.ajax-comment-form').forEach(bindCommentForm);
 (function () {
   const PUSHER_KEY     = '{{ pusher_key }}';
   const PUSHER_CLUSTER = '{{ pusher_cluster }}';
-  if (!PUSHER_KEY) return; // Skip if not configured
+  if (!PUSHER_KEY) return;
 
   const pusher  = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER, forceTLS: true });
   const channel = pusher.subscribe('wall');
 
-  // ── New post from any user ──
+  // ── New post ──
   channel.bind('new-post', function (p) {
-    // Skip if WE created this — we already see it from our own AJAX response
     if (p.author === ME) return;
-    // Secondary guard: skip if already in DOM (shouldn't happen, but safe)
     if (document.getElementById('post-' + p.pk)) return;
-
     p.can_delete = false;
-
     const emptyState = document.getElementById('wall-empty');
     if (emptyState) emptyState.remove();
-
-    // Create feed container if it doesn't exist yet (empty wall)
     let feed = document.getElementById('wall-feed');
     if (!feed) {
-      const newFeed = document.createElement('div');
-      newFeed.id = 'wall-feed';
-      document.querySelector('.filters-bar').insertAdjacentElement('afterend', newFeed);
-      feed = newFeed;
+      feed = document.createElement('div');
+      feed.id = 'wall-feed';
+      document.querySelector('.filters-bar').insertAdjacentElement('afterend', feed);
     }
-
     feed.insertAdjacentHTML('afterbegin', buildPostCard(p));
     const newCard = document.getElementById('post-' + p.pk);
     bindLikeBtn(newCard.querySelector('.like-btn'));
     bindCommentForm(newCard.querySelector('.ajax-comment-form'));
+    // Increment nav badge (handled in base.html)
+    bumpWallBadge();
   });
 
-  // ── New comment from any user ──
+  // ── New comment ──
   channel.bind('new-comment', function (c) {
-    // Skip if WE wrote this — we already see it from our own AJAX response
     if (c.author === ME) return;
-    // Secondary guard: skip if already in DOM
     if (document.getElementById('comment-' + c.pk)) return;
 
     const section = document.getElementById('comments-' + c.post_pk);
@@ -661,26 +972,40 @@ document.querySelectorAll('.ajax-comment-form').forEach(bindCommentForm);
     c.can_delete = false;
     const placeholder = section.querySelector('p');
     if (placeholder) placeholder.remove();
-
     const form = section.querySelector('.ajax-comment-form');
-    if (form) {
-      form.insertAdjacentHTML('beforebegin', buildCommentHTML(c));
-    } else {
-      section.insertAdjacentHTML('beforeend', buildCommentHTML(c));
-    }
+    if (form) form.insertAdjacentHTML('beforebegin', buildCommentHTML(c));
+    else section.insertAdjacentHTML('beforeend', buildCommentHTML(c));
 
-    const toggleBtn = document.querySelector('#post-' + c.post_pk + ' .comment-toggle');
+    // Update toggle button count + add badge if section closed
+    const toggleBtn = document.getElementById('comment-toggle-' + c.post_pk);
     if (toggleBtn) {
       const count = section.querySelectorAll('.comment-item').length;
-      toggleBtn.innerHTML = `<i class="bi bi-chat"></i> ${count} ${count === 1 ? 'comment' : 'comments'}`;
+      const isClosed = section.style.display === 'none';
+      let badgeHtml = '';
+      if (isClosed) {
+        let existing = toggleBtn.querySelector('.comment-new-badge');
+        const current = existing ? parseInt(existing.textContent) : 0;
+        const newCount = current + 1;
+        if (existing) existing.remove();
+        badgeHtml = `<span class="comment-new-badge">${newCount}</span>`;
+      }
+      toggleBtn.innerHTML = `<i class="bi bi-chat"></i> ${count} ${count === 1 ? 'comment' : 'comments'}${badgeHtml}`;
     }
+
+    // Sync to modal if post is open
+    if (String(modalPostPk) === String(c.post_pk)) {
+      const mc = document.getElementById('modalComments');
+      if (mc) { const p = mc.querySelector('p'); if(p) p.remove(); mc.insertAdjacentHTML('beforeend', buildCommentHTML(c)); }
+    }
+
+    // Nav badge
+    bumpWallBadge();
   });
 
-  // ── Like count update from any user ──
+  // ── Like update ──
   channel.bind('post-liked', function (data) {
     const card = document.getElementById('post-' + data.pk);
     if (!card) return;
-    // Only update count if WE didn't just click like (our AJAX already updated it)
     const likeBtn = card.querySelector('.like-btn');
     if (likeBtn && likeBtn.dataset.updating === '1') return;
     const countEl = card.querySelector('.like-count');
@@ -688,5 +1013,20 @@ document.querySelectorAll('.ajax-comment-form').forEach(bindCommentForm);
   });
 
 })();
+
+// ── Nav badge helper (called by Pusher handlers) ──
+function bumpWallBadge() {
+  // Signal to base that wall has new activity (storage event picked up by base.html JS)
+  try {
+    const cur = parseInt(localStorage.getItem('wall_unseen') || '0');
+    localStorage.setItem('wall_unseen', cur + 1);
+    // If base badge el is on this same page, update it
+    const b = document.getElementById('wall-nav-badge');
+    if (b) { b.textContent = cur + 1; b.style.display = 'inline-flex'; }
+  } catch(e) {}
+}
+
+// Clear wall badge when on wall page
+try { localStorage.setItem('wall_unseen', '0'); } catch(e) {}
 </script>
 {% endblock %}

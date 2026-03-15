@@ -105,3 +105,16 @@ class PostComment(models.Model):
 
     def __str__(self):
         return f"{self.author} on Post#{self.post_id}: {self.content[:40]}"
+
+
+class PostImage(models.Model):
+    """Extra images attached to a Wall post (supports multi-image upload)."""
+    post  = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='extra_images')
+    image = CloudinaryField('image')
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"Image {self.order} for Post#{self.post_id}"

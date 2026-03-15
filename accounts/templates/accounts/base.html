@@ -918,7 +918,10 @@
         <i class="bi bi-chat-dots"></i> Messages
         {% if unread_dm_count %}<span class="slide-notif-dot"></span>{% endif %}
       </a>
-      <a class="slide-nav-link" href="{% url 'wall' %}"><i class="bi bi-journals"></i> Knowledge Wall</a>
+      <a class="slide-nav-link" href="{% url 'wall' %}" style="position:relative;">
+        <i class="bi bi-journals"></i> Knowledge Wall
+        <span id="wall-nav-badge" style="display:none; background:#22c55e; color:#fff; font-size:0.65rem; font-weight:700; border-radius:50px; padding:1px 6px; margin-left:5px; vertical-align:middle;">0</span>
+      </a>
       {% if user.is_staff or user.is_superuser %}
       <a class="slide-nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-shield-check"></i> Admin</a>
       {% endif %}
@@ -1010,6 +1013,18 @@
     // Load saved preference (default: light)
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
+
+    // ─── Wall unseen badge ───
+    function refreshWallBadge() {
+      try {
+        const n = parseInt(localStorage.getItem('wall_unseen') || '0');
+        const badge = document.getElementById('wall-nav-badge');
+        if (badge) { badge.textContent = n; badge.style.display = n > 0 ? 'inline-flex' : 'none'; }
+      } catch(e) {}
+    }
+    refreshWallBadge();
+    window.addEventListener('storage', e => { if (e.key === 'wall_unseen') refreshWallBadge(); });
+
 
     btn.addEventListener('click', () => {
       setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
