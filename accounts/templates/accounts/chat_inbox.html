@@ -62,8 +62,9 @@
     font-size: 1.2rem;
     flex-shrink: 0;
   }
-  .inbox-action-btn .btn-icon.blue { background: rgba(67,97,238,0.12); color: var(--blue); }
+  .inbox-action-btn .btn-icon.blue { background: rgba(78,124,63,0.14); color: var(--blue); }
   .inbox-action-btn .btn-icon.purple { background: rgba(168,85,247,0.12); color: #a855f7; }
+  .inbox-action-btn .btn-icon.green { background: rgba(16,185,129,0.14); color: #10b981; }
   .inbox-action-btn .btn-label { font-weight: 600; font-size: 0.88rem; }
   .inbox-action-btn .btn-sub { font-size: 0.75rem; color: var(--text-light); }
 
@@ -227,6 +228,13 @@
         <div class="btn-sub">Match with someone from a university</div>
       </div>
     </button>
+    <button class="inbox-action-btn" id="btnRandomAnyone">
+      <div class="btn-icon green"><i class="bi bi-globe2"></i></div>
+      <div>
+        <div class="btn-label">Random chat with anyone</div>
+        <div class="btn-sub">Match with any random Clink user</div>
+      </div>
+    </button>
   </div>
 
   <!-- Past Conversations -->
@@ -285,6 +293,17 @@
   </div>
 </div>
 
+<!-- ── Modal: Random Chat with Anyone ── -->
+<div class="modal-overlay" id="modalRandomAnyone">
+  <div class="modal-box">
+    <button class="modal-close" data-close="modalRandomAnyone"><i class="bi bi-x-lg"></i></button>
+    <h3><i class="bi bi-globe2 me-2" style="color:#10b981;"></i>Random Chat with Anyone</h3>
+    <p>We'll match you with a random active Clink user from any university!</p>
+    <div class="modal-alert error" id="alertRandomAnyone"></div>
+    <button class="modal-btn" id="btnGoRandomAnyone" style="background: linear-gradient(135deg,#10b981,#059669);">Find Anyone →</button>
+  </div>
+</div>
+
 <script>
   // ── Generic modal helpers ──
   function openModal(id)  { document.getElementById(id).classList.add('open'); }
@@ -303,6 +322,7 @@
     setTimeout(() => document.getElementById('inputChatUser').focus(), 200);
   });
   document.getElementById('btnRandomChat').addEventListener('click', () => openModal('modalRandom'));
+  document.getElementById('btnRandomAnyone').addEventListener('click', () => openModal('modalRandomAnyone'));
 
   // ── Chat with user ──
   document.getElementById('btnGoChatUser').addEventListener('click', () => {
@@ -354,6 +374,31 @@
     } finally {
       btn.disabled = false;
       btn.textContent = 'Find Someone';
+    }
+  });
+
+  // ── Random chat with anyone ──
+  document.getElementById('btnGoRandomAnyone').addEventListener('click', async () => {
+    const alertEl = document.getElementById('alertRandomAnyone');
+    const btn     = document.getElementById('btnGoRandomAnyone');
+    alertEl.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Looking…';
+    try {
+      const res  = await fetch('/chat/random/');
+      const data = await res.json();
+      if (data.ok) {
+        window.location.href = data.redirect;
+      } else {
+        alertEl.textContent = 'No other users available right now. Try again later!';
+        alertEl.classList.add('show');
+      }
+    } catch (e) {
+      alertEl.textContent = 'Something went wrong. Please try again.';
+      alertEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Find Anyone →';
     }
   });
 </script>

@@ -508,19 +508,29 @@ def update_university(request):
 
 @login_required(login_url='/login/')
 def random_chat(request):
-    """Redirect to a random user from the chosen university."""
+    """Redirect to a random user — either from a chosen university or anyone."""
     import random as _random
     uni = request.GET.get('university', '').strip()
-    valid = [c[0] for c in CustomUser.UNIVERSITY_CHOICES]
-    if uni not in valid:
-        return JsonResponse({'ok': False, 'error': 'Invalid university.'}, status=400)
 
-    candidates = list(
-        CustomUser.objects.filter(university=uni, is_active=True)
-        .exclude(pk=request.user.pk)
-    )
-    if not candidates:
-        return JsonResponse({'ok': False, 'error': f'No users found from {uni}.'}, status=404)
+    if uni:
+        # University-specific random
+        valid = [c[0] for c in CustomUser.UNIVERSITY_CHOICES]
+        if uni not in valid:
+            return JsonResponse({'ok': False, 'error': 'Invalid university.'}, status=400)
+        candidates = list(
+            CustomUser.objects.filter(university=uni, is_active=True)
+            .exclude(pk=request.user.pk)
+        )
+        if not candidates:
+            return JsonResponse({'ok': False, 'error': f'No users found from {uni}.'}, status=404)
+    else:
+        # Global random — any active user
+        candidates = list(
+            CustomUser.objects.filter(is_active=True)
+            .exclude(pk=request.user.pk)
+        )
+        if not candidates:
+            return JsonResponse({'ok': False, 'error': 'No other users available.'}, status=404)
 
     pick = _random.choice(candidates)
     return JsonResponse({'ok': True, 'redirect': f'/chat/{pick.username}/'})
