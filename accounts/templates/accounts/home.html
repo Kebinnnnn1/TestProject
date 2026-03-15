@@ -941,14 +941,7 @@
     </div>
 </section>
 
-<!-- CTA Section -->
-
-{% if not user.is_authenticated %}
-<div class="container">
-    <div class="cta-section">
-        <h2>Join Clink for free.</h2>
-        <p>Connect with students across Cebu universities, share your knowledge, chat in real time, and convert files — all in one place. No installation needed.</p>
-        <a href="{% url 'register' %}" class="btn-cta-white">
+<!-- Features Grid -->
 <section class="features-section">
     <div class="container">
         <div class="text-center mb-5">
@@ -1030,6 +1023,13 @@
     </div>
 </section>
 
+<!-- CTA Section -->
+{% if not user.is_authenticated %}
+<div class="container">
+    <div class="cta-section">
+        <h2>Join Clink for free.</h2>
+        <p>Connect with students across Cebu universities, share your knowledge, chat in real time, and convert files — all in one place. No installation needed.</p>
+        <a href="{% url 'register' %}" class="btn-cta-white">
             <i class="bi bi-rocket-takeoff-fill"></i> Create Free Account
         </a>
     </div>
