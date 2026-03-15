@@ -547,6 +547,8 @@ class WallView(View):
             'uni_filter': uni_filter,
             'university_choices': CustomUser.UNIVERSITY_CHOICES,
             'me': request.user,
+            'pusher_key':     django_settings.PUSHER_KEY,
+            'pusher_cluster': django_settings.PUSHER_CLUSTER,
         })
 
 
@@ -570,6 +572,22 @@ def create_post(request):
         image=image,
         university=request.user.university,
     )
+    # Broadcast to all users on the wall channel
+    pusher_payload = {
+        'pk':         post.pk,
+        'author':     request.user.username,
+        'content':    post.content,
+        'tags':       post.tag_list(),
+        'university': post.university,
+        'image_url':  post.image.url if post.image else '',
+        'delete_url': f'/wall/{post.pk}/delete/',
+        'like_url':   f'/wall/{post.pk}/like/',
+        'comment_url':f'/wall/{post.pk}/comment/',
+    }
+    try:
+        _pusher_client().trigger('wall', 'new-post', pusher_payload)
+    except Exception:
+        pass
     if is_ajax:
         return JsonResponse({
             'ok': True,
@@ -586,6 +604,7 @@ def create_post(request):
                 'comment_url':f'/wall/{post.pk}/comment/',
             }
         })
+    # Non-AJAX: also broadcast (shouldn't normally happen but safe fallback)
     return redirect('wall')
 
 
@@ -610,6 +629,13 @@ def like_post(request, pk):
     else:
         post.likes.add(request.user)
         liked = True
+    try:
+        _pusher_client().trigger('wall', 'post-liked', {
+            'pk':    post.pk,
+            'count': post.likes.count(),
+        })
+    except Exception:
+        pass
     return JsonResponse({'liked': liked, 'count': post.likes.count()})
 
 
@@ -625,6 +651,17 @@ def add_comment(request, pk):
             return JsonResponse({'ok': False, 'error': 'Empty comment.'}, status=400)
         return redirect('wall')
     comment = PostComment.objects.create(post=post, author=request.user, content=content)
+    # Broadcast to all users on the wall channel
+    try:
+        _pusher_client().trigger('wall', 'new-comment', {
+            'post_pk':    post.pk,
+            'pk':         comment.pk,
+            'author':     request.user.username,
+            'content':    comment.content,
+            'delete_url': f'/wall/comment/{comment.pk}/delete/',
+        })
+    except Exception:
+        pass
     if is_ajax:
         return JsonResponse({
             'ok': True,
