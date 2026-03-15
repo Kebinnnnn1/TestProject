@@ -623,26 +623,26 @@ document.querySelectorAll('.ajax-comment-form').forEach(bindCommentForm);
 
   // ── New post from any user ──
   channel.bind('new-post', function (p) {
-    // Don't duplicate if WE just posted it (already injected via AJAX response)
+    // Skip if WE created this — we already see it from our own AJAX response
+    if (p.author === ME) return;
+    // Secondary guard: skip if already in DOM (shouldn't happen, but safe)
     if (document.getElementById('post-' + p.pk)) return;
 
-    // For other users, they can't delete it (not their post)
     p.can_delete = false;
 
-    const feed = document.getElementById('wall-feed');
     const emptyState = document.getElementById('wall-empty');
     if (emptyState) emptyState.remove();
 
-    // Create feed container if it doesn't exist yet
+    // Create feed container if it doesn't exist yet (empty wall)
+    let feed = document.getElementById('wall-feed');
     if (!feed) {
-      const container = document.querySelector('.wall-wrap');
-      const filterBar  = container.querySelector('.filters-bar');
       const newFeed = document.createElement('div');
       newFeed.id = 'wall-feed';
-      filterBar.insertAdjacentElement('afterend', newFeed);
+      document.querySelector('.filters-bar').insertAdjacentElement('afterend', newFeed);
+      feed = newFeed;
     }
 
-    document.getElementById('wall-feed').insertAdjacentHTML('afterbegin', buildPostCard(p));
+    feed.insertAdjacentHTML('afterbegin', buildPostCard(p));
     const newCard = document.getElementById('post-' + p.pk);
     bindLikeBtn(newCard.querySelector('.like-btn'));
     bindCommentForm(newCard.querySelector('.ajax-comment-form'));
@@ -650,11 +650,13 @@ document.querySelectorAll('.ajax-comment-form').forEach(bindCommentForm);
 
   // ── New comment from any user ──
   channel.bind('new-comment', function (c) {
-    // Don't duplicate if WE just added it (already injected via AJAX response)
+    // Skip if WE wrote this — we already see it from our own AJAX response
+    if (c.author === ME) return;
+    // Secondary guard: skip if already in DOM
     if (document.getElementById('comment-' + c.pk)) return;
 
     const section = document.getElementById('comments-' + c.post_pk);
-    if (!section) return; // Post not visible on this page (filtered)
+    if (!section) return;
 
     c.can_delete = false;
     const placeholder = section.querySelector('p');
@@ -667,7 +669,6 @@ document.querySelectorAll('.ajax-comment-form').forEach(bindCommentForm);
       section.insertAdjacentHTML('beforeend', buildCommentHTML(c));
     }
 
-    // Update comment count button
     const toggleBtn = document.querySelector('#post-' + c.post_pk + ' .comment-toggle');
     if (toggleBtn) {
       const count = section.querySelectorAll('.comment-item').length;
@@ -679,9 +680,13 @@ document.querySelectorAll('.ajax-comment-form').forEach(bindCommentForm);
   channel.bind('post-liked', function (data) {
     const card = document.getElementById('post-' + data.pk);
     if (!card) return;
+    // Only update count if WE didn't just click like (our AJAX already updated it)
+    const likeBtn = card.querySelector('.like-btn');
+    if (likeBtn && likeBtn.dataset.updating === '1') return;
     const countEl = card.querySelector('.like-count');
     if (countEl) countEl.textContent = data.count;
   });
+
 })();
 </script>
 {% endblock %}
