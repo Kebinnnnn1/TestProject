@@ -7,6 +7,7 @@ urlpatterns = [
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('verify/', views.VerifyEmailView.as_view(), name='verify_email'),
+    path('resend-verification/', views.ResendVerificationView.as_view(), name='resend_verification'),
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('admin-dashboard/', views.AdminDashboardView.as_view(), name='admin_dashboard'),
     path('admin-dashboard/toggle/<int:pk>/', views.toggle_user_active, name='toggle_user_active'),

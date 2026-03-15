@@ -108,6 +108,55 @@ class VerifyEmailView(View):
         return redirect('login')
 
 
+class ResendVerificationView(View):
+    """Allow unverified users to request a new verification email."""
+
+    def get(self, request):
+        return render(request, 'accounts/resend_verification.html')
+
+    def post(self, request):
+        email = request.POST.get('email', '').strip().lower()
+        if not email:
+            messages.error(request, 'Please enter your email address.')
+            return render(request, 'accounts/resend_verification.html')
+
+        try:
+            user = CustomUser.objects.get(email__iexact=email)
+        except CustomUser.DoesNotExist:
+            # Don't reveal whether the email exists — show the same success msg
+            messages.success(
+                request,
+                'If that email is registered and unverified, a new link has been sent.'
+            )
+            return redirect('login')
+
+        if user.is_verified:
+            messages.info(request, 'This account is already verified. You can log in.')
+            return redirect('login')
+
+        # Simple rate-limit: check if a token was created in the last 2 minutes
+        from django.utils import timezone
+        import datetime
+        existing = EmailVerificationToken.objects.filter(user=user).first()
+        if existing:
+            age = timezone.now() - existing.created_at
+            if age < datetime.timedelta(minutes=2):
+                messages.warning(
+                    request,
+                    'A verification email was already sent recently. '
+                    'Please wait a moment before requesting another.'
+                )
+                return render(request, 'accounts/resend_verification.html')
+
+        token = generate_token(user)
+        send_verification_email(request, user, token)
+        messages.success(
+            request,
+            'A new verification email has been sent! Please check your inbox (and spam folder).'
+        )
+        return redirect('login')
+
+
 # ---------------------------------------------------------------------------
 # Login / Logout
 # ---------------------------------------------------------------------------
