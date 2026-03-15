@@ -18,7 +18,7 @@
         position: absolute;
         width: 500px;
         height: 500px;
-        background: radial-gradient(circle, rgba(67, 97, 238, 0.1), transparent 70%);
+        background: radial-gradient(circle, rgba(78, 124, 63, 0.12), transparent 70%);
         top: -150px;
         right: -100px;
         border-radius: 50%;
@@ -30,7 +30,7 @@
         position: absolute;
         width: 400px;
         height: 400px;
-        background: radial-gradient(circle, rgba(255, 107, 53, 0.1), transparent 70%);
+        background: radial-gradient(circle, rgba(139, 191, 124, 0.12), transparent 70%);
         bottom: -100px;
         left: -80px;
         border-radius: 50%;
@@ -77,11 +77,11 @@
     }
 
     [data-theme="dark"] .login-blob-1 {
-        background: radial-gradient(circle, rgba(67, 97, 238, 0.25), transparent 70%);
+        background: radial-gradient(circle, rgba(78, 124, 63, 0.28), transparent 70%);
     }
 
     [data-theme="dark"] .login-blob-2 {
-        background: radial-gradient(circle, rgba(255, 107, 53, 0.25), transparent 70%);
+        background: radial-gradient(circle, rgba(139, 191, 124, 0.28), transparent 70%);
     }
 </style>
 {% endblock %}
@@ -110,7 +110,10 @@
             </div>
 
             <div class="mb-4">
-                <label class="form-label"><i class="bi bi-lock me-1"></i>Password</label>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.45rem;">
+                    <label class="form-label" style="margin:0;"><i class="bi bi-lock me-1"></i>Password</label>
+                    <a href="{% url 'password_reset' %}" style="font-size:0.8rem; color:var(--blue); text-decoration:none; font-weight:600;">Forgot password?</a>
+                </div>
                 {{ form.password }}
             </div>
 

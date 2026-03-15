@@ -28,7 +28,7 @@ no limits.{% endblock %}
   .cv-hero .b1 {
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(67, 97, 238, .18), transparent 70%);
+    background: radial-gradient(circle, rgba(78, 124, 63, .18), transparent 70%);
     top: -150px;
     right: -80px;
   }
@@ -36,7 +36,7 @@ no limits.{% endblock %}
   .cv-hero .b2 {
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(255, 107, 53, .15), transparent 70%);
+    background: radial-gradient(circle, rgba(139, 191, 124, .15), transparent 70%);
     bottom: -100px;
     left: -80px;
     animation-delay: 3s;
@@ -45,7 +45,7 @@ no limits.{% endblock %}
   .cv-hero .b3 {
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(114, 9, 183, .12), transparent 70%);
+    background: radial-gradient(circle, rgba(46, 92, 35, .12), transparent 70%);
     top: 40%;
     left: 45%;
     animation-delay: 5s;
@@ -55,8 +55,8 @@ no limits.{% endblock %}
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: linear-gradient(135deg, rgba(67, 97, 238, .1), rgba(114, 9, 183, .08));
-    border: 1px solid rgba(67, 97, 238, .25);
+    background: linear-gradient(135deg, rgba(78, 124, 63, .10), rgba(46, 92, 35, .08));
+    border: 1px solid rgba(78, 124, 63, .25);
     border-radius: 50px;
     padding: .45rem 1.1rem;
     font-size: .82rem;
@@ -168,7 +168,7 @@ no limits.{% endblock %}
   }
 
   .drop-zone {
-    border: 2.5px dashed rgba(67, 97, 238, .35);
+    border: 2.5px dashed rgba(78, 124, 63, .35);
     border-radius: 20px;
     padding: 3rem 2rem;
     text-align: center;
@@ -180,7 +180,7 @@ no limits.{% endblock %}
 
   .drop-zone.drag-over {
     border-color: var(--blue);
-    background: rgba(67, 97, 238, .06);
+    background: rgba(78, 124, 63, .06);
     transform: scale(1.01);
   }
 
@@ -242,7 +242,7 @@ no limits.{% endblock %}
     font-size: 1.3rem;
     flex-shrink: 0;
     color: var(--blue);
-    background: rgba(67, 97, 238, .1);
+    background: rgba(78, 124, 63, .10);
   }
 
   .fp-name {
@@ -317,7 +317,7 @@ no limits.{% endblock %}
   .format-select:focus {
     outline: none;
     border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(67, 97, 238, .12);
+    box-shadow: 0 0 0 3px rgba(78, 124, 63, .12);
   }
 
   /* Dynamic options panel */
@@ -327,7 +327,7 @@ no limits.{% endblock %}
     padding: 1.1rem 1.2rem;
     border-radius: 12px;
     background: var(--surface);
-    border: 1.5px solid rgba(67, 97, 238, .2);
+    border: 1.5px solid rgba(78, 124, 63, .2);
   }
 
   .opts-panel.show {
@@ -397,7 +397,7 @@ no limits.{% endblock %}
     margin-top: 1.5rem;
     padding: 1rem;
     border-radius: 14px;
-    background: linear-gradient(135deg, var(--blue), var(--purple));
+    background: var(--grad-main);
     border: none;
     color: #fff;
     font-size: 1rem;
@@ -408,12 +408,12 @@ no limits.{% endblock %}
     justify-content: center;
     gap: 8px;
     transition: all .25s;
-    box-shadow: 0 8px 24px rgba(67, 97, 238, .3);
+    box-shadow: 0 8px 24px rgba(78, 124, 63, .30);
   }
 
   .btn-convert:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(67, 97, 238, .4);
+    box-shadow: 0 12px 32px rgba(78, 124, 63, .40);
   }
 
   .btn-convert:disabled {
@@ -441,7 +441,7 @@ no limits.{% endblock %}
   .progress-bar-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, var(--blue), var(--purple));
+    background: var(--grad-main);
     border-radius: 3px;
     transition: width .3s;
   }
@@ -505,7 +505,7 @@ no limits.{% endblock %}
 
   .fmt-card:hover {
     transform: translateY(-4px);
-    border-color: rgba(67, 97, 238, .3);
+    border-color: rgba(78, 124, 63, .30);
     box-shadow: var(--shadow-md);
   }
 
@@ -595,7 +595,7 @@ no limits.{% endblock %}
     right: -5%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(67, 97, 238, .2), transparent 70%);
+    background: radial-gradient(circle, rgba(78, 124, 63, .25), transparent 70%);
     border-radius: 50%;
     animation: blobPulse 7s ease-in-out infinite;
   }
