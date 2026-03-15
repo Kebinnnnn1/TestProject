@@ -11,7 +11,7 @@ from django.db.models import Q
 from django.conf import settings as django_settings
 
 from .forms import RegistrationForm, LoginForm
-from .models import CustomUser, EmailVerificationToken, DirectMessage
+from .models import CustomUser, EmailVerificationToken, DirectMessage, Post, PostComment
 from .tokens import generate_token, send_verification_email
 
 
@@ -524,3 +524,93 @@ def random_chat(request):
 
     pick = _random.choice(candidates)
     return JsonResponse({'ok': True, 'redirect': f'/chat/{pick.username}/'})
+
+
+# ---------------------------------------------------------------------------
+# Knowledge Wall
+# ---------------------------------------------------------------------------
+
+@method_decorator(login_required(login_url='/login/'), name='dispatch')
+class WallView(View):
+    """Main knowledge wall feed."""
+    def get(self, request):
+        tag_filter = request.GET.get('tag', '').strip()
+        uni_filter = request.GET.get('university', '').strip()
+        posts = Post.objects.select_related('author').prefetch_related('likes', 'comments__author')
+        if tag_filter:
+            posts = posts.filter(tags__icontains=tag_filter)
+        if uni_filter:
+            posts = posts.filter(university=uni_filter)
+        return render(request, 'accounts/wall.html', {
+            'posts': posts,
+            'tag_filter': tag_filter,
+            'uni_filter': uni_filter,
+            'university_choices': CustomUser.UNIVERSITY_CHOICES,
+            'me': request.user,
+        })
+
+
+@login_required(login_url='/login/')
+@require_POST
+def create_post(request):
+    """Create a new wall post."""
+    content = request.POST.get('content', '').strip()
+    tags    = request.POST.get('tags', '').strip()
+    image   = request.FILES.get('image')
+    if not content:
+        messages.error(request, 'Post content cannot be empty.')
+        return redirect('wall')
+    Post.objects.create(
+        author=request.user,
+        content=content,
+        tags=tags,
+        image=image,
+        university=request.user.university,
+    )
+    return redirect('wall')
+
+
+@login_required(login_url='/login/')
+@require_POST
+def delete_post(request, pk):
+    """Delete own post."""
+    post = get_object_or_404(Post, pk=pk)
+    if post.author == request.user or request.user.is_staff:
+        post.delete()
+    return redirect('wall')
+
+
+@login_required(login_url='/login/')
+@require_POST
+def like_post(request, pk):
+    """Toggle like on a post — returns JSON."""
+    post = get_object_or_404(Post, pk=pk)
+    if request.user in post.likes.all():
+        post.likes.remove(request.user)
+        liked = False
+    else:
+        post.likes.add(request.user)
+        liked = True
+    return JsonResponse({'liked': liked, 'count': post.likes.count()})
+
+
+@login_required(login_url='/login/')
+@require_POST
+def add_comment(request, pk):
+    """Add a comment to a wall post."""
+    post    = get_object_or_404(Post, pk=pk)
+    content = request.POST.get('content', '').strip()
+    if content:
+        PostComment.objects.create(post=post, author=request.user, content=content)
+    return redirect('wall')
+
+
+@login_required(login_url='/login/')
+@require_POST
+def delete_comment(request, pk):
+    """Delete own comment."""
+    comment = get_object_or_404(PostComment, pk=pk)
+    if comment.author == request.user or request.user.is_staff:
+        comment.delete()
+    return redirect('wall')
+

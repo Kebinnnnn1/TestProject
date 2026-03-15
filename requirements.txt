@@ -4,3 +4,5 @@ whitenoise
 dj-database-url
 psycopg2-binary
 pusher
+cloudinary
+django-cloudinary-storage

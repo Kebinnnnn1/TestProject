@@ -909,6 +909,7 @@
         <i class="bi bi-chat-dots"></i> Messages
         {% if unread_dm_count %}<span class="slide-notif-dot"></span>{% endif %}
       </a>
+      <a class="slide-nav-link" href="{% url 'wall' %}"><i class="bi bi-journals"></i> Knowledge Wall</a>
       {% if user.is_staff or user.is_superuser %}
       <a class="slide-nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-shield-check"></i> Admin</a>
       {% endif %}

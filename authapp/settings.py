@@ -36,6 +36,14 @@ PUSHER_KEY     = config('PUSHER_KEY',     default='')
 PUSHER_SECRET  = config('PUSHER_SECRET',  default='')
 PUSHER_CLUSTER = config('PUSHER_CLUSTER', default='mt1')
 
+# Cloudinary — image uploads for Knowledge Wall
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY':    config('CLOUDINARY_API_KEY',    default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -43,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'accounts',
 ]
 

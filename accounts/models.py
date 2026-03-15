@@ -63,3 +63,44 @@ class DirectMessage(models.Model):
 
     def __str__(self):
         return f"{self.sender} → {self.recipient}: {self.content[:40]}"
+
+
+class Post(models.Model):
+    """A knowledge-sharing post on the Wall."""
+    author    = models.ForeignKey(
+        'CustomUser', on_delete=models.CASCADE, related_name='posts'
+    )
+    content   = models.TextField(max_length=3000)
+    image     = models.ImageField(upload_to='wall/', blank=True, null=True)
+    tags      = models.CharField(max_length=200, blank=True, default='',
+                                 help_text='Comma-separated tags, e.g. django,python')
+    university = models.CharField(max_length=10, blank=True, default='')
+    likes     = models.ManyToManyField(
+        'CustomUser', blank=True, related_name='liked_posts'
+    )
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.author} — {self.content[:60]}"
+
+    def tag_list(self):
+        return [t.strip() for t in self.tags.split(',') if t.strip()]
+
+
+class PostComment(models.Model):
+    """A comment on a Wall post."""
+    post      = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author    = models.ForeignKey(
+        'CustomUser', on_delete=models.CASCADE, related_name='post_comments'
+    )
+    content   = models.TextField(max_length=1000)
+    timestamp = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"{self.author} on Post#{self.post_id}: {self.content[:40]}"

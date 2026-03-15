@@ -1,0 +1,463 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Knowledge Wall — Clink{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── Layout ── */
+  .wall-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* ── Create Post Card ── */
+  .create-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+  .create-card textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    resize: vertical;
+    min-height: 90px;
+    background: var(--surface-2);
+    color: var(--text-dark);
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .create-card textarea:focus { outline: none; border-color: var(--blue); }
+  .create-card input[type="text"] {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.55rem 1rem;
+    font-size: 0.85rem;
+    background: var(--surface-2);
+    color: var(--text-dark);
+    font-family: inherit;
+    margin-top: 0.6rem;
+  }
+  .create-card input[type="text"]:focus { outline: none; border-color: var(--blue); }
+  .create-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.85rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.45rem 1rem;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.83rem;
+    color: var(--text-light);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .file-label:hover { border-color: var(--blue); color: var(--blue); }
+  .file-label input { display: none; }
+
+  /* ── Filters Bar ── */
+  .filters-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-chip {
+    padding: 0.35rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-mid);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .filter-chip:hover, .filter-chip.active {
+    border-color: var(--blue);
+    color: var(--blue);
+    background: rgba(67,97,238,0.08);
+  }
+  .filter-chip.clear { color: #ef4444; border-color: #ef4444; }
+  .filter-chip.clear:hover { background: rgba(239,68,68,0.08); }
+
+  /* ── Post Card ── */
+  .post-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.4rem 1.4rem 1rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.4s ease both;
+  }
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+  .post-avatar {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--grad-main);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .post-meta { flex: 1; min-width: 0; }
+  .post-author {
+    font-weight: 700;
+    font-size: 0.93rem;
+    color: var(--text-dark);
+  }
+  .post-sub {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .uni-badge {
+    padding: 1px 8px;
+    border-radius: 50px;
+    background: rgba(67,97,238,0.12);
+    color: var(--blue);
+    font-weight: 600;
+    font-size: 0.72rem;
+  }
+  .post-content {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-dark);
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 0.85rem;
+  }
+  .post-image {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 0.85rem;
+    max-height: 400px;
+    object-fit: cover;
+  }
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.85rem;
+  }
+  .tag-chip {
+    padding: 2px 10px;
+    border-radius: 50px;
+    background: var(--surface-2);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .tag-chip:hover { color: var(--blue); border-color: var(--blue); background: rgba(67,97,238,0.07); }
+
+  /* ── Post Actions ── */
+  .post-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--text-mid);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    font-family: inherit;
+  }
+  .action-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .action-btn.liked { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.06); }
+  .action-btn.danger:hover { border-color: #ef4444; color: #ef4444; }
+  .action-btn.comment-toggle { margin-left: auto; }
+
+  /* ── Comments ── */
+  .comments-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .comment-item {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+    align-items: flex-start;
+  }
+  .comment-avatar {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--grad-main);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .comment-bubble {
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 0.5rem 0.85rem;
+    flex: 1;
+    font-size: 0.87rem;
+    color: var(--text-dark);
+    line-height: 1.5;
+  }
+  .comment-author { font-weight: 700; font-size: 0.8rem; margin-bottom: 2px; color: var(--text-dark); }
+  .comment-time { font-size: 0.72rem; color: var(--text-light); }
+  .comment-form { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+  .comment-form input {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.85rem;
+    background: var(--surface-2);
+    color: var(--text-dark);
+    font-family: inherit;
+  }
+  .comment-form input:focus { outline: none; border-color: var(--blue); }
+
+  /* ── Empty State ── */
+  .wall-empty {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--text-light);
+  }
+  .wall-empty i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+
+  /* ── Dark Mode ── */
+  [data-theme="dark"] .create-card,
+  [data-theme="dark"] .post-card { box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+  [data-theme="dark"] .create-card textarea,
+  [data-theme="dark"] .create-card input[type="text"] { background: var(--surface); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wall-wrap">
+
+  <!-- Page Header -->
+  <div style="margin-bottom:1.5rem;">
+    <h1 style="font-size:1.75rem;font-weight:800;color:var(--text-dark);letter-spacing:-0.5px;margin:0 0 0.3rem;">
+      <i class="bi bi-journals" style="background:var(--grad-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+      Knowledge Wall
+    </h1>
+    <p style="color:var(--text-light);font-size:0.9rem;margin:0;">Share tips, tricks, and insights with students across Cebu universities.</p>
+  </div>
+
+  <!-- Create Post -->
+  <div class="create-card">
+    <form method="post" action="{% url 'create_post' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+        <div class="post-avatar" style="flex-shrink:0;">{{ me.username|slice:":1"|upper }}</div>
+        <textarea name="content" placeholder="Share something useful with your fellow students…" rows="3"></textarea>
+      </div>
+      <input type="text" name="tags" placeholder="#tags  (e.g. django, python, math)">
+      <div class="create-actions">
+        <label class="file-label">
+          <i class="bi bi-image"></i> Add Photo
+          <input type="file" name="image" accept="image/*" id="imgInput">
+        </label>
+        <span id="imgName" style="font-size:0.8rem;color:var(--text-light);"></span>
+        <button type="submit" class="btn-primary-grad" style="margin-left:auto;">
+          <i class="bi bi-send-fill"></i> Post
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <span style="font-size:0.82rem;font-weight:600;color:var(--text-light);">Filter:</span>
+    {% for code, name in university_choices %}
+    <a href="?university={{ code }}"
+       class="filter-chip {% if uni_filter == code %}active{% endif %}">{{ code }}</a>
+    {% endfor %}
+    {% if uni_filter or tag_filter %}
+    <a href="{% url 'wall' %}" class="filter-chip clear"><i class="bi bi-x"></i> Clear</a>
+    {% endif %}
+    {% if tag_filter %}
+    <span class="filter-chip active">#{{ tag_filter }}</span>
+    {% endif %}
+  </div>
+
+  <!-- Feed -->
+  {% if posts %}
+    {% for post in posts %}
+    <div class="post-card">
+      <!-- Header -->
+      <div class="post-header">
+        <div class="post-avatar">{{ post.author.username|slice:":1"|upper }}</div>
+        <div class="post-meta">
+          <div class="post-author">{{ post.author.username }}</div>
+          <div class="post-sub">
+            {% if post.university %}<span class="uni-badge">{{ post.university }}</span>{% endif %}
+            <span>{{ post.timestamp|timesince }} ago</span>
+          </div>
+        </div>
+        {% if post.author == me or me.is_staff %}
+        <form method="post" action="{% url 'delete_post' post.pk %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="action-btn danger"
+            onclick="return confirm('Delete this post?')" title="Delete post">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </form>
+        {% endif %}
+      </div>
+
+      <!-- Content -->
+      <div class="post-content">{{ post.content }}</div>
+
+      <!-- Image -->
+      {% if post.image %}
+      <img src="{{ post.image.url }}" alt="Post image" class="post-image">
+      {% endif %}
+
+      <!-- Tags -->
+      {% if post.tag_list %}
+      <div class="post-tags">
+        {% for tag in post.tag_list %}
+        <a href="?tag={{ tag }}" class="tag-chip">#{{ tag }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Actions -->
+      <div class="post-actions">
+        <!-- Like -->
+        <button class="action-btn like-btn {% if me in post.likes.all %}liked{% endif %}"
+          data-post="{{ post.pk }}"
+          data-liked="{% if me in post.likes.all %}1{% else %}0{% endif %}">
+          <i class="bi bi-heart{% if me in post.likes.all %}-fill{% endif %}"></i>
+          <span class="like-count">{{ post.likes.count }}</span>
+        </button>
+
+        <!-- Comment toggle -->
+        <button class="action-btn comment-toggle" onclick="toggleComments('{{ post.pk }}')">
+          <i class="bi bi-chat"></i> {{ post.comments.count }}
+          {% if post.comments.count == 1 %}comment{% else %}comments{% endif %}
+        </button>
+      </div>
+
+      <!-- Comments section -->
+      <div class="comments-section" id="comments-{{ post.pk }}" style="display:none;">
+        {% for comment in post.comments.all %}
+        <div class="comment-item">
+          <div class="comment-avatar">{{ comment.author.username|slice:":1"|upper }}</div>
+          <div class="comment-bubble">
+            <div class="comment-author">
+              {{ comment.author.username }}
+              <span class="comment-time">· {{ comment.timestamp|timesince }} ago</span>
+              {% if comment.author == me or me.is_staff %}
+              <form method="post" action="{% url 'delete_comment' comment.pk %}" style="display:inline;margin-left:4px;">
+                {% csrf_token %}
+                <button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.75rem;padding:0;" title="Delete comment">
+                  <i class="bi bi-x"></i>
+                </button>
+              </form>
+              {% endif %}
+            </div>
+            {{ comment.content }}
+          </div>
+        </div>
+        {% empty %}
+        <p style="color:var(--text-light);font-size:0.85rem;text-align:center;">No comments yet. Be the first!</p>
+        {% endfor %}
+
+        <!-- Add comment form -->
+        <form method="post" action="{% url 'add_comment' post.pk %}" class="comment-form">
+          {% csrf_token %}
+          <input type="text" name="content" placeholder="Write a comment…" required>
+          <button type="submit" class="action-btn" style="flex-shrink:0;">
+            <i class="bi bi-send"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="wall-empty">
+    <i class="bi bi-journals"></i>
+    <p style="font-size:1.1rem;font-weight:600;color:var(--text-dark);">No posts yet!</p>
+    <p style="font-size:0.9rem;">Be the first to share something useful with your fellow students.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ── Image filename preview ──
+document.getElementById('imgInput').addEventListener('change', function () {
+  const name = this.files[0]?.name || '';
+  document.getElementById('imgName').textContent = name ? `📎 ${name}` : '';
+});
+
+// ── Toggle comments ──
+function toggleComments(pk) {
+  const el = document.getElementById('comments-' + pk);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── Like button AJAX ──
+document.querySelectorAll('.like-btn').forEach(btn => {
+  btn.addEventListener('click', async function () {
+    const pk = this.dataset.post;
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    try {
+      const res = await fetch(`/wall/${pk}/like/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrf },
+      });
+      const data = await res.json();
+      const icon = this.querySelector('i');
+      const count = this.querySelector('.like-count');
+      if (data.liked) {
+        this.classList.add('liked');
+        icon.className = 'bi bi-heart-fill';
+      } else {
+        this.classList.remove('liked');
+        icon.className = 'bi bi-heart';
+      }
+      count.textContent = data.count;
+    } catch (e) { console.error(e); }
+  });
+});
+</script>
+{% endblock %}
