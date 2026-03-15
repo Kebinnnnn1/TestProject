@@ -280,7 +280,7 @@
 
   <!-- Create Post -->
   <div class="create-card">
-    <form method="post" action="{% url 'create_post' %}" enctype="multipart/form-data">
+    <form id="createPostForm" method="post" action="{% url 'create_post' %}" enctype="multipart/form-data">
       {% csrf_token %}
       <div style="display:flex;gap:0.75rem;align-items:flex-start;">
         <div class="post-avatar" style="flex-shrink:0;">{{ me.username|slice:":1"|upper }}</div>
@@ -317,6 +317,7 @@
 
   <!-- Feed -->
   {% if posts %}
+  <div id="wall-feed">
     {% for post in posts %}
     <div class="post-card">
       <!-- Header -->
@@ -400,7 +401,7 @@
         {% endfor %}
 
         <!-- Add comment form -->
-        <form method="post" action="{% url 'add_comment' post.pk %}" class="comment-form">
+        <form class="comment-form ajax-comment-form" data-post="{{ post.pk }}">
           {% csrf_token %}
           <input type="text" name="content" placeholder="Write a comment…" required>
           <button type="submit" class="action-btn" style="flex-shrink:0;">
@@ -410,8 +411,9 @@
       </div>
     </div>
     {% endfor %}
+  </div>
   {% else %}
-  <div class="wall-empty">
+  <div id="wall-empty" class="wall-empty">
     <i class="bi bi-journals"></i>
     <p style="font-size:1.1rem;font-weight:600;color:var(--text-dark);">No posts yet!</p>
     <p style="font-size:0.9rem;">Be the first to share something useful with your fellow students.</p>
@@ -423,10 +425,12 @@
 
 {% block extra_scripts %}
 <script>
+const ME = "{{ me.username }}";
+const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
+
 // ── Image filename preview ──
 document.getElementById('imgInput').addEventListener('change', function () {
-  const name = this.files[0]?.name || '';
-  document.getElementById('imgName').textContent = name ? `📎 ${name}` : '';
+  document.getElementById('imgName').textContent = this.files[0]?.name ? `📎 ${this.files[0].name}` : '';
 });
 
 // ── Toggle comments ──
@@ -435,15 +439,157 @@ function toggleComments(pk) {
   if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
+// ─────────────────────────────────────────────
+// BUILD POST CARD HTML from JSON data
+// ─────────────────────────────────────────────
+function buildPostCard(p) {
+  const initial = p.author[0].toUpperCase();
+  const uniBadge = p.university ? `<span class="uni-badge">${p.university}</span>` : '';
+  const deleteBtn = p.can_delete ? `
+    <form method="post" action="${p.delete_url}" style="margin:0;">
+      <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF()}">
+      <button type="submit" class="action-btn danger" onclick="return confirm('Delete this post?')" title="Delete post">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </form>` : '';
+  const tagsHtml = p.tags.length ? `<div class="post-tags">${p.tags.map(t => `<a href="?tag=${t}" class="tag-chip">#${t}</a>`).join('')}</div>` : '';
+  const imageHtml = p.image_url ? `<img src="${p.image_url}" alt="Post image" class="post-image">` : '';
+
+  return `
+  <div class="post-card" id="post-${p.pk}" style="animation:fadeInUp 0.4s ease both;">
+    <div class="post-header">
+      <div class="post-avatar">${initial}</div>
+      <div class="post-meta">
+        <div class="post-author">${p.author}</div>
+        <div class="post-sub">${uniBadge}<span>just now</span></div>
+      </div>
+      ${deleteBtn}
+    </div>
+    <div class="post-content">${p.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    ${imageHtml}
+    ${tagsHtml}
+    <div class="post-actions">
+      <button class="action-btn like-btn" data-post="${p.pk}" data-liked="0">
+        <i class="bi bi-heart"></i><span class="like-count">0</span>
+      </button>
+      <button class="action-btn comment-toggle" onclick="toggleComments('${p.pk}')">
+        <i class="bi bi-chat"></i> 0 comments
+      </button>
+    </div>
+    <div class="comments-section" id="comments-${p.pk}" style="display:none;">
+      <p style="color:var(--text-light);font-size:0.85rem;text-align:center;">No comments yet. Be the first!</p>
+      <form class="comment-form ajax-comment-form" data-post="${p.pk}">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF()}">
+        <input type="text" name="content" placeholder="Write a comment…" required>
+        <button type="submit" class="action-btn"><i class="bi bi-send"></i></button>
+      </form>
+    </div>
+  </div>`;
+}
+
+// ── AJAX: Create Post ──
+document.getElementById('createPostForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const form = this;
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Posting…';
+
+  try {
+    const fd = new FormData(form);
+    const res = await fetch(form.action, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd,
+    });
+    const data = await res.json();
+    if (data.ok) {
+      const feed = document.getElementById('wall-feed');
+      const emptyState = document.getElementById('wall-empty');
+      if (emptyState) emptyState.remove();
+      feed.insertAdjacentHTML('afterbegin', buildPostCard(data.post));
+      bindLikeBtn(feed.querySelector(`#post-${data.post.pk} .like-btn`));
+      bindCommentForm(feed.querySelector(`#post-${data.post.pk} .ajax-comment-form`));
+      form.reset();
+      document.getElementById('imgName').textContent = '';
+    } else {
+      alert(data.error || 'Could not create post.');
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-send-fill"></i> Post';
+  }
+});
+
+// ─────────────────────────────────────────────
+// BUILD COMMENT HTML from JSON data
+// ─────────────────────────────────────────────
+function buildCommentHTML(c) {
+  const initial = c.author[0].toUpperCase();
+  const deleteBtn = c.can_delete ? `
+    <form method="post" action="${c.delete_url}" style="display:inline;margin-left:4px;">
+      <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF()}">
+      <button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.75rem;padding:0;" title="Delete comment">
+        <i class="bi bi-x"></i>
+      </button>
+    </form>` : '';
+  return `
+  <div class="comment-item" id="comment-${c.pk}">
+    <div class="comment-avatar">${initial}</div>
+    <div class="comment-bubble">
+      <div class="comment-author">${c.author} <span class="comment-time">· just now</span>${deleteBtn}</div>
+      ${c.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+    </div>
+  </div>`;
+}
+
+// ── AJAX: Add Comment ──
+function bindCommentForm(form) {
+  if (!form) return;
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const postPk = this.dataset.post;
+    const input = this.querySelector('input[name=content]');
+    if (!input.value.trim()) return;
+
+    try {
+      const fd = new FormData(this);
+      const res = await fetch(`/wall/${postPk}/comment/`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd,
+      });
+      const data = await res.json();
+      if (data.ok) {
+        const section = document.getElementById('comments-' + postPk);
+        // Remove "no comments yet" placeholder if present
+        const placeholder = section.querySelector('p');
+        if (placeholder) placeholder.remove();
+        // Insert new comment before the form
+        this.insertAdjacentHTML('beforebegin', buildCommentHTML(data.comment));
+        // Update comment count button
+        const toggleBtn = document.querySelector(`#post-${postPk} .comment-toggle`);
+        if (toggleBtn) {
+          const count = section.querySelectorAll('.comment-item').length;
+          toggleBtn.innerHTML = `<i class="bi bi-chat"></i> ${count} ${count === 1 ? 'comment' : 'comments'}`;
+        }
+        input.value = '';
+      }
+    } catch (err) { console.error(err); }
+  });
+}
+
 // ── Like button AJAX ──
-document.querySelectorAll('.like-btn').forEach(btn => {
+function bindLikeBtn(btn) {
+  if (!btn) return;
   btn.addEventListener('click', async function () {
     const pk = this.dataset.post;
-    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
     try {
       const res = await fetch(`/wall/${pk}/like/`, {
         method: 'POST',
-        headers: { 'X-CSRFToken': csrf },
+        headers: { 'X-CSRFToken': CSRF() },
       });
       const data = await res.json();
       const icon = this.querySelector('i');
@@ -456,8 +602,12 @@ document.querySelectorAll('.like-btn').forEach(btn => {
         icon.className = 'bi bi-heart';
       }
       count.textContent = data.count;
-    } catch (e) { console.error(e); }
+    } catch (err) { console.error(err); }
   });
-});
+}
+
+// Bind to all existing like buttons and comment forms on page load
+document.querySelectorAll('.like-btn').forEach(bindLikeBtn);
+document.querySelectorAll('.ajax-comment-form').forEach(bindCommentForm);
 </script>
 {% endblock %}

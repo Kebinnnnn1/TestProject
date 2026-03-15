@@ -553,20 +553,39 @@ class WallView(View):
 @login_required(login_url='/login/')
 @require_POST
 def create_post(request):
-    """Create a new wall post."""
+    """Create a new wall post. Returns JSON for AJAX calls."""
     content = request.POST.get('content', '').strip()
     tags    = request.POST.get('tags', '').strip()
     image   = request.FILES.get('image')
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if not content:
+        if is_ajax:
+            return JsonResponse({'ok': False, 'error': 'Post content cannot be empty.'}, status=400)
         messages.error(request, 'Post content cannot be empty.')
         return redirect('wall')
-    Post.objects.create(
+    post = Post.objects.create(
         author=request.user,
         content=content,
         tags=tags,
         image=image,
         university=request.user.university,
     )
+    if is_ajax:
+        return JsonResponse({
+            'ok': True,
+            'post': {
+                'pk':         post.pk,
+                'author':     request.user.username,
+                'content':    post.content,
+                'tags':       post.tag_list(),
+                'university': post.university,
+                'image_url':  post.image.url if post.image else '',
+                'can_delete': True,
+                'delete_url': f'/wall/{post.pk}/delete/',
+                'like_url':   f'/wall/{post.pk}/like/',
+                'comment_url':f'/wall/{post.pk}/comment/',
+            }
+        })
     return redirect('wall')
 
 
@@ -597,11 +616,26 @@ def like_post(request, pk):
 @login_required(login_url='/login/')
 @require_POST
 def add_comment(request, pk):
-    """Add a comment to a wall post."""
+    """Add a comment to a wall post. Returns JSON for AJAX calls."""
     post    = get_object_or_404(Post, pk=pk)
     content = request.POST.get('content', '').strip()
-    if content:
-        PostComment.objects.create(post=post, author=request.user, content=content)
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    if not content:
+        if is_ajax:
+            return JsonResponse({'ok': False, 'error': 'Empty comment.'}, status=400)
+        return redirect('wall')
+    comment = PostComment.objects.create(post=post, author=request.user, content=content)
+    if is_ajax:
+        return JsonResponse({
+            'ok': True,
+            'comment': {
+                'pk':         comment.pk,
+                'author':     request.user.username,
+                'content':    comment.content,
+                'can_delete': True,
+                'delete_url': f'/wall/comment/{comment.pk}/delete/',
+            }
+        })
     return redirect('wall')
 
 
