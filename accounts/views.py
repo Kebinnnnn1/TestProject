@@ -643,8 +643,11 @@ def create_post(request):
 @login_required(login_url='/login/')
 @require_POST
 def delete_post(request, pk):
-    """Delete own post."""
-    post = get_object_or_404(Post, pk=pk)
+    """Delete own post. Silently redirect if post not found."""
+    try:
+        post = Post.objects.get(pk=pk)
+    except Post.DoesNotExist:
+        return redirect('wall')
     if post.author == request.user or request.user.is_staff:
         post.delete()
     return redirect('wall')
