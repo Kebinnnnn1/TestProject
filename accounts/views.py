@@ -677,7 +677,7 @@ def like_post(request, pk):
 @login_required(login_url='/login/')
 @require_POST
 def add_comment(request, pk):
-    """Add a comment to a wall post. Returns JSON for AJAX calls."""
+    """Add a comment/reply to a wall post. Returns JSON for AJAX calls."""
     post    = get_object_or_404(Post, pk=pk)
     content = request.POST.get('content', '').strip()
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -685,16 +685,29 @@ def add_comment(request, pk):
         if is_ajax:
             return JsonResponse({'ok': False, 'error': 'Empty comment.'}, status=400)
         return redirect('wall')
+    # Detect reply: content starts with @username
+    is_reply = content.startswith('@')
     comment = PostComment.objects.create(post=post, author=request.user, content=content)
-    # Broadcast to all users on the wall channel
+    pusher_payload = {
+        'post_pk':    post.pk,
+        'pk':         comment.pk,
+        'author':     request.user.username,
+        'content':    comment.content,
+        'is_reply':   is_reply,
+        'delete_url': f'/wall/comment/{comment.pk}/delete/',
+    }
     try:
-        _pusher_client().trigger('wall', 'new-comment', {
-            'post_pk':    post.pk,
-            'pk':         comment.pk,
-            'author':     request.user.username,
-            'content':    comment.content,
-            'delete_url': f'/wall/comment/{comment.pk}/delete/',
-        })
+        pc = _pusher_client()
+        # Broadcast to all users on the wall feed
+        pc.trigger('wall', 'new-comment', pusher_payload)
+        # Notify the post author privately (if it's not their own comment)
+        if post.author != request.user:
+            pc.trigger(f'user-notif-{post.author.pk}', 'wall-reply', {
+                'post_pk':  post.pk,
+                'author':   request.user.username,
+                'preview':  comment.content[:60],
+                'is_reply': is_reply,
+            })
     except Exception:
         pass
     if is_ajax:
@@ -702,8 +715,10 @@ def add_comment(request, pk):
             'ok': True,
             'comment': {
                 'pk':         comment.pk,
+                'post_pk':    post.pk,
                 'author':     request.user.username,
                 'content':    comment.content,
+                'is_reply':   is_reply,
                 'can_delete': True,
                 'delete_url': f'/wall/comment/{comment.pk}/delete/',
             }

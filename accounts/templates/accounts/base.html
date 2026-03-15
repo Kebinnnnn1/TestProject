@@ -1119,7 +1119,34 @@
           });
         }
       });
+
+      // ── Wall comment/reply notification for post owner ──
+      _ch.bind('wall-reply', function (data) {
+        const verb = data.is_reply ? 'replied on' : 'commented on';
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position:fixed; bottom:24px; right:24px; z-index:9999;
+          background:var(--card-bg,#1e1e2e); border:1.5px solid var(--border,#333);
+          border-radius:14px; padding:14px 18px; max-width:300px;
+          box-shadow:0 8px 32px rgba(0,0,0,0.35);
+          animation: slideUp 0.3s ease; cursor:pointer;
+          display:flex; align-items:flex-start; gap:10px;
+        `;
+        toast.innerHTML = `
+          <span style="font-size:1.3rem;">💬</span>
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;color:var(--text-dark,#fff);margin-bottom:2px;">
+              <strong>${data.author}</strong> ${verb} your post
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-light,#aaa);">${data.preview}</div>
+            <a href="/wall/" style="font-size:0.75rem;color:#3b82f6;font-weight:600;text-decoration:none;">View post →</a>
+          </div>`;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.4s'; setTimeout(() => toast.remove(), 400); }, 5000);
+        toast.onclick = () => { window.location.href = '/wall/'; };
+      });
     })();
+
     {% endif %}
   </script>
   {% block extra_scripts %}{% endblock %}

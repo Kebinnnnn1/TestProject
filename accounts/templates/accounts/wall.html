@@ -274,8 +274,6 @@
   .reply-form {
     display: none;
     margin-top: 6px;
-    margin-left: 36px;
-    display: none;
   }
   .reply-form.open { display: flex; gap: 0.5rem; }
   .reply-form input {
@@ -289,20 +287,34 @@
     font-family: inherit;
   }
   .reply-form input:focus { outline: none; border-color: var(--blue); }
-  .reply-item {
-    display: flex; gap: 0.5rem;
-    margin-top: 0.4rem;
-    margin-left: 36px;
-    align-items: flex-start;
+
+  /* ── Threaded Reply Item ── */
+  .comment-item.is-reply {
+    margin-left: 40px;
+    margin-top: 0.3rem;
+    position: relative;
   }
-  .reply-avatar {
-    width: 24px; height: 24px;
-    border-radius: 6px;
-    background: var(--grad-main);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.65rem; font-weight: 700; color: #fff;
-    flex-shrink: 0;
+  .comment-item.is-reply::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: var(--border);
+    border-radius: 2px;
   }
+  .comment-item.is-reply .comment-avatar {
+    width: 26px; height: 26px;
+    font-size: 0.65rem;
+    border-radius: 7px;
+  }
+  .reply-quote {
+    font-size: 0.72rem;
+    color: var(--text-light);
+    margin-bottom: 2px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .reply-quote i { font-size: 0.7rem; }
   .reply-bubble {
     background: var(--surface-2);
     border-radius: 8px;
@@ -930,9 +942,16 @@ document.getElementById('createPostForm').addEventListener('submit', async funct
 // ─────────────────────────────────────────────
 // BUILD COMMENT HTML from JSON data
 // ─────────────────────────────────────────────
-function buildCommentHTML(c) {
+function buildCommentHTML(c, tempId) {
   const initial = c.author[0].toUpperCase();
-  const replyFormId = `reply-form-ajax-${c.pk}`;
+  const replyFormId = `reply-form-ajax-${c.pk || tempId}`;
+  const isReplyClass = c.is_reply ? 'is-reply' : '';
+  const replyQuote = c.is_reply ? (() => {
+    // Extract @username from content
+    const match = c.content.match(/^@(\S+)/);
+    const replyTo = match ? match[1] : '';
+    return replyTo ? `<div class="reply-quote"><i class="bi bi-reply-fill"></i> Replying to <strong>@${replyTo}</strong></div>` : '';
+  })() : '';
   const deleteBtn = c.can_delete ? `
     <form method="post" action="${c.delete_url}" style="display:inline;margin-left:4px;">
       <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF()}">
@@ -940,10 +959,12 @@ function buildCommentHTML(c) {
         <i class="bi bi-x"></i>
       </button>
     </form>` : '';
+  const idAttr = c.pk ? `id="comment-${c.pk}"` : `id="${tempId}"`;
   return `
-  <div class="comment-item" id="comment-${c.pk}">
+  <div class="comment-item ${isReplyClass}" ${idAttr}>
     <div class="comment-avatar">${initial}</div>
     <div class="comment-bubble" style="flex:1;">
+      ${replyQuote}
       <div class="comment-author">${c.author} <span class="comment-time">· just now</span>${deleteBtn}</div>
       ${c.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}
       <button class="reply-btn" onclick="toggleReply('${replyFormId}', '${c.author}')">
@@ -958,18 +979,43 @@ function buildCommentHTML(c) {
   </div>`;
 }
 
-
-// ── AJAX: Add Comment ──
+// ── AJAX: Add Comment (with Optimistic UI) ──
 function bindCommentForm(form) {
   if (!form) return;
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     const postPk = this.dataset.post;
     const input = this.querySelector('input[name=content]');
-    if (!input.value.trim()) return;
+    const content = input.value.trim();
+    if (!content) return;
+
+    // ─ Optimistic: show comment immediately ─
+    const tempId = 'comment-temp-' + Date.now();
+    const optimistic = {
+      pk: null, post_pk: postPk, author: ME,
+      content, is_reply: content.startsWith('@'),
+      can_delete: false, delete_url: ''
+    };
+    const section = document.getElementById('comments-' + postPk);
+    const placeholder = section ? section.querySelector('p') : null;
+    if (placeholder) placeholder.remove();
+    this.insertAdjacentHTML('beforebegin', buildCommentHTML(optimistic, tempId));
+    input.value = '';
+    // Close reply form if it's a reply form
+    if (this.classList.contains('reply-form')) {
+      this.classList.remove('open');
+      this.style.display = 'none';
+    }
+    // Update toggle count immediately
+    const toggleBtn = document.getElementById('comment-toggle-' + postPk);
+    if (toggleBtn && section) {
+      const count = section.querySelectorAll('.comment-item').length;
+      toggleBtn.innerHTML = `<i class="bi bi-chat"></i> ${count} ${count === 1 ? 'comment' : 'comments'}`;
+    }
 
     try {
       const fd = new FormData(this);
+      fd.set('content', content);
       const res = await fetch(`/wall/${postPk}/comment/`, {
         method: 'POST',
         headers: { 'X-Requested-With': 'XMLHttpRequest' },
@@ -977,31 +1023,41 @@ function bindCommentForm(form) {
       });
       const data = await res.json();
       if (data.ok) {
-        const section = document.getElementById('comments-' + postPk);
-        const placeholder = section.querySelector('p');
-        if (placeholder) placeholder.remove();
-        this.insertAdjacentHTML('beforebegin', buildCommentHTML(data.comment));
-        // Bind the reply form in the newly added comment
-        const newCommentEl = document.getElementById('comment-' + data.comment.pk);
-        if (newCommentEl) {
-          const replyFrm = newCommentEl.querySelector('.ajax-comment-form');
-          if (replyFrm) bindCommentForm(replyFrm);
+        // Patch the optimistic element with real data (pk, delete button)
+        const tempEl = document.getElementById(tempId);
+        if (tempEl) {
+          data.comment.can_delete = true;
+          const realHtml = buildCommentHTML(data.comment, tempId);
+          tempEl.outerHTML = realHtml;
+          // Bind reply form in real element
+          const realEl = document.getElementById('comment-' + data.comment.pk);
+          if (realEl) {
+            const replyFrm = realEl.querySelector('.ajax-comment-form');
+            if (replyFrm) bindCommentForm(replyFrm);
+          }
         }
-        const toggleBtn = document.getElementById('comment-toggle-' + postPk);
-        if (toggleBtn) {
-          const count = section.querySelectorAll('.comment-item').length;
-          toggleBtn.innerHTML = `<i class="bi bi-chat"></i> ${count} ${count === 1 ? 'comment' : 'comments'}`;
-        }
-        input.value = '';
         // Sync with modal if open
-        if (modalPostPk === postPk) {
+        if (String(modalPostPk) === String(postPk)) {
           const mc = document.getElementById('modalComments');
-          if (mc) { const p = mc.querySelector('p'); if(p) p.remove(); mc.insertAdjacentHTML('beforeend', buildCommentHTML(data.comment)); }
+          if (mc) {
+            const mp = mc.querySelector('p'); if (mp) mp.remove();
+            mc.insertAdjacentHTML('beforeend', buildCommentHTML(data.comment));
+          }
         }
+      } else {
+        // Revert on error
+        const tempEl = document.getElementById(tempId);
+        if (tempEl) tempEl.remove();
+        alert(data.error || 'Could not post comment.');
       }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+      const tempEl = document.getElementById(tempId);
+      if (tempEl) tempEl.remove();
+    }
   });
 }
+
 
 // ── Like button AJAX ──
 function bindLikeBtn(btn) {
