@@ -123,12 +123,8 @@ class ResendVerificationView(View):
         try:
             user = CustomUser.objects.get(email__iexact=email)
         except CustomUser.DoesNotExist:
-            # Don't reveal whether the email exists — show the same success msg
-            messages.success(
-                request,
-                'If that email is registered and unverified, a new link has been sent.'
-            )
-            return redirect('login')
+            messages.error(request, 'No account found with that email address.')
+            return render(request, 'accounts/resend_verification.html')
 
         if user.is_verified:
             messages.info(request, 'This account is already verified. You can log in.')
