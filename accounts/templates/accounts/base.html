@@ -4,7 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Convertly{% endblock %}</title>
+  <title>{% block title %}Converly{% endblock %}</title>
+  {% load static %}
+  <link rel="icon" type="image/svg+xml" href="{% static 'accounts/favicon.svg' %}">
   <meta name="description"
     content="{% block meta_description %}Convertly — Convert files quickly and easily. Free, instant, and private.{% endblock %}">
 
@@ -226,11 +228,13 @@
       transition: all 0.2s;
       font-size: 1.2rem;
     }
+
     .hamburger-btn:hover {
       border-color: var(--blue);
       color: var(--blue);
       background: var(--surface-3);
     }
+
     .hamburger-dot {
       position: absolute;
       top: 5px;
@@ -242,9 +246,19 @@
       border: 2px solid var(--surface-2);
       animation: pulse-dot 1.8s infinite;
     }
+
     @keyframes pulse-dot {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.3); opacity: 0.7; }
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+      }
     }
 
     /* ─── Slide Menu ─── */
@@ -253,12 +267,24 @@
       position: fixed;
       inset: 0;
       z-index: 1998;
-      background: rgba(0,0,0,0.45);
+      background: rgba(0, 0, 0, 0.45);
       backdrop-filter: blur(2px);
       animation: fadeIn 0.2s ease;
     }
-    .menu-overlay.open { display: block; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .menu-overlay.open {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
 
     .slide-menu {
       position: fixed;
@@ -276,7 +302,10 @@
       padding: 0;
       overflow-y: auto;
     }
-    .slide-menu.open { right: 0; }
+
+    .slide-menu.open {
+      right: 0;
+    }
 
     .slide-menu-header {
       padding: 1.25rem 1.25rem 1rem;
@@ -285,11 +314,13 @@
       align-items: center;
       justify-content: space-between;
     }
+
     .slide-menu-user {
       display: flex;
       align-items: center;
       gap: 10px;
     }
+
     .slide-menu-avatar {
       width: 36px;
       height: 36px;
@@ -302,11 +333,13 @@
       font-weight: 700;
       font-size: 0.9rem;
     }
+
     .slide-menu-username {
       font-weight: 600;
       font-size: 0.9rem;
       color: var(--text-dark);
     }
+
     .slide-menu-close {
       background: none;
       border: none;
@@ -317,12 +350,16 @@
       border-radius: 8px;
       transition: color 0.2s;
     }
-    .slide-menu-close:hover { color: var(--text-dark); }
+
+    .slide-menu-close:hover {
+      color: var(--text-dark);
+    }
 
     .slide-menu-links {
       flex: 1;
       padding: 0.75rem 0;
     }
+
     .slide-nav-link {
       display: flex;
       align-items: center;
@@ -335,11 +372,18 @@
       transition: background 0.15s, color 0.15s;
       position: relative;
     }
+
     .slide-nav-link:hover {
       background: var(--surface-2);
       color: var(--blue);
     }
-    .slide-nav-link i { font-size: 1rem; width: 20px; text-align: center; }
+
+    .slide-nav-link i {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+    }
+
     .slide-notif-dot {
       width: 8px;
       height: 8px;
@@ -349,6 +393,7 @@
       flex-shrink: 0;
       animation: pulse-dot 1.8s infinite;
     }
+
     .slide-menu-footer {
       padding: 1rem 1.25rem;
       border-top: 1px solid var(--border);
@@ -873,13 +918,18 @@
       {% if user.is_authenticated %}
       <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
-        <button type="submit" style="width:100%;display:flex;align-items:center;gap:10px;padding:0.7rem 1rem;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);font-weight:500;font-size:0.92rem;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-mid)'">
+        <button type="submit"
+          style="width:100%;display:flex;align-items:center;gap:10px;padding:0.7rem 1rem;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);font-weight:500;font-size:0.92rem;cursor:pointer;transition:all 0.2s;"
+          onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-mid)'">
           <i class="bi bi-box-arrow-right"></i> Sign Out
         </button>
       </form>
       {% else %}
-      <a href="{% url 'login' %}" class="btn-nav-outline nav-link" style="display:block;text-align:center;margin-bottom:0.5rem;">Sign In</a>
-      <a href="{% url 'register' %}" class="btn-nav-primary nav-link" style="display:block;text-align:center;">Get Started</a>
+      <a href="{% url 'login' %}" class="btn-nav-outline nav-link"
+        style="display:block;text-align:center;margin-bottom:0.5rem;">Sign In</a>
+      <a href="{% url 'register' %}" class="btn-nav-primary nav-link" style="display:block;text-align:center;">Get
+        Started</a>
       {% endif %}
     </div>
   </div>
@@ -962,10 +1012,10 @@
     });
 
     // ─── Hamburger Slide Menu ───
-    const menuToggle  = document.getElementById('menuToggle');
-    const menuClose   = document.getElementById('menuClose');
+    const menuToggle = document.getElementById('menuToggle');
+    const menuClose = document.getElementById('menuClose');
     const menuOverlay = document.getElementById('menuOverlay');
-    const slideMenu   = document.getElementById('slideMenu');
+    const slideMenu = document.getElementById('slideMenu');
 
     function openMenu() {
       slideMenu.classList.add('open');
@@ -977,8 +1027,8 @@
       menuOverlay.classList.remove('open');
       document.body.style.overflow = '';
     }
-    if (menuToggle)  menuToggle.addEventListener('click', openMenu);
-    if (menuClose)   menuClose.addEventListener('click', closeMenu);
+    if (menuToggle) menuToggle.addEventListener('click', openMenu);
+    if (menuClose) menuClose.addEventListener('click', closeMenu);
     if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
 
     // ─── Global Scroll-Reveal (Intersection Observer) ───
@@ -1001,7 +1051,7 @@
 
     // ─── Live DM badge via Pusher ───
     {% if user.is_authenticated and pusher_key %}
-    (function() {
+    (function () {
       const PK = "{{ pusher_key }}";
       const PC = "{{ pusher_cluster }}";
       const UID = "{{ user.pk }}";
@@ -1011,7 +1061,7 @@
       const _ch = _p.subscribe('user-notif-' + UID);
       const hamburgerBtn = document.getElementById('menuToggle');
 
-      _ch.bind('new-dm', function() {
+      _ch.bind('new-dm', function () {
         // Show red dot on hamburger if not already there
         if (hamburgerBtn && !hamburgerBtn.querySelector('.hamburger-dot')) {
           const dot = document.createElement('span');
@@ -1022,7 +1072,7 @@
         const msgLink = document.querySelector('.slide-menu-links .slide-notif-dot');
         if (!msgLink) {
           const links = document.querySelectorAll('.slide-nav-link');
-          links.forEach(function(l) {
+          links.forEach(function (l) {
             if (l.textContent.trim().startsWith('Messages') && !l.querySelector('.slide-notif-dot')) {
               const d = document.createElement('span');
               d.className = 'slide-notif-dot';
