@@ -1018,8 +1018,21 @@
     function refreshWallBadge() {
       try {
         const n = parseInt(localStorage.getItem('wall_unseen') || '0');
+        // Nav link pill
         const badge = document.getElementById('wall-nav-badge');
         if (badge) { badge.textContent = n; badge.style.display = n > 0 ? 'inline-flex' : 'none'; }
+        // Hamburger dot — same red dot used for DM notifications
+        const hamburger = document.getElementById('menuToggle');
+        if (hamburger) {
+          let dot = hamburger.querySelector('.hamburger-dot');
+          if (n > 0 && !dot) {
+            dot = document.createElement('span');
+            dot.className = 'hamburger-dot';
+            hamburger.appendChild(dot);
+          } else if (n === 0 && dot) {
+            dot.remove();
+          }
+        }
       } catch(e) {}
     }
     refreshWallBadge();

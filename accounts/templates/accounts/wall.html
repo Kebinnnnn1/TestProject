@@ -262,6 +262,56 @@
   }
   .comment-form input:focus { outline: none; border-color: var(--blue); }
 
+  /* ── Reply Button & Form ── */
+  .reply-btn {
+    background: none; border: none; color: var(--text-light);
+    font-size: 0.75rem; font-weight: 600; cursor: pointer;
+    padding: 2px 6px; border-radius: 6px; margin-top: 4px;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: color 0.2s;
+  }
+  .reply-btn:hover { color: var(--blue); }
+  .reply-form {
+    display: none;
+    margin-top: 6px;
+    margin-left: 36px;
+    display: none;
+  }
+  .reply-form.open { display: flex; gap: 0.5rem; }
+  .reply-form input {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.82rem;
+    background: var(--surface-2);
+    color: var(--text-dark);
+    font-family: inherit;
+  }
+  .reply-form input:focus { outline: none; border-color: var(--blue); }
+  .reply-item {
+    display: flex; gap: 0.5rem;
+    margin-top: 0.4rem;
+    margin-left: 36px;
+    align-items: flex-start;
+  }
+  .reply-avatar {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    background: var(--grad-main);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .reply-bubble {
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.82rem;
+    color: var(--text-dark);
+    line-height: 1.45;
+  }
+
   /* ── Image Grid (multi-image posts) ── */
   .post-image-grid {
     display: grid;
@@ -406,6 +456,9 @@
           <i class="bi bi-image"></i> Add Photos / GIF
           <input type="file" name="images" accept="image/*,.gif" id="imgInput" multiple>
         </label>
+        <button type="button" id="removeFilesBtn" onclick="clearFiles()" style="display:none; background:none; border:1.5px solid #ef4444; border-radius:8px; color:#ef4444; padding:0.35rem 0.75rem; font-size:0.8rem; cursor:pointer; align-items:center; gap:4px;">
+          <i class="bi bi-x-circle"></i> Remove
+        </button>
         <span id="imgName" style="font-size:0.8rem;color:var(--text-light);"></span>
         <button type="submit" class="btn-primary-grad" style="margin-left:auto;">
           <i class="bi bi-send-fill"></i> Post
@@ -513,9 +566,9 @@
       <!-- Comments section -->
       <div class="comments-section" id="comments-{{ post.pk }}" style="display:none;">
         {% for comment in post.comments.all %}
-        <div class="comment-item">
+        <div class="comment-item" id="comment-{{ comment.pk }}">
           <div class="comment-avatar">{{ comment.author.username|slice:":1"|upper }}</div>
-          <div class="comment-bubble">
+          <div class="comment-bubble" style="flex:1;">
             <div class="comment-author">
               {{ comment.author.username }}
               <span class="comment-time">· {{ comment.timestamp|timesince }} ago</span>
@@ -529,6 +582,14 @@
               {% endif %}
             </div>
             {{ comment.content }}
+            <button class="reply-btn" onclick="toggleReply('reply-form-{{ comment.pk }}', '{{ comment.author.username }}')">
+              <i class="bi bi-reply"></i> Reply
+            </button>
+            <form class="reply-form ajax-comment-form" id="reply-form-{{ comment.pk }}" data-post="{{ post.pk }}" style="display:none;">
+              {% csrf_token %}
+              <input type="text" name="content" placeholder="Replying to @{{ comment.author.username }}…" required>
+              <button type="submit" class="action-btn" style="flex-shrink:0;"><i class="bi bi-send"></i></button>
+            </form>
           </div>
         </div>
         {% empty %}
@@ -559,7 +620,7 @@
 
 <!-- ── Post Modal ── -->
 <div id="postModalBackdrop" class="post-modal-backdrop" style="display:none;" onclick="closeModalOnBackdrop(event)">
-  <div class="post-modal" id="postModal">
+  <div class="post-modal" id="postModal" onclick="event.stopPropagation()">
     <div class="post-modal-header">
       <div style="display:flex;align-items:center;gap:0.6rem;">
         <div class="post-avatar" id="modalAvatar"></div>
@@ -597,10 +658,12 @@ const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
 document.getElementById('imgInput').addEventListener('change', function () {
   const grid = document.getElementById('imgPreviewGrid');
   const label = document.getElementById('imgName');
+  const removeBtn = document.getElementById('removeFilesBtn');
   grid.innerHTML = '';
   const files = Array.from(this.files);
-  if (!files.length) { label.textContent = ''; return; }
+  if (!files.length) { label.textContent = ''; removeBtn.style.display = 'none'; return; }
   label.textContent = `📎 ${files.length} file${files.length > 1 ? 's' : ''} selected`;
+  removeBtn.style.display = 'inline-flex';
   files.forEach(f => {
     const reader = new FileReader();
     reader.onload = e => {
@@ -612,18 +675,42 @@ document.getElementById('imgInput').addEventListener('change', function () {
   });
 });
 
+// ── Clear files ──
+function clearFiles() {
+  document.getElementById('imgInput').value = '';
+  document.getElementById('imgName').textContent = '';
+  document.getElementById('imgPreviewGrid').innerHTML = '';
+  document.getElementById('removeFilesBtn').style.display = 'none';
+}
+
 // ── Toggle comments ──
 function toggleComments(pk) {
   const el = document.getElementById('comments-' + pk);
   if (!el) return;
   const isOpen = el.style.display !== 'none';
   el.style.display = isOpen ? 'none' : 'block';
-  // Clear comment badge when opening
   if (!isOpen) {
     const btn = document.getElementById('comment-toggle-' + pk);
     if (btn) { const b = btn.querySelector('.comment-new-badge'); if (b) b.remove(); }
   }
 }
+
+// ── Toggle reply form ──
+function toggleReply(formId, username) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+  const isOpen = form.classList.contains('open') || form.style.display === 'flex';
+  if (isOpen) {
+    form.classList.remove('open');
+    form.style.display = 'none';
+  } else {
+    form.classList.add('open');
+    form.style.display = 'flex';
+    const input = form.querySelector('input[name=content]');
+    if (input) { input.focus(); if (!input.value) input.value = `@${username} `; }
+  }
+}
+
 
 // ─────────────────────────────────────────────
 // POST MODAL
@@ -845,6 +932,7 @@ document.getElementById('createPostForm').addEventListener('submit', async funct
 // ─────────────────────────────────────────────
 function buildCommentHTML(c) {
   const initial = c.author[0].toUpperCase();
+  const replyFormId = `reply-form-ajax-${c.pk}`;
   const deleteBtn = c.can_delete ? `
     <form method="post" action="${c.delete_url}" style="display:inline;margin-left:4px;">
       <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF()}">
@@ -855,12 +943,21 @@ function buildCommentHTML(c) {
   return `
   <div class="comment-item" id="comment-${c.pk}">
     <div class="comment-avatar">${initial}</div>
-    <div class="comment-bubble">
+    <div class="comment-bubble" style="flex:1;">
       <div class="comment-author">${c.author} <span class="comment-time">· just now</span>${deleteBtn}</div>
       ${c.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+      <button class="reply-btn" onclick="toggleReply('${replyFormId}', '${c.author}')">
+        <i class="bi bi-reply"></i> Reply
+      </button>
+      <form class="reply-form ajax-comment-form" id="${replyFormId}" data-post="${c.post_pk}" style="display:none;">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF()}">
+        <input type="text" name="content" placeholder="Replying to @${c.author}…" required>
+        <button type="submit" class="action-btn" style="flex-shrink:0;"><i class="bi bi-send"></i></button>
+      </form>
     </div>
   </div>`;
 }
+
 
 // ── AJAX: Add Comment ──
 function bindCommentForm(form) {
@@ -884,6 +981,12 @@ function bindCommentForm(form) {
         const placeholder = section.querySelector('p');
         if (placeholder) placeholder.remove();
         this.insertAdjacentHTML('beforebegin', buildCommentHTML(data.comment));
+        // Bind the reply form in the newly added comment
+        const newCommentEl = document.getElementById('comment-' + data.comment.pk);
+        if (newCommentEl) {
+          const replyFrm = newCommentEl.querySelector('.ajax-comment-form');
+          if (replyFrm) bindCommentForm(replyFrm);
+        }
         const toggleBtn = document.getElementById('comment-toggle-' + postPk);
         if (toggleBtn) {
           const count = section.querySelectorAll('.comment-item').length;
