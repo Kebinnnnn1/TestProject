@@ -867,88 +867,6 @@
         {% endfor %}
     </div>
 </div>
-
-<section class="features-section">
-    <div class="container">
-        <div class="text-center mb-5">
-            <div class="tag-gradient mb-3"><i class="bi bi-stars"></i> Everything in Clink</div>
-            <h2 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;">
-                Students. Knowledge. <span class="text-grad">Connection.</span>
-            </h2>
-            <p style="color: var(--text-light); max-width: 480px; margin: 1rem auto 0; line-height: 1.7;">
-                From private messaging to shared notes and instant file conversion — Clink is the all-in-one hub for Cebu university students.
-            </p>
-        </div>
-
-        <div class="row g-4">
-            <!-- PRIMARY: Chat -->
-            <div class="col-md-6 col-lg-4">
-                <div class="feature-card">
-                    <div class="feature-icon"
-                        style="background: linear-gradient(135deg, rgba(78,124,63,0.18), rgba(139,191,124,0.08));">
-                        <i class="bi bi-chat-dots-fill" style="color: var(--blue);"></i>
-                    </div>
-                    <h5>Private Messaging</h5>
-                    <p>Send real-time direct messages to any student on Clink. Powered by Pusher for instant delivery — no refreshing needed.</p>
-                </div>
-            </div>
-            <!-- PRIMARY: Knowledge Wall -->
-            <div class="col-md-6 col-lg-4">
-                <div class="feature-card">
-                    <div class="feature-icon"
-                        style="background: linear-gradient(135deg, rgba(46,92,35,0.16), rgba(78,124,63,0.08));">
-                        <i class="bi bi-newspaper" style="color: var(--purple);"></i>
-                    </div>
-                    <h5>Knowledge Wall</h5>
-                    <p>Post study tips, notes and insights. Like and comment on posts from students across all Cebu universities — your shared campus feed.</p>
-                </div>
-            </div>
-            <!-- PRIMARY: Random Match -->
-            <div class="col-md-6 col-lg-4">
-                <div class="feature-card">
-                    <div class="feature-icon"
-                        style="background: linear-gradient(135deg, rgba(139,191,124,0.18), rgba(168,212,154,0.08));">
-                        <i class="bi bi-shuffle" style="color: var(--orange);"></i>
-                    </div>
-                    <h5>Random Connections</h5>
-                    <p>Discover students you'd never meet otherwise. Match by university or go global — every click is a new connection waiting to happen.</p>
-                </div>
-            </div>
-            <!-- SECONDARY: Converter -->
-            <div class="col-md-6 col-lg-4">
-                <div class="feature-card">
-                    <div class="feature-icon"
-                        style="background: linear-gradient(135deg, rgba(139,191,124,0.18), rgba(168,212,154,0.08));">
-                        <i class="bi bi-file-earmark-image-fill" style="color: var(--orange);"></i>
-                    </div>
-                    <h5>Image Conversion</h5>
-                    <p>Convert between JPG, PNG, WEBP, and BMP instantly using your browser's Canvas API. Zero quality loss on lossless formats.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="feature-card">
-                    <div class="feature-icon"
-                        style="background: linear-gradient(135deg, rgba(78,124,63,0.16), rgba(107,153,96,0.08));">
-                        <i class="bi bi-file-earmark-pdf-fill" style="color: var(--blue);"></i>
-                    </div>
-                    <h5>Image → PDF</h5>
-                    <p>Turn any image into a perfectly sized PDF document in one click. Great for sharing study materials as documents.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="feature-card">
-                    <div class="feature-icon"
-                        style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(52,211,153,0.08));">
-                        <i class="bi bi-shield-lock-fill" style="color: #10b981;"></i>
-                    </div>
-                    <h5>100% Private Conversion</h5>
-                    <p>Your files never leave your device. All conversions happen in your browser using Web APIs — no uploads, ever.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- ── Converter Highlight Section ── -->
 <section style="padding: 5rem 0; background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
     <div class="container">
@@ -1031,6 +949,87 @@
         <h2>Join Clink for free.</h2>
         <p>Connect with students across Cebu universities, share your knowledge, chat in real time, and convert files — all in one place. No installation needed.</p>
         <a href="{% url 'register' %}" class="btn-cta-white">
+<section class="features-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="tag-gradient mb-3"><i class="bi bi-stars"></i> Everything in Clink</div>
+            <h2 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;">
+                Students. Knowledge. <span class="text-grad">Connection.</span>
+            </h2>
+            <p style="color: var(--text-light); max-width: 480px; margin: 1rem auto 0; line-height: 1.7;">
+                From private messaging to shared notes and instant file conversion — Clink is the all-in-one hub for Cebu university students.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- PRIMARY: Chat -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(78,124,63,0.18), rgba(139,191,124,0.08));">
+                        <i class="bi bi-chat-dots-fill" style="color: var(--blue);"></i>
+                    </div>
+                    <h5>Private Messaging</h5>
+                    <p>Send real-time direct messages to any student on Clink. Powered by Pusher for instant delivery — no refreshing needed.</p>
+                </div>
+            </div>
+            <!-- PRIMARY: Knowledge Wall -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(46,92,35,0.16), rgba(78,124,63,0.08));">
+                        <i class="bi bi-newspaper" style="color: var(--purple);"></i>
+                    </div>
+                    <h5>Knowledge Wall</h5>
+                    <p>Post study tips, notes and insights. Like and comment on posts from students across all Cebu universities — your shared campus feed.</p>
+                </div>
+            </div>
+            <!-- PRIMARY: Random Match -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(139,191,124,0.18), rgba(168,212,154,0.08));">
+                        <i class="bi bi-shuffle" style="color: var(--orange);"></i>
+                    </div>
+                    <h5>Random Connections</h5>
+                    <p>Discover students you'd never meet otherwise. Match by university or go global — every click is a new connection waiting to happen.</p>
+                </div>
+            </div>
+            <!-- SECONDARY: Converter -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(139,191,124,0.18), rgba(168,212,154,0.08));">
+                        <i class="bi bi-file-earmark-image-fill" style="color: var(--orange);"></i>
+                    </div>
+                    <h5>Image Conversion</h5>
+                    <p>Convert between JPG, PNG, WEBP, and BMP instantly using your browser's Canvas API. Zero quality loss on lossless formats.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(78,124,63,0.16), rgba(107,153,96,0.08));">
+                        <i class="bi bi-file-earmark-pdf-fill" style="color: var(--blue);"></i>
+                    </div>
+                    <h5>Image → PDF</h5>
+                    <p>Turn any image into a perfectly sized PDF document in one click. Great for sharing study materials as documents.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(52,211,153,0.08));">
+                        <i class="bi bi-shield-lock-fill" style="color: #10b981;"></i>
+                    </div>
+                    <h5>100% Private Conversion</h5>
+                    <p>Your files never leave your device. All conversions happen in your browser using Web APIs — no uploads, ever.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
             <i class="bi bi-rocket-takeoff-fill"></i> Create Free Account
         </a>
     </div>
