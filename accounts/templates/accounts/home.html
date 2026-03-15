@@ -1,7 +1,6 @@
 {% extends 'accounts/base.html' %}
-{% block title %}Clink — Convert Files & Connect Cebu Universities{% endblock %}
-{% block meta_description %}Clink helps you convert files and connect with students across Cebu universities. Upload a file, choose your format, and
-download the converted version in seconds. No installations.{% endblock %}
+{% block title %}Clink — Chat, Share & Connect Across Cebu Universities{% endblock %}
+{% block meta_description %}Clink connects Cebu university students through real-time private chat, a shared Knowledge Wall, and instant file conversion — all free, all in your browser.{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -723,19 +722,21 @@ download the converted version in seconds. No installations.{% endblock %}
             <div class="col-lg-6 hero-content">
                 <div class="hero-badge">
                     <span class="dot"></span>
-                    Free forever • No uploads to servers
+                    Built for Cebu University Students
                 </div>
                 <h1 class="hero-title">
-                    Convert files<br>
-                    <span class="text-grad">in seconds.</span>
+                    Connect, share &amp;<br>
+                    <span class="text-grad">learn together.</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Upload a file, choose the format you need, and download the converted version instantly.
-                    No complicated tools, no installations, no account needed to try.
+                    Clink brings Cebu university students together — real-time private chats, a shared Knowledge Wall to post insights, and instant file conversion, all in one free platform.
                 </p>
                 <div class="hero-actions">
-                    <a href="{% url 'converter' %}" class="btn-primary-grad">
-                        <i class="bi bi-arrow-repeat"></i> Start Converting
+                    <a href="{% url 'wall' %}" class="btn-primary-grad">
+                        <i class="bi bi-newspaper"></i> Knowledge Wall
+                    </a>
+                    <a href="{% url 'chat_inbox' %}" class="btn-secondary-outline">
+                        <i class="bi bi-chat-dots-fill"></i> Start Chatting
                     </a>
                     {% if not user.is_authenticated %}
                     <a href="{% url 'register' %}" class="btn-secondary-outline">
@@ -751,101 +752,98 @@ download the converted version in seconds. No installations.{% endblock %}
                         <div class="av av-4">TL</div>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-mid); margin: 0;">
-                        <strong style="color: var(--text-dark);">5,000+ conversions</strong> done this month
+                        <strong style="color: var(--text-dark);">1,200+ students</strong> connected across Cebu
                     </p>
                 </div>
             </div>
 
-            <!-- Dashboard Mockup -->
+            <!-- Chat + Wall Mockup -->
             <div class="col-lg-6 hero-content">
                 <div class="hero-visual" style="position: relative; padding: 40px 50px 40px 50px;">
-                    <!-- Floating card 1 -->
+                    <!-- Floating card: online users -->
                     <div class="float-card float-card-1">
                         <div class="float-icon"
                             style="background: linear-gradient(135deg, rgba(78,124,63,0.15), rgba(78,124,63,0.05));">
-                            <i class="bi bi-file-earmark-arrow-up-fill" style="color: var(--blue);"></i>
+                            <i class="bi bi-people-fill" style="color: var(--blue);"></i>
                         </div>
-                        <div class="float-label">Privacy</div>
-                        <div class="float-value" style="font-size: 0.95rem; color: #16a34a;">100% Local</div>
-                        <div class="float-sub" style="color: var(--text-light);">No server uploads</div>
+                        <div class="float-label">Online Now</div>
+                        <div class="float-value">42</div>
+                        <div class="float-sub" style="color:#16a34a;">↑ 12 since yesterday</div>
                     </div>
-                    <!-- Floating card 2 -->
+                    <!-- Floating card: wall posts -->
                     <div class="float-card float-card-2">
                         <div class="float-icon"
                             style="background: linear-gradient(135deg, rgba(139,191,124,0.18), rgba(139,191,124,0.06));">
-                            <i class="bi bi-arrow-repeat" style="color: var(--orange);"></i>
+                            <i class="bi bi-journal-richtext" style="color: var(--orange);"></i>
                         </div>
-                        <div class="float-label">Conversions</div>
-                        <div class="float-value">5,200</div>
-                        <div class="float-sub change-up"><i class="bi bi-arrow-up-short"></i>+18% today</div>
-                    </div>
-                    <!-- Floating card 3 -->
-                    <div class="float-card float-card-3">
-                        <div class="float-label">Formats</div>
-                        <div class="float-value">8+</div>
-                        <div class="float-sub change-up"><i class="bi bi-arrow-up-short"></i>Always free</div>
+                        <div class="float-label">Wall Posts</div>
+                        <div class="float-value">318</div>
+                        <div class="float-sub change-up"><i class="bi bi-arrow-up-short"></i>+24 today</div>
                     </div>
 
-                    <!-- Main dashboard card -->
+                    <!-- Main: chat window mockup -->
                     <div class="dashboard-card">
                         <div class="dashboard-header">
                             <div class="dot-red"></div>
                             <div class="dot-yellow"></div>
                             <div class="dot-green"></div>
-                            <span
-                                style="margin-left: auto; font-size: 0.75rem; font-weight: 600; color: var(--text-light);">Clink
-                                Dashboard</span>
+                            <span style="margin-left:8px;font-size:0.8rem;font-weight:600;color:var(--text-mid);">Clink — Messages</span>
                         </div>
                         <div class="dashboard-body">
+                            <!-- Stats row -->
                             <div class="stat-row">
                                 <div class="stat-chip">
-                                    <div class="label">Users</div>
-                                    <div class="value text-grad">1,247</div>
-                                    <div class="change change-up"><i class="bi bi-arrow-up-short"></i> +8.4%</div>
+                                    <div class="label">Chats</div>
+                                    <div class="value text-grad">847</div>
+                                    <div class="change change-up"><i class="bi bi-arrow-up-short"></i> +18%</div>
                                 </div>
                                 <div class="stat-chip">
-                                    <div class="label">Verified</div>
-                                    <div class="value">98.2%</div>
-                                    <div class="change change-up"><i class="bi bi-arrow-up-short"></i> +1.2%</div>
+                                    <div class="label">Posts</div>
+                                    <div class="value">318</div>
+                                    <div class="change change-up"><i class="bi bi-arrow-up-short"></i> +24</div>
                                 </div>
                                 <div class="stat-chip">
-                                    <div class="label">Active</div>
-                                    <div class="value">1,189</div>
-                                    <div class="change change-down"><i class="bi bi-arrow-down-short"></i> 2</div>
+                                    <div class="label">Univs.</div>
+                                    <div class="value">5</div>
+                                    <div class="change change-up"><i class="bi bi-arrow-up-short"></i> Linked</div>
                                 </div>
                             </div>
-                            <!-- Mini bar chart -->
-                            <div
-                                style="font-size: 0.72rem; font-weight: 600; color: var(--text-light); margin-bottom: 0.3rem; text-transform: uppercase;">
-                                Registrations this week</div>
-                            <div class="mini-chart">
-                                <div class="bar" style="height: 30%;"></div>
-                                <div class="bar" style="height: 55%;"></div>
-                                <div class="bar accent" style="height: 70%;"></div>
-                                <div class="bar" style="height: 45%;"></div>
-                                <div class="bar" style="height: 80%;"></div>
-                                <div class="bar accent" style="height: 90%;"></div>
-                                <div class="bar" style="height: 65%;"></div>
+                            <!-- Chat bubbles -->
+                            <div style="font-size:0.72rem;font-weight:600;color:var(--text-light);margin-bottom:0.4rem;text-transform:uppercase;">Recent Messages</div>
+                            <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:0.5rem;">
+                                <div class="user-av av-1" style="width:26px;height:26px;font-size:0.62rem;flex-shrink:0;">JD</div>
+                                <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px 12px 12px 3px;padding:0.5rem 0.75rem;font-size:0.8rem;color:var(--text-dark);max-width:80%;">
+                                    Hey! Check the Knowledge Wall 🔥
+                                </div>
                             </div>
-                            <!-- Users -->
-                            <div
-                                style="font-size: 0.72rem; font-weight: 600; color: var(--text-light); margin: 1rem 0 0.3rem; text-transform: uppercase;">
-                                Recent Users</div>
+                            <div style="display:flex;justify-content:flex-end;margin-bottom:0.5rem;">
+                                <div style="background:var(--grad-main);border-radius:12px 12px 3px 12px;padding:0.5rem 0.75rem;font-size:0.8rem;color:#fff;max-width:80%;">
+                                    Found great CTU notes there 🎯
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:0.7rem;">
+                                <div class="user-av av-2" style="width:26px;height:26px;font-size:0.62rem;flex-shrink:0;">AK</div>
+                                <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:12px 12px 12px 3px;padding:0.5rem 0.75rem;font-size:0.8rem;color:var(--text-dark);max-width:80%;">
+                                    Can you convert it to PDF?
+                                </div>
+                            </div>
+                            <!-- Wall activity -->
+                            <div style="font-size:0.72rem;font-weight:600;color:var(--text-light);margin-bottom:0.3rem;text-transform:uppercase;">Wall Activity</div>
                             <div class="user-row-mini">
-                                <div class="user-av av-1">JD</div>
+                                <div class="user-av av-1">SR</div>
                                 <div>
-                                    <div class="uname">john_doe</div>
-                                    <div class="uemail">john@example.com</div>
+                                    <div class="uname">Posted: "Data Structures Final Tips"</div>
+                                    <div class="uemail">SWU · 2 min ago</div>
                                 </div>
-                                <div class="status-dot" style="background: #22c55e; box-shadow: 0 0 4px #22c55e;"></div>
+                                <div class="status-dot" style="background:#22c55e;box-shadow:0 0 4px #22c55e;"></div>
                             </div>
-                            <div class="user-row-mini" style="margin-top: 0.4rem;">
-                                <div class="user-av av-2">AK</div>
+                            <div class="user-row-mini" style="margin-top:0.4rem;">
+                                <div class="user-av av-3">TL</div>
                                 <div>
-                                    <div class="uname">alex_k</div>
-                                    <div class="uemail">alex@example.com</div>
+                                    <div class="uname">Liked: "React Hooks Cheatsheet"</div>
+                                    <div class="uemail">CTU · 5 min ago</div>
                                 </div>
-                                <div class="status-dot" style="background: #22c55e; box-shadow: 0 0 4px #22c55e;"></div>
+                                <div class="status-dot" style="background:#22c55e;box-shadow:0 0 4px #22c55e;"></div>
                             </div>
                         </div>
                     </div>
@@ -859,12 +857,13 @@ download the converted version in seconds. No installations.{% endblock %}
 <div class="feature-strip">
     <div class="strip-inner">
         {% for item in ",,,,,,,,,,,,,,,,,,,,,,,,"|make_list %}
+        <span class="strip-item"><i class="bi bi-chat-dots-fill"></i> Real-time Chat</span>
+        <span class="strip-item"><i class="bi bi-newspaper"></i> Knowledge Wall</span>
+        <span class="strip-item"><i class="bi bi-shuffle"></i> Random Match</span>
         <span class="strip-item"><i class="bi bi-file-earmark-image-fill"></i> PNG → JPG</span>
         <span class="strip-item"><i class="bi bi-file-earmark-pdf-fill"></i> Image → PDF</span>
-        <span class="strip-item"><i class="bi bi-arrow-repeat"></i> PDF → PNG</span>
-        <span class="strip-item"><i class="bi bi-shield-lock-fill"></i> No Server Uploads</span>
-        <span class="strip-item"><i class="bi bi-lightning-fill"></i> Instant Conversion</span>
-        <span class="strip-item"><i class="bi bi-eye-slash-fill"></i> 100% Private</span>
+        <span class="strip-item"><i class="bi bi-shield-lock-fill"></i> 100% Private</span>
+        <span class="strip-item"><i class="bi bi-mortarboard-fill"></i> Cebu Universities</span>
         {% endfor %}
     </div>
 </div>
@@ -872,16 +871,50 @@ download the converted version in seconds. No installations.{% endblock %}
 <section class="features-section">
     <div class="container">
         <div class="text-center mb-5">
-            <div class="tag-gradient mb-3"><i class="bi bi-stars"></i> Why Clink</div>
+            <div class="tag-gradient mb-3"><i class="bi bi-stars"></i> Everything in Clink</div>
             <h2 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;">
-                Fast, free, and <span class="text-grad">totally private.</span>
+                Students. Knowledge. <span class="text-grad">Connection.</span>
             </h2>
             <p style="color: var(--text-light); max-width: 480px; margin: 1rem auto 0; line-height: 1.7;">
-                No complicated software. No subscriptions. Just upload, convert, and download.
+                From private messaging to shared notes and instant file conversion — Clink is the all-in-one hub for Cebu university students.
             </p>
         </div>
 
         <div class="row g-4">
+            <!-- PRIMARY: Chat -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(78,124,63,0.18), rgba(139,191,124,0.08));">
+                        <i class="bi bi-chat-dots-fill" style="color: var(--blue);"></i>
+                    </div>
+                    <h5>Private Messaging</h5>
+                    <p>Send real-time direct messages to any student on Clink. Powered by Pusher for instant delivery — no refreshing needed.</p>
+                </div>
+            </div>
+            <!-- PRIMARY: Knowledge Wall -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(46,92,35,0.16), rgba(78,124,63,0.08));">
+                        <i class="bi bi-newspaper" style="color: var(--purple);"></i>
+                    </div>
+                    <h5>Knowledge Wall</h5>
+                    <p>Post study tips, notes and insights. Like and comment on posts from students across all Cebu universities — your shared campus feed.</p>
+                </div>
+            </div>
+            <!-- PRIMARY: Random Match -->
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"
+                        style="background: linear-gradient(135deg, rgba(139,191,124,0.18), rgba(168,212,154,0.08));">
+                        <i class="bi bi-shuffle" style="color: var(--orange);"></i>
+                    </div>
+                    <h5>Random Connections</h5>
+                    <p>Discover students you'd never meet otherwise. Match by university or go global — every click is a new connection waiting to happen.</p>
+                </div>
+            </div>
+            <!-- SECONDARY: Converter -->
             <div class="col-md-6 col-lg-4">
                 <div class="feature-card">
                     <div class="feature-icon"
@@ -889,8 +922,7 @@ download the converted version in seconds. No installations.{% endblock %}
                         <i class="bi bi-file-earmark-image-fill" style="color: var(--orange);"></i>
                     </div>
                     <h5>Image Conversion</h5>
-                    <p>Convert between JPG, PNG, WEBP, and BMP instantly using your browser's Canvas API. Zero quality
-                        loss on lossless formats.</p>
+                    <p>Convert between JPG, PNG, WEBP, and BMP instantly using your browser's Canvas API. Zero quality loss on lossless formats.</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
@@ -900,19 +932,7 @@ download the converted version in seconds. No installations.{% endblock %}
                         <i class="bi bi-file-earmark-pdf-fill" style="color: var(--blue);"></i>
                     </div>
                     <h5>Image → PDF</h5>
-                    <p>Turn any image into a perfectly sized PDF document in one click. Great for sharing photos as
-                        documents.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="feature-card">
-                    <div class="feature-icon"
-                        style="background: linear-gradient(135deg, rgba(46,92,35,0.16), rgba(78,124,63,0.08));">
-                        <i class="bi bi-file-earmark-break-fill" style="color: var(--purple);"></i>
-                    </div>
-                    <h5>PDF → Image</h5>
-                    <p>Extract the first page of any PDF as a high-resolution PNG or JPG. Powered by PDF.js right in
-                        your browser.</p>
+                    <p>Turn any image into a perfectly sized PDF document in one click. Great for sharing study materials as documents.</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-4">
@@ -921,31 +941,8 @@ download the converted version in seconds. No installations.{% endblock %}
                         style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(52,211,153,0.08));">
                         <i class="bi bi-shield-lock-fill" style="color: #10b981;"></i>
                     </div>
-                    <h5>100% Private</h5>
-                    <p>Your files never leave your device. All conversions happen in your browser using Web APIs — no
-                        uploads, ever.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="feature-card">
-                    <div class="feature-icon"
-                        style="background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.08));">
-                        <i class="bi bi-lightning-fill" style="color: #f59e0b;"></i>
-                    </div>
-                    <h5>Instant Results</h5>
-                    <p>No waiting for server queues. Conversion starts the moment you click — small files convert in
-                        under a second.</p>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-                <div class="feature-card">
-                    <div class="feature-icon"
-                        style="background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(248,113,113,0.06));">
-                        <i class="bi bi-infinity" style="color: #ef4444;"></i>
-                    </div>
-                    <h5>Always Free</h5>
-                    <p>No limits, no subscriptions, no credit card. Clink is completely free to use as many times as
-                        you want.</p>
+                    <h5>100% Private Conversion</h5>
+                    <p>Your files never leave your device. All conversions happen in your browser using Web APIs — no uploads, ever.</p>
                 </div>
             </div>
         </div>
@@ -956,18 +953,17 @@ download the converted version in seconds. No installations.{% endblock %}
 {% if not user.is_authenticated %}
 <div class="container">
     <div class="cta-section">
-        <h2>Start converting for free.</h2>
-        <p>Join thousands of students who use Clink to convert files and connect across Cebu universities — no installations, no limits.</p>
+        <h2>Join Clink for free.</h2>
+        <p>Connect with students across Cebu universities, share your knowledge, chat in real time, and convert files — all in one place. No installation needed.</p>
         <a href="{% url 'register' %}" class="btn-cta-white">
             <i class="bi bi-rocket-takeoff-fill"></i> Create Free Account
         </a>
     </div>
 </div>
-{% endif %}
 
-<div style="padding-bottom: 4rem;"></div>
 
 {% endblock %}
+
 
 {% block extra_scripts %}
 <script>
