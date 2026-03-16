@@ -750,9 +750,77 @@
       } else { if(inp)inp.value=text; alert(d.error||'Could not post comment.'); }
     } catch(e){console.error('Comment error:',e);if(inp)inp.value=text;}
   });
+  // toggleComments - open/close comment section
+  window.toggleComments = function(pk) {
+    var el = document.getElementById('comments-' + pk);
+    if (!el) return;
+    var isOpen = el.style.display !== 'none';
+    el.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) {
+      var btn = document.getElementById('comment-toggle-' + pk);
+      if (btn) { var b = btn.querySelector('.comment-new-badge'); if (b) b.remove(); }
+    }
+  };
+
+  // openPostModal - show post in modal overlay
+  window.openPostModal = function(pk) {
+    var card = document.getElementById('post-' + pk);
+    if (!card) return;
+    window.modalPostPk = pk;
+    var author = (card.querySelector('.post-author') || {}).textContent || '';
+    var el;
+    el = document.getElementById('modalAvatar'); if(el) el.textContent = author[0] ? author[0].toUpperCase() : '?';
+    el = document.getElementById('modalAuthor'); if(el) el.textContent = author;
+    el = document.getElementById('modalMeta');   if(el) el.innerHTML = (card.querySelector('.post-sub')||{}).innerHTML || '';
+    el = document.getElementById('modalContent'); if(el) el.textContent = (card.querySelector('.post-content')||{}).textContent || '';
+    var imgEl = document.getElementById('modalImages');
+    if (imgEl) { imgEl.innerHTML = ''; var sg = card.querySelector('.post-image-grid'); if(sg){var cl=sg.cloneNode(true);cl.style.cursor='default';imgEl.appendChild(cl);} }
+    var tagsEl = document.getElementById('modalTags');
+    if(tagsEl) tagsEl.innerHTML = (card.querySelector('.post-tags')||{}).outerHTML || '';
+    var mc = document.getElementById('modalComments');
+    if(mc) {
+      mc.innerHTML = '';
+      var sec = document.getElementById('comments-' + pk);
+      if(sec) { sec.querySelectorAll('.comment-item').forEach(function(ci){ mc.appendChild(ci.cloneNode(true)); }); }
+      if(!mc.innerHTML.trim()) mc.innerHTML = '<p style="color:var(--text-light);font-size:0.85rem;text-align:center;">No comments yet. Be the first!</p>';
+    }
+    var csrf = document.getElementById('modalCsrf'); if(csrf) csrf.value = csrfToken();
+    var inp = document.getElementById('modalCommentInput'); if(inp) inp.value = '';
+    var bd = document.getElementById('postModalBackdrop'); if(bd) bd.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closePostModal = function() {
+    var bd = document.getElementById('postModalBackdrop'); if(bd) bd.style.display = 'none';
+    document.body.style.overflow = '';
+    window.modalPostPk = null;
+  };
+
+  document.addEventListener('keydown', function(e) { if(e.key==='Escape') window.closePostModal && window.closePostModal(); });
+
+  // Modal comment form submit
+  var mcf = document.getElementById('modalCommentForm');
+  if (mcf) mcf.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!window.modalPostPk) return;
+    var inp = document.getElementById('modalCommentInput');
+    var text = inp ? inp.value.trim() : '';
+    if (!text) return;
+    var fd = new FormData(); fd.append('content', text); fd.append('csrfmiddlewaretoken', csrfToken());
+    try {
+      var res = await fetch('/wall/' + window.modalPostPk + '/comment/', {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'},body:fd});
+      var d = await res.json();
+      if (d.ok) {
+        if(inp) inp.value = '';
+        var mc = document.getElementById('modalComments');
+        if(mc){ var p=mc.querySelector('p');if(p)p.remove();
+          mc.insertAdjacentHTML('beforeend','<div class="comment-item"><div class="comment-avatar">'+d.comment.author[0].toUpperCase()+'</div><div class="comment-bubble" style="flex:1;"><div class="comment-author">'+d.comment.author+'<span class="comment-time"> &middot; just now</span></div>'+d.comment.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div></div>');}
+      }
+    } catch(err) { console.error('Modal comment error:', err); }
+  });
+
   console.log('[Wall] Critical event delegation ready.');
-})();
-</script>
+})();</script>
 {# Script 2: Full wall functionality #}
 <script>
 const ME = "{{ me.username }}";
