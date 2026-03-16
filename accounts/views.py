@@ -591,25 +591,31 @@ def wall_posts(request):
     me      = request.user
 
     def serialize_post(p):
+        def safe_url(field):
+            try:
+                return field.url if field and str(field) else ''
+            except Exception:
+                return ''
         imgs = list(p.extra_images.all())
-        image_urls = [pi.image.url for pi in imgs]
-        if p.image:
-            image_urls.insert(0, p.image.url)
+        image_urls = [safe_url(pi.image) for pi in imgs if safe_url(pi.image)]
+        primary = p.image_url  # uses the safe property on Post
+        if primary:
+            image_urls.insert(0, primary)
         return {
-            'pk':         p.pk,
-            'author':     p.author.username,
-            'university': p.university or '',
-            'content':    p.content,
-            'tags':       p.tag_list,
-            'timestamp':  p.timestamp.isoformat(),
-            'image_url':  p.image.url if p.image else '',
-            'image_urls': image_urls,
-            'like_count': p.likes.count(),
-            'liked':      me in p.likes.all(),
-            'can_delete': p.author == me or me.is_staff,
-            'delete_url': f'/wall/{p.pk}/delete/',
-            'like_url':   f'/wall/{p.pk}/like/',
-            'comment_url':f'/wall/{p.pk}/comment/',
+            'pk':          p.pk,
+            'author':      p.author.username,
+            'university':  p.university or '',
+            'content':     p.content,
+            'tags':        p.tag_list(),
+            'timestamp':   p.timestamp.isoformat(),
+            'image_url':   primary,
+            'image_urls':  image_urls,
+            'like_count':  p.likes.count(),
+            'liked':       me in p.likes.all(),
+            'can_delete':  p.author == me or me.is_staff,
+            'delete_url':  f'/wall/{p.pk}/delete/',
+            'like_url':    f'/wall/{p.pk}/like/',
+            'comment_url': f'/wall/{p.pk}/comment/',
             'comment_count': p.comments.count(),
         }
 
