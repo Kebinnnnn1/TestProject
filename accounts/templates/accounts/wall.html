@@ -706,7 +706,8 @@
 {% block extra_scripts %}
 <script>
 const ME = "{{ me.username }}";
-const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
+const CSRF = () => (document.querySelector('meta[name=csrf-token]') || document.querySelector('[name=csrfmiddlewaretoken]'))?.content || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
 
 // ── Multi-image preview thumbnails ──
 document.getElementById('imgInput').addEventListener('change', function () {
