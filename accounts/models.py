@@ -90,6 +90,16 @@ class Post(models.Model):
     def tag_list(self):
         return [t.strip() for t in self.tags.split(',') if t.strip()]
 
+    @property
+    def image_url(self):
+        """Returns the Cloudinary URL safely, or empty string if no image."""
+        try:
+            if self.image and str(self.image):
+                return self.image.url
+        except Exception:
+            pass
+        return ''
+
 
 class PostComment(models.Model):
     """A comment on a Wall post."""

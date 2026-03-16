@@ -660,7 +660,7 @@ def create_post(request):
         pi = PostImage.objects.create(post=post, image=f, order=i)
         extra_urls.append(pi.image.url)
 
-    image_urls = ([post.image.url] if post.image else []) + extra_urls
+    image_urls = ([post.image_url] if post.image_url else []) + extra_urls
 
     # Broadcast to all users on the wall channel
     pusher_payload = {
@@ -669,7 +669,8 @@ def create_post(request):
         'content':    post.content,
         'tags':       post.tag_list(),
         'university': post.university,
-        'image_url':  post.image.url if post.image else '',
+        'image_url':  post.image_url,
+
         'image_urls': image_urls,
         'delete_url': f'/wall/{post.pk}/delete/',
         'like_url':   f'/wall/{post.pk}/like/',
@@ -688,7 +689,7 @@ def create_post(request):
                 'content':    post.content,
                 'tags':       post.tag_list(),
                 'university': post.university,
-                'image_url':  post.image.url if post.image else '',
+                'image_url':  post.image_url,
                 'image_urls': image_urls,
                 'can_delete': True,
                 'delete_url': f'/wall/{post.pk}/delete/',

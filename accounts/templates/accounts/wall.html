@@ -556,10 +556,10 @@
 
         <!-- Image Grid -->
         {% with imgs=post.extra_images.all %}
-        {% if post.image or imgs %}
-        <div class="post-image-grid {% if not imgs and post.image %}single{% endif %}" onclick="openPostModal('{{ post.pk }}')">
-          {% if post.image %}
-          <img src="{{ post.image.url }}" alt="Post image" loading="lazy">
+        {% if post.image_url or imgs %}
+        <div class="post-image-grid {% if not imgs and post.image_url %}single{% endif %}" onclick="openPostModal('{{ post.pk }}')">
+          {% if post.image_url %}
+          <img src="{{ post.image_url }}" alt="Post image" loading="lazy">
           {% endif %}
           {% for pi in imgs|slice:":3" %}
           <img src="{{ pi.image.url }}" alt="Post image" loading="lazy">
