@@ -710,7 +710,7 @@ const CSRF = () => (document.querySelector('meta[name=csrf-token]') || document.
 
 
 // ── Multi-image preview thumbnails ──
-document.getElementById('imgInput').addEventListener('change', function () {
+;(document.getElementById('imgInput') || {addEventListener:()=>{}}).addEventListener('change', function () {
   const grid = document.getElementById('imgPreviewGrid');
   const label = document.getElementById('imgName');
   const removeBtn = document.getElementById('removeFilesBtn');
@@ -842,7 +842,7 @@ function closeModalOnBackdrop(e) {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePostModal(); });
 
 // Modal comment form submit
-document.getElementById('modalCommentForm').addEventListener('submit', async function (e) {
+;(document.getElementById('modalCommentForm') || {addEventListener:()=>{}}).addEventListener('submit', async function (e) {
   e.preventDefault();
   if (!modalPostPk) return;
   const input = document.getElementById('modalCommentInput');
@@ -941,7 +941,8 @@ function buildPostCard(p) {
 }
 
 // ── AJAX: Create Post ──
-document.getElementById('createPostForm').addEventListener('submit', async function (e) {
+;(document.getElementById('createPostForm') || {addEventListener:()=>{}}).addEventListener('submit', async function (e) {
+
   e.preventDefault();
   const form = this;
   const btn = form.querySelector('button[type=submit]');
