@@ -704,10 +704,59 @@
 {% endblock %}
 
 {% block extra_scripts %}
+{# Critical Script 1: event delegation - runs independently #}
+<script>
+(function() {
+  'use strict';
+  function csrfToken() {
+    var el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+  }
+  // Like buttons via event delegation
+  document.addEventListener('click', async function(ev) {
+    var btn = ev.target.closest && ev.target.closest('.like-btn');
+    if (!btn) return;
+    ev.stopPropagation();
+    var pk = btn.dataset.post;
+    if (!pk) return;
+    btn.disabled = true;
+    try {
+      var res = await fetch('/wall/' + pk + '/like/', {method:'POST', headers:{'X-CSRFToken':csrfToken()}});
+      var d = await res.json();
+      var ic = btn.querySelector('i'), ct = btn.querySelector('.like-count');
+      if (d.liked) { btn.classList.add('liked'); if(ic) ic.className='bi bi-heart-fill'; }
+      else         { btn.classList.remove('liked'); if(ic) ic.className='bi bi-heart'; }
+      if(ct) ct.textContent = d.count;
+    } catch(e){console.error('Like error:',e);} finally{btn.disabled=false;}
+  });
+  // Comment forms via event delegation
+  document.addEventListener('submit', async function(ev) {
+    var form = ev.target.closest && ev.target.closest('.ajax-comment-form');
+    if (!form) return;
+    ev.preventDefault();
+    var pk = form.dataset.post, inp = form.querySelector('input[name=content]');
+    var text = inp ? inp.value.trim() : '';
+    if (!text || !pk) return;
+    var tok = (form.querySelector('[name=csrfmiddlewaretoken]')||{value:csrfToken()}).value;
+    if(inp) inp.value = '';
+    try {
+      var fd = new FormData(); fd.append('content',text); fd.append('csrfmiddlewaretoken',tok);
+      var res = await fetch('/wall/'+pk+'/comment/', {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'},body:fd});
+      var d = await res.json();
+      if (d.ok) {
+        var c = d.comment, sec = document.getElementById('comments-'+pk);
+        if(sec){var pl=sec.querySelector('p');if(pl)pl.remove();
+          form.insertAdjacentHTML('beforebegin','<div class="comment-item" id="comment-'+c.pk+'"><div class="comment-avatar">'+c.author[0].toUpperCase()+'</div><div class="comment-bubble" style="flex:1;"><div class="comment-author">'+c.author+'<span class="comment-time"> &middot; just now</span></div>'+c.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div></div>');}
+      } else { if(inp)inp.value=text; alert(d.error||'Could not post comment.'); }
+    } catch(e){console.error('Comment error:',e);if(inp)inp.value=text;}
+  });
+  console.log('[Wall] Critical event delegation ready.');
+})();
+</script>
+{# Script 2: Full wall functionality #}
 <script>
 const ME = "{{ me.username }}";
-const CSRF = () => (document.querySelector('meta[name=csrf-token]') || document.querySelector('[name=csrfmiddlewaretoken]'))?.content || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-
+const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
 // ── Multi-image preview thumbnails ──
 ;(document.getElementById('imgInput') || {addEventListener:()=>{}}).addEventListener('change', function () {
