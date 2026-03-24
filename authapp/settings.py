@@ -14,13 +14,14 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-producti
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 # Also allow all Vercel preview/production domains automatically
-ALLOWED_HOSTS += ['.vercel.app']
+ALLOWED_HOSTS += ['.vercel.app', '.culink.me']
 
 # CSRF: allow form submissions from Vercel HTTPS domains
 CSRF_TRUSTED_ORIGINS = [
     'https://*.vercel.app',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
+    'https://culink.me',
     'https://www.culink.me',
 ]
 
