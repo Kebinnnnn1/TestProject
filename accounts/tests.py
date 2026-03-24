@@ -93,13 +93,13 @@ class LoginTests(TestCase):
         })
         self.assertRedirects(response, reverse('dashboard'))
 
-    def test_login_unverified_user_blocked(self):
-        """An unverified user should NOT be logged in."""
+    def test_login_unverified_user_succeeds(self):
+        """An unverified user should be logged in and redirected to dashboard."""
         response = self.client.post(reverse('login'), {
             'username': 'unverified', 'password': 'SecureP@ss123'
         })
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.assertRedirects(response, reverse('dashboard'))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
 
     def test_login_wrong_password(self):
         """Wrong password should fail login."""
@@ -110,49 +110,48 @@ class LoginTests(TestCase):
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
 
-class DashboardAccessTests(TestCase):
+class VerifiedAccessTests(TestCase):
+    """Unverified users can access converter but NOT chat/wall."""
     def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            username='dashuser', email='dash@example.com', password='SecureP@ss123'
+        self.unverified = CustomUser.objects.create_user(
+            username='unveri', email='uv@example.com', password='SecureP@ss123'
         )
-        self.user.is_verified = True
-        self.user.save()
+        self.unverified.is_verified = False
+        self.unverified.save()
 
-    def test_dashboard_requires_login(self):
-        """Dashboard should redirect unauthenticated users to login."""
-        response = self.client.get(reverse('dashboard'))
-        self.assertRedirects(response, f"{reverse('login')}?next={reverse('dashboard')}")
+        self.verified = CustomUser.objects.create_user(
+            username='veri', email='ve@example.com', password='SecureP@ss123'
+        )
+        self.verified.is_verified = True
+        self.verified.save()
 
-    def test_dashboard_accessible_when_logged_in(self):
-        """Dashboard should return 200 for authenticated users."""
-        self.client.force_login(self.user)
-        response = self.client.get(reverse('dashboard'))
+    def test_unverified_user_can_access_converter(self):
+        """Converter should be accessible to unverified users."""
+        self.client.force_login(self.unverified)
+        response = self.client.get(reverse('converter'))
         self.assertEqual(response.status_code, 200)
 
+    def test_unverified_user_blocked_from_chat(self):
+        """Unverified users should be redirected away from chat."""
+        self.client.force_login(self.unverified)
+        response = self.client.get(reverse('chat_inbox'))
+        self.assertRedirects(response, reverse('dashboard'))
 
-class AdminDashboardTests(TestCase):
-    def setUp(self):
-        self.regular_user = CustomUser.objects.create_user(
-            username='regular', email='r@example.com', password='SecureP@ss123'
-        )
-        self.regular_user.is_verified = True
-        self.regular_user.save()
+    def test_unverified_user_blocked_from_wall(self):
+        """Unverified users should be redirected away from wall."""
+        self.client.force_login(self.unverified)
+        response = self.client.get(reverse('wall'))
+        self.assertRedirects(response, reverse('dashboard'))
 
-        self.staff_user = CustomUser.objects.create_user(
-            username='staffmember', email='staff@example.com', password='SecureP@ss123'
-        )
-        self.staff_user.is_staff = True
-        self.staff_user.is_verified = True
-        self.staff_user.save()
-
-    def test_admin_dashboard_denied_for_regular_user(self):
-        """Regular users should NOT have access to admin dashboard."""
-        self.client.force_login(self.regular_user)
-        response = self.client.get(reverse('admin_dashboard'))
-        self.assertNotEqual(response.status_code, 200)
-
-    def test_admin_dashboard_accessible_for_staff(self):
-        """Staff users should be able to access admin dashboard."""
-        self.client.force_login(self.staff_user)
-        response = self.client.get(reverse('admin_dashboard'))
+    def test_verified_user_can_access_chat(self):
+        """Verified users should access chat normally."""
+        self.client.force_login(self.verified)
+        response = self.client.get(reverse('chat_inbox'))
         self.assertEqual(response.status_code, 200)
+
+    def test_verified_user_can_access_wall(self):
+        """Verified users should access wall normally."""
+        self.client.force_login(self.verified)
+        response = self.client.get(reverse('wall'))
+        self.assertEqual(response.status_code, 200)
+

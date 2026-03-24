@@ -1,3 +1,5 @@
+from functools import wraps
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -29,6 +31,29 @@ def redirect_if_logged_in(view_func):
     """Redirect already-authenticated users away from public auth pages."""
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated:
+            return redirect('dashboard')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
+def verified_required(view_func):
+    """Block unverified users from accessing restricted features (chat, wall).
+    For AJAX requests returns a 403 JSON response; otherwise redirects to
+    the dashboard with a warning flash message."""
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_verified:
+            is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+            if is_ajax:
+                return JsonResponse(
+                    {'ok': False, 'error': 'Please verify your email to access this feature.'},
+                    status=403,
+                )
+            messages.warning(
+                request,
+                'You need to verify your email before accessing this feature. '
+                'Check your inbox for the verification link.'
+            )
             return redirect('dashboard')
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -176,20 +201,19 @@ class CustomLoginView(View):
                 messages.error(request, 'Invalid username or password.')
                 return render(request, self.template_name, {'form': form})
 
-            if not user.is_verified:
-                messages.warning(
-                    request,
-                    'Please verify your email before logging in. '
-                    'Check your inbox for the verification link.'
-                )
-                return render(request, self.template_name, {'form': form})
-
             if not user.is_active:
                 messages.error(request, 'Your account has been deactivated. Contact support.')
                 return render(request, self.template_name, {'form': form})
 
             login(request, user)
-            messages.success(request, f'Welcome back, {user.username}!')
+            if not user.is_verified:
+                messages.warning(
+                    request,
+                    'Welcome! Please verify your email to unlock all features '
+                    '(Chat & Knowledge Wall). Check your inbox for the verification link.'
+                )
+            else:
+                messages.success(request, f'Welcome back, {user.username}!')
             return redirect('dashboard')
 
         return render(request, self.template_name, {'form': form})
@@ -370,6 +394,7 @@ def _dm_channel(user_a, user_b):
 
 
 @method_decorator(login_required(login_url='/login/'), name='dispatch')
+@method_decorator(verified_required, name='dispatch')
 class ChatInboxView(View):
     """List of all other users the current user can DM."""
     def get(self, request):
@@ -408,6 +433,7 @@ class ChatInboxView(View):
 
 
 @method_decorator(login_required(login_url='/login/'), name='dispatch')
+@method_decorator(verified_required, name='dispatch')
 class ConversationView(View):
     """Show DM thread between current user and another user."""
     def get(self, request, username):
@@ -437,6 +463,7 @@ class ConversationView(View):
 
 
 @login_required(login_url='/login/')
+@verified_required
 @require_POST
 def send_dm(request, username):
     """Save a DM and trigger a Pusher event."""
@@ -469,6 +496,7 @@ def send_dm(request, username):
 
 
 @login_required(login_url='/login/')
+@verified_required
 def message_history(request, username):
     """Return past messages as JSON (for initial page load)."""
     me = request.user
@@ -507,6 +535,7 @@ def update_university(request):
 
 
 @login_required(login_url='/login/')
+@verified_required
 def random_chat(request):
     """Redirect to a random user — either from a chosen university or anyone."""
     import random as _random
@@ -543,6 +572,7 @@ def random_chat(request):
 PAGE_SIZE = 10
 
 @method_decorator(login_required(login_url='/login/'), name='dispatch')
+@method_decorator(verified_required, name='dispatch')
 class WallView(View):
     """Main knowledge wall feed — initial load only (first PAGE_SIZE posts)."""
     def get(self, request):
@@ -573,6 +603,7 @@ class WallView(View):
 
 
 @login_required(login_url='/login/')
+@verified_required
 def wall_posts(request):
     """AJAX endpoint returning the next batch of posts as JSON for infinite scroll."""
     offset     = int(request.GET.get('offset', 0))
@@ -628,6 +659,7 @@ def wall_posts(request):
 
 
 @login_required(login_url='/login/')
+@verified_required
 @require_POST
 def create_post(request):
     """Create a new wall post. Returns JSON for AJAX calls."""
@@ -707,6 +739,7 @@ def create_post(request):
 
 
 @login_required(login_url='/login/')
+@verified_required
 @require_POST
 def delete_post(request, pk):
     """Delete own post. Silently redirect if post not found."""
@@ -720,6 +753,7 @@ def delete_post(request, pk):
 
 
 @login_required(login_url='/login/')
+@verified_required
 @require_POST
 def like_post(request, pk):
     """Toggle like on a post — returns JSON."""
@@ -741,6 +775,7 @@ def like_post(request, pk):
 
 
 @login_required(login_url='/login/')
+@verified_required
 @require_POST
 def add_comment(request, pk):
     """Add a comment/reply to a wall post. Returns JSON for AJAX calls."""
@@ -819,6 +854,7 @@ def add_comment(request, pk):
 
 
 @login_required(login_url='/login/')
+@verified_required
 @require_POST
 def delete_comment(request, pk):
     """Delete own comment."""

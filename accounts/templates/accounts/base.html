@@ -914,6 +914,7 @@
       <a class="slide-nav-link" href="{% url 'converter' %}"><i class="bi bi-arrow-left-right"></i> Converter</a>
       {% if user.is_authenticated %}
       <a class="slide-nav-link" href="{% url 'dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a>
+      {% if user.is_verified %}
       <a class="slide-nav-link" href="{% url 'chat_inbox' %}">
         <i class="bi bi-chat-dots"></i> Messages
         {% if unread_dm_count %}<span class="slide-notif-dot"></span>{% endif %}
@@ -922,6 +923,14 @@
         <i class="bi bi-journals"></i> Knowledge Wall
         <span id="wall-nav-badge" style="display:none; background:#22c55e; color:#fff; font-size:0.65rem; font-weight:700; border-radius:50px; padding:1px 6px; margin-left:5px; vertical-align:middle;">0</span>
       </a>
+      {% else %}
+      <a class="slide-nav-link" href="#" onclick="event.preventDefault();document.getElementById('verifyModal').style.display='flex';closeMenu();" style="opacity:0.5;">
+        <i class="bi bi-lock"></i> Messages <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
+      </a>
+      <a class="slide-nav-link" href="#" onclick="event.preventDefault();document.getElementById('verifyModal').style.display='flex';closeMenu();" style="opacity:0.5;">
+        <i class="bi bi-lock"></i> Knowledge Wall <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
+      </a>
+      {% endif %}
       {% if user.is_staff or user.is_superuser %}
       <a class="slide-nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-shield-check"></i> Admin</a>
       {% endif %}
@@ -983,6 +992,18 @@
   {% endif %}
 
   <main>
+    {% if user.is_authenticated and not user.is_verified %}
+    <div class="container mt-3">
+      <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fbbf24;border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <i class="bi bi-exclamation-triangle-fill" style="color:#d97706;font-size:1.2rem;"></i>
+        <div style="flex:1;min-width:200px;">
+          <strong style="color:#92400e;">Email not verified</strong>
+          <span style="color:#a16207;font-size:0.88rem;"> — Verify your email to unlock Chat & Knowledge Wall.</span>
+        </div>
+        <a href="{% url 'resend_verification' %}" style="color:#d97706;font-weight:600;font-size:0.85rem;text-decoration:none;white-space:nowrap;">Resend verification →</a>
+      </div>
+    </div>
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
 
@@ -1149,6 +1170,29 @@
 
     {% endif %}
   </script>
+  {% if user.is_authenticated and not user.is_verified %}
+  <!-- Verification Required Modal -->
+  <div id="verifyModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:var(--card-bg,#fff);border:1.5px solid var(--border,#e5e7eb);border-radius:20px;padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;animation:fadeInUp 0.3s ease;">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <i class="bi bi-shield-lock" style="font-size:1.8rem;color:#d97706;"></i>
+      </div>
+      <h3 style="color:var(--text-dark,#111);margin-bottom:0.5rem;font-size:1.2rem;">Verification Required</h3>
+      <p style="color:var(--text-mid,#666);font-size:0.9rem;margin-bottom:1.5rem;line-height:1.5;">
+        You need to verify your email to access <strong>Chat</strong> and <strong>Knowledge Wall</strong>.
+        Check your inbox for the verification link.
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <a href="{% url 'resend_verification' %}" style="background:var(--grad-main);color:#fff;border:none;border-radius:12px;padding:0.7rem 1.5rem;font-weight:600;font-size:0.9rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+          <i class="bi bi-envelope"></i> Resend Email
+        </a>
+        <button onclick="document.getElementById('verifyModal').style.display='none'" style="background:transparent;border:1.5px solid var(--border,#e5e7eb);border-radius:12px;padding:0.7rem 1.5rem;font-weight:600;font-size:0.9rem;color:var(--text-mid,#666);cursor:pointer;">
+          Dismiss
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
   {% block extra_scripts %}{% endblock %}
 </body>
 
