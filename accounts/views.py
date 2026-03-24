@@ -236,6 +236,67 @@ class DashboardView(View):
         return render(request, 'accounts/dashboard.html', {'user': request.user})
 
 
+@login_required(login_url='/login/')
+@require_POST
+def change_password(request):
+    """Change the logged-in user's password."""
+    old_pw = request.POST.get('old_password', '')
+    new_pw = request.POST.get('new_password', '')
+    confirm_pw = request.POST.get('confirm_password', '')
+
+    if not request.user.check_password(old_pw):
+        messages.error(request, 'Current password is incorrect.')
+        return redirect('dashboard')
+
+    if len(new_pw) < 8:
+        messages.error(request, 'New password must be at least 8 characters.')
+        return redirect('dashboard')
+
+    if new_pw != confirm_pw:
+        messages.error(request, 'New passwords do not match.')
+        return redirect('dashboard')
+
+    request.user.set_password(new_pw)
+    request.user.save()
+    # Re-authenticate so the user stays logged in
+    login(request, request.user)
+    messages.success(request, 'Password changed successfully!')
+    return redirect('dashboard')
+
+
+@login_required(login_url='/login/')
+@require_POST
+def change_email(request):
+    """Change the logged-in user's email. Marks user as unverified."""
+    new_email = request.POST.get('new_email', '').strip().lower()
+
+    if not new_email:
+        messages.error(request, 'Please enter a new email address.')
+        return redirect('dashboard')
+
+    if new_email == request.user.email:
+        messages.info(request, 'That is already your current email.')
+        return redirect('dashboard')
+
+    if CustomUser.objects.filter(email__iexact=new_email).exclude(pk=request.user.pk).exists():
+        messages.error(request, 'An account with this email already exists.')
+        return redirect('dashboard')
+
+    request.user.email = new_email
+    request.user.is_verified = False
+    request.user.save()
+
+    # Send new verification email
+    token = generate_token(request.user)
+    send_verification_email(request, request.user, token)
+
+    messages.success(
+        request,
+        'Email updated! A verification link has been sent to your new email.'
+    )
+    return redirect('dashboard')
+
+
 # ---------------------------------------------------------------------------
 # Admin Dashboard
 # ---------------------------------------------------------------------------

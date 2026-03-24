@@ -24,6 +24,8 @@ urlpatterns = [
     path('chat/<str:username>/history/', views.message_history, name='message_history'),
     # Profile
     path('dashboard/university/', views.update_university, name='update_university'),
+    path('dashboard/change-password/', views.change_password, name='change_password'),
+    path('dashboard/change-email/', views.change_email, name='change_email'),
     # Knowledge Wall
     path('wall/', views.WallView.as_view(), name='wall'),
     path('wall/create/', views.create_post, name='create_post'),

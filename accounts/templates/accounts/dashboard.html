@@ -332,6 +332,54 @@
             </div>
         </div>
 
+        <!-- Profile Settings -->
+        <div class="row g-3 mt-1">
+            <div class="col-md-6">
+                <div class="info-card reveal">
+                    <h5><i class="bi bi-key-fill me-2" style="color:#f59e0b;"></i>Change Password</h5>
+                    <form method="post" action="{% url 'change_password' %}">
+                        {% csrf_token %}
+                        <div style="margin-bottom:0.9rem;">
+                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">Current Password</label>
+                            <input type="password" name="old_password" required
+                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                        </div>
+                        <div style="margin-bottom:0.9rem;">
+                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">New Password</label>
+                            <input type="password" name="new_password" required minlength="8"
+                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">Confirm New Password</label>
+                            <input type="password" name="confirm_password" required minlength="8"
+                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                        </div>
+                        <button type="submit" style="padding:0.65rem 1.5rem;border-radius:12px;border:none;background:var(--grad-main);color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;">Update Password</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-card reveal delay-1">
+                    <h5><i class="bi bi-envelope-fill me-2" style="color:#3b82f6;"></i>Change Email</h5>
+                    <p style="font-size:0.82rem;color:var(--text-light);margin-bottom:1rem;">
+                        Current: <strong style="color:var(--text-dark);">{{ user.email }}</strong>
+                    </p>
+                    <form method="post" action="{% url 'change_email' %}">
+                        {% csrf_token %}
+                        <div style="margin-bottom:1rem;">
+                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">New Email Address</label>
+                            <input type="email" name="new_email" required
+                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                        </div>
+                        <button type="submit" style="padding:0.65rem 1.5rem;border-radius:12px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;">Update Email</button>
+                        <p style="font-size:0.75rem;color:var(--text-light);margin-top:0.75rem;margin-bottom:0;">
+                            <i class="bi bi-info-circle me-1"></i>Changing your email will require re-verification.
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 {% endblock %}

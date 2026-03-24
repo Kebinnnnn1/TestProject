@@ -911,24 +911,26 @@
     </div>
     <nav class="slide-menu-links">
       <a class="slide-nav-link" href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a>
-      <a class="slide-nav-link" href="{% url 'converter' %}"><i class="bi bi-arrow-left-right"></i> Converter</a>
       {% if user.is_authenticated %}
       <a class="slide-nav-link" href="{% url 'dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a>
+      {% endif %}
+      <a class="slide-nav-link" href="{% url 'converter' %}"><i class="bi bi-arrow-left-right"></i> Converter</a>
+      {% if user.is_authenticated %}
       {% if user.is_verified %}
-      <a class="slide-nav-link" href="{% url 'chat_inbox' %}">
-        <i class="bi bi-chat-dots"></i> Messages
-        {% if unread_dm_count %}<span class="slide-notif-dot"></span>{% endif %}
-      </a>
       <a class="slide-nav-link" href="{% url 'wall' %}" style="position:relative;">
         <i class="bi bi-journals"></i> Knowledge Wall
         <span id="wall-nav-badge" style="display:none; background:#22c55e; color:#fff; font-size:0.65rem; font-weight:700; border-radius:50px; padding:1px 6px; margin-left:5px; vertical-align:middle;">0</span>
       </a>
+      <a class="slide-nav-link" href="{% url 'chat_inbox' %}">
+        <i class="bi bi-chat-dots"></i> Messages
+        {% if unread_dm_count %}<span class="slide-notif-dot"></span>{% endif %}
+      </a>
       {% else %}
       <a class="slide-nav-link" href="#" onclick="event.preventDefault();document.getElementById('verifyModal').style.display='flex';closeMenu();" style="opacity:0.5;">
-        <i class="bi bi-lock"></i> Messages <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
+        <i class="bi bi-lock"></i> Knowledge Wall <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
       </a>
       <a class="slide-nav-link" href="#" onclick="event.preventDefault();document.getElementById('verifyModal').style.display='flex';closeMenu();" style="opacity:0.5;">
-        <i class="bi bi-lock"></i> Knowledge Wall <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
+        <i class="bi bi-lock"></i> Messages <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
       </a>
       {% endif %}
       {% if user.is_staff or user.is_superuser %}
