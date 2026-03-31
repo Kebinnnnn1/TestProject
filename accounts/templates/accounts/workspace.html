@@ -142,15 +142,18 @@ footer { display: none !important; }
 }
 .ws-kb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .ws-kb-count { font-size: .66rem; font-weight: 600; opacity: .6; margin-left: auto; }
-.ws-proj-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: .62rem; transition: box-shadow .2s, transform .15s; cursor: pointer; }
+.ws-proj-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: .62rem; transition: box-shadow .2s, transform .15s; cursor: pointer; position: relative; }
 .ws-proj-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); transform: translateY(-2px); }
-.ws-card-name { font-size: .86rem; font-weight: 600; color: var(--text-dark); margin-bottom: .3rem; }
+.ws-card-name { font-size: .86rem; font-weight: 600; color: var(--text-dark); margin-bottom: .3rem; padding-right: 1.6rem; }
 .ws-card-meta { display: flex; flex-wrap: wrap; gap: .28rem; margin-bottom: .38rem; }
 .ws-card-pt { display: flex; justify-content: space-between; font-size: .67rem; color: var(--text-light); margin-bottom: 2px; }
 .ws-card-track { height: 5px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
 .ws-card-fill  { height: 100%; background: linear-gradient(90deg,#2563eb,#3b82f6); border-radius: 3px; transition: width .3s; }
 .ws-kb-add { background: none; border: 1px dashed var(--border); border-radius: 8px; padding: .32rem; width: 100%; font-size: .77rem; color: var(--text-light); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: .15rem; }
 .ws-kb-add:hover { border-color: var(--blue); color: var(--blue); background: rgba(33,150,243,.04); }
+.ws-card-del { position: absolute; top: .4rem; right: .4rem; background: none; border: none; cursor: pointer; width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: .72rem; color: var(--text-light); opacity: 0; transition: opacity .15s, background .15s, color .15s; }
+.ws-proj-card:hover .ws-card-del { opacity: 1; }
+.ws-card-del:hover { background: rgba(239,68,68,.12); color: #ef4444; }
 
 /* ── Goals ── */
 .ws-goal-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: .65rem .82rem; margin-bottom: .45rem; display: flex; align-items: center; gap: .65rem; transition: box-shadow .2s; }
@@ -161,7 +164,27 @@ footer { display: none !important; }
 .ws-goal-name.done-text { text-decoration: line-through; color: var(--text-light); }
 
 /* ── Notes ── */
-.ws-note-area { width: 100%; min-height: calc(100vh - 270px); border: none; background: transparent; font-size: .94rem; line-height: 1.85; color: var(--text-dark); outline: none; resize: none; font-family: inherit; padding: 0; }
+.ws-note-area { width: 100%; min-height: 280px; border: none; background: transparent; font-size: .94rem; line-height: 1.85; color: var(--text-dark); outline: none; resize: none; font-family: inherit; padding: 0; }
+.ws-notes-layout { display: flex; gap: .75rem; align-items: start; }
+.ws-notes-list { width: 200px; min-width: 200px; display: flex; flex-direction: column; gap: .3rem; }
+.ws-note-item { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 10px; padding: .5rem .65rem; cursor: pointer; transition: border-color .15s, background .15s; position: relative; }
+.ws-note-item:hover { border-color: var(--blue); background: var(--surface-2); }
+.ws-note-item.active { border-color: var(--blue); background: rgba(33,150,243,.06); }
+.ws-note-item-title { font-size: .78rem; font-weight: 600; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ws-note-item-date { font-size: .66rem; color: var(--text-light); margin-top: 1px; }
+.ws-note-del { position: absolute; top: .3rem; right: .3rem; background: none; border: none; cursor: pointer; width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: .65rem; color: var(--text-light); opacity: 0; transition: opacity .15s, background .15s, color .15s; }
+.ws-note-item:hover .ws-note-del { opacity: 1; }
+.ws-note-del:hover { background: rgba(239,68,68,.12); color: #ef4444; }
+.ws-note-new { background: none; border: 1px dashed var(--border); border-radius: 10px; padding: .42rem; width: 100%; font-size: .77rem; color: var(--text-light); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all .15s; }
+.ws-note-new:hover { border-color: var(--blue); color: var(--blue); background: rgba(33,150,243,.04); }
+.ws-note-editor { flex: 1; min-width: 0; }
+.ws-note-editor-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.2rem; }
+.ws-note-toolbar { display: flex; align-items: center; gap: .5rem; margin-bottom: .65rem; border-bottom: 1px solid var(--border); padding-bottom: .55rem; }
+.ws-note-status { font-size: .72rem; color: var(--text-light); flex: 1; }
+.ws-note-save-btn { display: inline-flex; align-items: center; gap: 4px; background: var(--blue); color: #fff; border: none; border-radius: 7px; padding: .28rem .7rem; font-size: .76rem; font-weight: 700; cursor: pointer; transition: opacity .15s; }
+.ws-note-save-btn:hover { opacity: .85; }
+.ws-note-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1rem; color: var(--text-light); text-align: center; gap: .5rem; }
+@media (max-width: 600px) { .ws-notes-layout { flex-direction: column; } .ws-notes-list { width: 100%; min-width: 0; } }
 
 /* ── Modal ── */
 .ws-modal-bd { display: none; position: fixed; inset: 0; z-index: 800; background: rgba(0,0,0,.45); backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 1rem; }
@@ -352,6 +375,8 @@ function closeMob() {
 function togglePicker() { document.getElementById('wsPicker').classList.toggle('open'); }
 function selDoc(pk) {
   WS.activeId = pk; localStorage.setItem('ws_active', pk);
+  // Reset note state when switching docs
+  if (NOTE.docPk !== pk) NOTE = { docPk: null, itemPk: null };
   renderSb(); renderMain();
   if (window.innerWidth <= 900) closeMob();
 }
@@ -447,6 +472,7 @@ function projCard(item, docPk) {
   const due   = item.due_date ? `<span class="wb ${ov?'wb-overdue':'wb-due'}"><i class="bi bi-${ov?'alarm-fill':'calendar3'}"></i> ${item.due_date}</span>` : '';
   const prog  = item.progress || 0;
   return `<div class="ws-proj-card" onclick="openEdit(${item.pk},${docPk})">
+    <button class="ws-card-del" onclick="event.stopPropagation();delItem(${item.pk},${docPk})" title="Delete card"><i class="bi bi-trash3"></i></button>
     <div class="ws-card-name">${esc(item.content)}</div>
     <div class="ws-card-meta"><span class="wb ${pc}">${item.priority}</span>${due}<span class="wb wb-prog">${prog}%</span></div>
     <div class="ws-card-pt"><span>Progress</span><span>${prog}%</span></div>
@@ -481,24 +507,118 @@ function goalCard(item, docPk) {
 }
 
 /* ── NOTE ── */
+let NOTE = { docPk: null, itemPk: null }; // active note
+
 function renderNote(doc) {
-  const content = doc.items.length ? doc.items[0].content : '';
-  const pk = doc.items.length ? doc.items[0].pk : null;
-  document.getElementById('wsContent').innerHTML = `${docHdr(doc)}
-    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;">
-      <textarea class="ws-note-area" id="wsNoteEl" placeholder="Start writing…" onkeyup="schedNote(${doc.pk},${pk})">${esc(content)}</textarea>
+  // Auto-select first note if none active for this doc
+  if (doc.items.length && (NOTE.docPk !== doc.pk || !NOTE.itemPk)) {
+    NOTE = { docPk: doc.pk, itemPk: doc.items[0].pk };
+  }
+  // Build list sidebar
+  const listHtml = doc.items.map(i => {
+    const title = i.content ? i.content.split('\n')[0].slice(0, 40) || 'Untitled' : 'Untitled';
+    const isActive = i.pk === NOTE.itemPk && NOTE.docPk === doc.pk;
+    return `<div class="ws-note-item ${isActive ? 'active' : ''}" onclick="openNote(${i.pk},${doc.pk})">
+      <button class="ws-note-del" onclick="event.stopPropagation();delNoteItem(${i.pk},${doc.pk})" title="Delete note"><i class="bi bi-x-lg"></i></button>
+      <div class="ws-note-item-title">${esc(title)}</div>
     </div>`;
+  }).join('');
+
+  // Build editor area
+  let editorHtml;
+  if (NOTE.docPk === doc.pk && NOTE.itemPk) {
+    const item = doc.items.find(i => i.pk === NOTE.itemPk);
+    if (item) {
+      editorHtml = `
+        <div class="ws-note-editor-card">
+          <div class="ws-note-toolbar">
+            <span class="ws-note-status" id="wsNoteSt">Auto-saved</span>
+            <button class="ws-note-save-btn" onclick="saveNoteNow()"><i class="bi bi-floppy"></i> Save</button>
+          </div>
+          <textarea class="ws-note-area" id="wsNoteEl" placeholder="Start writing…" oninput="schedNote(${doc.pk},${item.pk})">${esc(item.content || '')}</textarea>
+        </div>`;
+    } else {
+      NOTE.itemPk = null; editorHtml = noteEmptyState(doc.pk);
+    }
+  } else {
+    NOTE.itemPk = null; editorHtml = noteEmptyState(doc.pk);
+  }
+
+  document.getElementById('wsContent').innerHTML = `${docHdr(doc)}
+    <div class="ws-notes-layout">
+      <div class="ws-notes-list">
+        ${listHtml}
+        <button class="ws-note-new" onclick="newNote(${doc.pk})"><i class="bi bi-plus"></i> New note</button>
+      </div>
+      <div class="ws-note-editor" id="wsNoteEditor">${editorHtml}</div>
+    </div>`;
+
   const ab = document.getElementById('wsAddBtn');
   if (ab) ab.style.display = 'none';
-  document.getElementById('wsNoteEl').focus();
+  document.getElementById('wsNoteEl')?.focus();
 }
-function schedNote(docPk, pk) { clearTimeout(WS.noteSaveTimer); WS.noteSaveTimer = setTimeout(() => saveNote(docPk, pk), 800); }
-async function saveNote(docPk, pk) {
-  const val = document.getElementById('wsNoteEl')?.value ?? '';
+
+function noteEmptyState(docPk) {
+  return `<div class="ws-note-empty">
+    <i class="bi bi-journal-text" style="font-size:2rem;color:var(--text-light);"></i>
+    <div style="font-size:.9rem;font-weight:600;color:var(--text-dark);">No note selected</div>
+    <div style="font-size:.8rem;">Pick one from the list or create a new one.</div>
+    <button class="ws-note-save-btn" style="margin-top:.4rem;" onclick="newNote(${docPk})"><i class="bi bi-plus"></i> New note</button>
+  </div>`;
+}
+
+function openNote(itemPk, docPk) {
+  NOTE = { docPk, itemPk };
+  const doc = WS.docs.find(d => d.pk === docPk);
+  if (doc) renderNote(doc);
+}
+
+async function newNote(docPk) {
   const doc = WS.docs.find(d => d.pk === docPk);
   if (!doc) return;
-  if (pk) { doc.items[0].content = val; await api(`/workspace/item/${pk}/update/`, { content: val }); }
-  else { const d = await api(`/workspace/doc/${docPk}/item/`, { content: val, status:'todo', priority:'medium' }); if (d.ok) doc.items = [d.item]; }
+  const d = await api(`/workspace/doc/${docPk}/item/`, { content: '', status: 'todo', priority: 'medium' });
+  if (d.ok) { doc.items.push(d.item); NOTE = { docPk, itemPk: d.item.pk }; renderNote(doc); document.getElementById('wsNoteEl')?.focus(); }
+}
+
+async function delNoteItem(itemPk, docPk) {
+  if (!confirm('Delete this note?')) return;
+  await api(`/workspace/item/${itemPk}/delete/`, {});
+  const doc = WS.docs.find(d => d.pk === docPk);
+  if (doc) {
+    doc.items = doc.items.filter(i => i.pk !== itemPk);
+    if (NOTE.itemPk === itemPk) NOTE.itemPk = doc.items.length ? doc.items[0].pk : null;
+    renderNote(doc);
+  }
+}
+
+let _noteSaveTimer = null;
+function schedNote(docPk, itemPk) {
+  const st = document.getElementById('wsNoteSt');
+  if (st) st.textContent = 'Unsaved…';
+  clearTimeout(_noteSaveTimer);
+  _noteSaveTimer = setTimeout(() => saveNote(docPk, itemPk), 1200);
+}
+
+async function saveNoteNow() {
+  const area = document.getElementById('wsNoteEl');
+  if (!area || !NOTE.itemPk) return;
+  await saveNote(NOTE.docPk, NOTE.itemPk);
+}
+
+async function saveNote(docPk, itemPk) {
+  const area = document.getElementById('wsNoteEl');
+  const val = area?.value ?? '';
+  const doc = WS.docs.find(d => d.pk === docPk);
+  if (!doc) return;
+  const item = doc.items.find(i => i.pk === itemPk);
+  const st = document.getElementById('wsNoteSt');
+  if (st) st.textContent = 'Saving…';
+  if (item) {
+    item.content = val;
+    await api(`/workspace/item/${itemPk}/update/`, { content: val });
+    if (st) st.textContent = 'Saved ✓';
+    setTimeout(() => { if (document.getElementById('wsNoteSt')) document.getElementById('wsNoteSt').textContent = 'Auto-saved'; }, 1800);
+  }
 }
 
 /* ── Modal ── */
