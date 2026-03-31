@@ -1,4 +1,4 @@
-﻿{% extends 'accounts/base.html' %}
+{% extends 'accounts/base.html' %}
 {% block title %}Dashboard — CUlink{% endblock %}
 
 {% block extra_head %}
@@ -354,6 +354,9 @@
                 <div class="info-card reveal delay-1">
                     <h5><i class="bi bi-grid me-2" style="color:var(--pink);"></i>Quick Actions</h5>
                     <div class="d-flex flex-column gap-2">
+                        <a href="{% url 'profile' %}" class="quick-link quick-link-pink">
+                            <i class="bi bi-person-fill" style="font-size:1.1rem;"></i> Edit Profile
+                        </a>
                         {% if user.is_staff or user.is_superuser %}
                         <a href="{% url 'admin_dashboard' %}" class="quick-link">
                             <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i> Admin Dashboard
@@ -373,76 +376,19 @@
             </div>
         </div>
 
+        <!-- Profile Settings Promo -->
         <div class="row g-3 mt-1">
             <div class="col-12">
-                <div class="info-card reveal">
-                    <h5><i class="bi bi-mortarboard-fill me-2" style="color:#a855f7;"></i>University Settings</h5>
-                    {% if user.is_verified %}
-                    <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:1.25rem;">
-                        Set your university so others can find you via <strong>Random Chat</strong>.
-                        {% if user.university %}Currently: <strong>{{ user.university }}</strong>{% endif %}
+                <div class="info-card reveal" style="background:linear-gradient(135deg,rgba(255,63,164,0.06),rgba(255,63,164,0.02));border-color:rgba(255,63,164,0.2);">
+                    <h5 style="border-bottom-color:rgba(255,63,164,0.15);">
+                        <i class="bi bi-person-bounding-box me-2" style="color:var(--pink);"></i>Profile &amp; Settings
+                    </h5>
+                    <p style="font-size:0.88rem;color:var(--text-light);margin-bottom:1.2rem;">
+                        Update your display name, profile picture, university, email, and password — all in one place.
                     </p>
-                    <form method="post" action="{% url 'update_university' %}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-                        {% csrf_token %}
-                        <select name="university" style="flex:1;min-width:220px;">
-                            <option value="">— Select your university —</option>
-                            <option value="CTU" {% if user.university == "CTU" %}selected{% endif %}>CTU — Cebu Technological University</option>
-                            <option value="CEC" {% if user.university == "CEC" %}selected{% endif %}>CEC — Cebu Eastern College</option>
-                            <option value="SWU" {% if user.university == "SWU" %}selected{% endif %}>SWU — Southwestern University</option>
-                            <option value="ACT" {% if user.university == "ACT" %}selected{% endif %}>ACT — Asian College of Technology</option>
-                            <option value="UV"  {% if user.university == "UV"  %}selected{% endif %}>UV — University of the Visayas</option>
-                        </select>
-                        <button type="submit" class="dash-save-btn">Save University</button>
-                    </form>
-                    {% else %}
-                    <p style="font-size:0.85rem;color:var(--text-light);margin:0;">
-                        <i class="bi bi-lock-fill me-1"></i>Please <strong>verify your email</strong> to set your university.
-                    </p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Profile Settings -->
-        <div class="row g-3 mt-1">
-            <div class="col-md-6">
-                <div class="info-card reveal">
-                    <h5><i class="bi bi-key-fill me-2" style="color:#f59e0b;"></i>Change Password</h5>
-                    <form method="post" action="{% url 'change_password' %}">
-                        {% csrf_token %}
-                        <div style="margin-bottom:0.9rem;">
-                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">Current Password</label>
-                            <input type="password" name="old_password" required>
-                        </div>
-                        <div style="margin-bottom:0.9rem;">
-                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">New Password</label>
-                            <input type="password" name="new_password" required minlength="8">
-                        </div>
-                        <div style="margin-bottom:1rem;">
-                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">Confirm New Password</label>
-                            <input type="password" name="confirm_password" required minlength="8">
-                        </div>
-                        <button type="submit" class="dash-save-btn">Update Password</button>
-                    </form>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="info-card reveal delay-1">
-                    <h5><i class="bi bi-envelope-fill me-2" style="color:#3b82f6;"></i>Change Email</h5>
-                    <p style="font-size:0.82rem;color:var(--text-light);margin-bottom:1rem;">
-                        Current: <strong style="color:var(--text-dark);">{{ user.email }}</strong>
-                    </p>
-                    <form method="post" action="{% url 'change_email' %}">
-                        {% csrf_token %}
-                        <div style="margin-bottom:1rem;">
-                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">New Email Address</label>
-                            <input type="email" name="new_email" required>
-                        </div>
-                        <button type="submit" class="dash-save-btn">Update Email</button>
-                        <p style="font-size:0.75rem;color:var(--text-light);margin-top:0.75rem;margin-bottom:0;">
-                            <i class="bi bi-info-circle me-1"></i>Changing your email will require re-verification.
-                        </p>
-                    </form>
+                    <a href="{% url 'profile' %}" class="quick-link quick-link-pink" style="width:fit-content;">
+                        <i class="bi bi-person-fill"></i> Go to Profile Settings
+                    </a>
                 </div>
             </div>
         </div>

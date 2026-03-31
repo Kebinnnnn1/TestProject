@@ -237,6 +237,38 @@ class DashboardView(View):
         return render(request, 'accounts/dashboard.html', {'user': request.user})
 
 
+@method_decorator(login_required, name='dispatch')
+class ProfileView(View):
+    def get(self, request):
+        return render(request, 'accounts/profile.html', {'user': request.user})
+
+
+@login_required(login_url='/login/')
+@require_POST
+def update_profile(request):
+    """Update display name and/or avatar."""
+    user = request.user
+    display_name = request.POST.get('display_name', '').strip()
+    user.display_name = display_name[:60]
+
+    avatar_file = request.FILES.get('avatar')
+    if avatar_file:
+        # Upload to Cloudinary
+        import cloudinary.uploader
+        result = cloudinary.uploader.upload(
+            avatar_file,
+            folder='avatars',
+            public_id=f'avatar_{user.pk}',
+            overwrite=True,
+            transformation=[{'width': 400, 'height': 400, 'crop': 'fill', 'gravity': 'face'}],
+        )
+        user.avatar = result.get('public_id', '')
+
+    user.save(update_fields=['display_name', 'avatar'])
+    messages.success(request, 'Profile updated successfully!')
+    return redirect('profile')
+
+
 @login_required(login_url='/login/')
 @require_POST
 def change_password(request):
@@ -262,7 +294,7 @@ def change_password(request):
     # Re-authenticate so the user stays logged in
     login(request, request.user)
     messages.success(request, 'Password changed successfully!')
-    return redirect('dashboard')
+    return redirect('profile')
 
 
 @login_required(login_url='/login/')
@@ -295,7 +327,7 @@ def change_email(request):
         request,
         'Email updated! A verification link has been sent to your new email.'
     )
-    return redirect('dashboard')
+    return redirect('profile')
 
 
 # ---------------------------------------------------------------------------
@@ -593,7 +625,7 @@ def update_university(request):
         messages.success(request, f'University updated to {uni}!')
     else:
         messages.error(request, 'Invalid university selection.')
-    return redirect('dashboard')
+    return redirect('profile')
 
 
 @login_required(login_url='/login/')

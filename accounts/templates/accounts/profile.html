@@ -1,0 +1,669 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Profile — CUlink{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Page Layout ── */
+.prof-page {
+  min-height: calc(100vh - 70px);
+  background: var(--bg);
+  padding: 2.5rem 0 5rem;
+}
+
+/* ── Hero Banner ── */
+.prof-banner {
+  background: var(--bg-dark);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.prof-banner::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(255,63,164,0.22), transparent 70%);
+  border-radius: 50%;
+}
+.prof-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: 30px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255,63,164,0.10), transparent 70%);
+  border-radius: 50%;
+}
+.prof-avatar-wrap {
+  position: relative;
+  display: inline-block;
+  margin-right: 1.8rem;
+  flex-shrink: 0;
+}
+.prof-avatar {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,0.2);
+  display: block;
+}
+.prof-initials {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), #c0007c);
+  color: #fff;
+  font-size: 2.2rem;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  letter-spacing: -1px;
+  border: 3px solid rgba(255,255,255,0.2);
+  user-select: none;
+}
+.prof-banner-info {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+  z-index: 1;
+}
+.prof-banner-text { flex: 1; }
+.prof-banner-name {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.15rem;
+  line-height: 1.2;
+}
+.prof-banner-username {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.45);
+  font-weight: 500;
+  margin-bottom: 0.6rem;
+}
+.prof-banner-badges { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.prof-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.prof-badge-pink   { background: rgba(255,63,164,0.2); color: var(--pink);  border: 1px solid rgba(255,63,164,0.3); }
+.prof-badge-green  { background: rgba(16,185,129,0.18); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+.prof-badge-yellow { background: rgba(245,158,11,0.18); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+.prof-badge-purple { background: rgba(167,139,250,0.18); color: #a78bfa; border: 1px solid rgba(167,139,250,0.3); }
+.prof-banner-edit {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(255,255,255,0.18);
+  color: #fff;
+  font-size: 0.85rem; font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+  position: relative; z-index: 1;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.prof-banner-edit:hover {
+  background: rgba(255,63,164,0.25);
+  border-color: var(--pink);
+  color: #fff;
+}
+
+/* ── Tab Nav ── */
+.prof-tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-pill);
+  padding: 0.28rem;
+  margin-bottom: 1.8rem;
+  border: 1px solid var(--border);
+  width: fit-content;
+  flex-wrap: wrap;
+}
+.prof-tab {
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--text-mid);
+  font-size: 0.85rem; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Space Grotesk', sans-serif;
+  white-space: nowrap;
+}
+.prof-tab:hover { color: var(--text-dark); background: var(--bg-card-alt); }
+.prof-tab.active {
+  background: var(--bg-white);
+  color: var(--pink);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Panel ── */
+.prof-panel { display: none; }
+.prof-panel.active { display: block; }
+
+/* ── Cards ── */
+.prof-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.8rem;
+  margin-bottom: 1.2rem;
+  box-shadow: var(--shadow-sm);
+}
+.prof-card-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-light);
+  margin-bottom: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.prof-card-title i { color: var(--pink); font-size: 1rem; }
+
+/* ── Form Controls ── */
+.prof-field { margin-bottom: 1.2rem; }
+.prof-label {
+  display: block;
+  font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--text-light);
+  margin-bottom: 0.4rem;
+}
+.prof-input, .prof-select {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  color: var(--text-dark);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  font-size: 0.92rem;
+  font-family: 'Space Grotesk', sans-serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+.prof-input:focus, .prof-select:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(255,63,164,0.10);
+}
+.prof-input[readonly] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.prof-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-top: 0.35rem;
+}
+
+/* ── Avatar Upload ── */
+.avatar-upload-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 1.4rem;
+  flex-wrap: wrap;
+}
+.avatar-preview-sm {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+.avatar-initials-sm {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), #c0007c);
+  color: #fff;
+  font-size: 1.6rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  user-select: none;
+}
+.avatar-upload-ctrl { flex: 1; }
+.avatar-upload-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text-dark);
+  font-size: 0.85rem; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.avatar-upload-btn:hover { border-color: var(--pink); color: var(--pink); }
+#avatarInput { display: none; }
+
+/* ── Save Button ── */
+.prof-save-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 0.7rem 2rem;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--pink);
+  color: #fff;
+  font-size: 0.9rem; font-weight: 700;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.prof-save-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+/* ── Info Rows ── */
+.prof-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.prof-info-row:last-child { border-bottom: none; }
+.prof-ir-label { font-size: 0.82rem; color: var(--text-light); font-weight: 500; }
+.prof-ir-value { font-size: 0.88rem; font-weight: 700; color: var(--text-dark); text-align: right; max-width: 60%; word-break: break-all; }
+
+/* ── Stats Grid ── */
+.prof-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+.prof-stat {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.prof-stat-val { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); }
+.prof-stat-lbl { font-size: 0.72rem; color: var(--text-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.2rem; }
+
+/* ── Danger Zone ── */
+.danger-card {
+  background: var(--bg-white);
+  border: 1.5px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.danger-info h6 { font-size: 0.92rem; font-weight: 700; color: #dc2626; margin-bottom: 0.2rem; }
+.danger-info p  { font-size: 0.82rem; color: var(--text-light); margin: 0; }
+.danger-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 0.6rem 1.4rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(239,68,68,0.35);
+  background: rgba(239,68,68,0.07);
+  color: #dc2626;
+  font-size: 0.88rem; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+  white-space: nowrap;
+}
+.danger-btn:hover { background: rgba(239,68,68,0.15); border-color: #ef4444; }
+
+/* ── Section Divider ── */
+.prof-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.4rem 0;
+}
+
+@media (max-width: 600px) {
+  .prof-banner-info { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .prof-avatar-wrap { margin-right: 0; }
+  .prof-tabs { width: 100%; }
+  .prof-tab { flex: 1; justify-content: center; }
+  .prof-banner { padding: 1.5rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="prof-page">
+  <div class="container">
+
+    <!-- Banner -->
+    <div class="prof-banner reveal">
+      <div class="prof-banner-info">
+        <div class="prof-avatar-wrap">
+          {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="Avatar" class="prof-avatar">
+          {% else %}
+            <div class="prof-initials">{{ user.username|slice:":1"|upper }}</div>
+          {% endif %}
+        </div>
+        <div class="prof-banner-text">
+          <div class="prof-banner-name">
+            {% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}
+          </div>
+          {% if user.display_name %}
+            <div class="prof-banner-username">@{{ user.username }}</div>
+          {% else %}
+            <div class="prof-banner-username" style="height:1.2rem;"></div>
+          {% endif %}
+          <div class="prof-banner-badges">
+            {% if user.is_verified %}
+              <span class="prof-badge prof-badge-green"><i class="bi bi-patch-check-fill"></i> Verified</span>
+            {% else %}
+              <span class="prof-badge prof-badge-yellow"><i class="bi bi-exclamation-circle-fill"></i> Unverified</span>
+            {% endif %}
+            {% if user.role == 'admin' %}
+              <span class="prof-badge prof-badge-purple"><i class="bi bi-shield-fill-check"></i> Admin</span>
+            {% elif user.role == 'moderator' %}
+              <span class="prof-badge prof-badge-yellow"><i class="bi bi-shield-fill"></i> Moderator</span>
+            {% else %}
+              <span class="prof-badge prof-badge-pink"><i class="bi bi-person-fill"></i> Member</span>
+            {% endif %}
+            {% if user.university %}
+              <span class="prof-badge" style="background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.25);">
+                <i class="bi bi-mortarboard-fill"></i> {{ user.university }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+        <button class="prof-banner-edit ms-auto" onclick="switchTab('edit')">
+          <i class="bi bi-pencil-fill"></i> Edit Profile
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab Nav -->
+    <div class="prof-tabs reveal delay-1">
+      <button class="prof-tab active" id="tab-overview"  onclick="switchTab('overview')">
+        <i class="bi bi-person-fill"></i> Overview
+      </button>
+      <button class="prof-tab" id="tab-edit"     onclick="switchTab('edit')">
+        <i class="bi bi-pencil-square"></i> Edit Profile
+      </button>
+      <button class="prof-tab" id="tab-settings" onclick="switchTab('settings')">
+        <i class="bi bi-gear-fill"></i> Account Settings
+      </button>
+    </div>
+
+    <!-- ─── Panel: Overview ─────────────────────────────────── -->
+    <div class="prof-panel active" id="panel-overview">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <div class="prof-card reveal">
+            <div class="prof-card-title"><i class="bi bi-person-vcard-fill"></i> Account Details</div>
+            <div class="prof-info-row">
+              <span class="prof-ir-label">Username</span>
+              <span class="prof-ir-value">{{ user.username }}</span>
+            </div>
+            {% if user.display_name %}
+            <div class="prof-info-row">
+              <span class="prof-ir-label">Display Name</span>
+              <span class="prof-ir-value">{{ user.display_name }}</span>
+            </div>
+            {% endif %}
+            <div class="prof-info-row">
+              <span class="prof-ir-label">Email</span>
+              <span class="prof-ir-value">{{ user.email }}</span>
+            </div>
+            <div class="prof-info-row">
+              <span class="prof-ir-label">University</span>
+              <span class="prof-ir-value">{% if user.university %}{{ user.get_university_display }}{% else %}<span style="color:var(--text-light);font-weight:500;">Not set</span>{% endif %}</span>
+            </div>
+            <div class="prof-info-row">
+              <span class="prof-ir-label">Role</span>
+              <span class="prof-ir-value">{{ user.role|capfirst }}</span>
+            </div>
+            <div class="prof-info-row">
+              <span class="prof-ir-label">Member Since</span>
+              <span class="prof-ir-value">{{ user.date_joined|date:"N j, Y" }}</span>
+            </div>
+            <div class="prof-info-row">
+              <span class="prof-ir-label">Last Login</span>
+              <span class="prof-ir-value">{{ user.last_login|date:"N j, Y g:i A"|default:"—" }}</span>
+            </div>
+            <div class="prof-info-row">
+              <span class="prof-ir-label">Email Verified</span>
+              <span class="prof-ir-value">
+                {% if user.is_verified %}
+                  <span style="color:#10b981;font-weight:700;"><i class="bi bi-check-circle-fill me-1"></i>Yes</span>
+                {% else %}
+                  <span style="color:#f59e0b;font-weight:700;"><i class="bi bi-exclamation-circle-fill me-1"></i>No —
+                    <a href="{% url 'resend_verification' %}" style="color:#f59e0b;">Resend link</a>
+                  </span>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="prof-card reveal delay-1">
+            <div class="prof-card-title"><i class="bi bi-lightning-charge-fill"></i> Quick Actions</div>
+            <div class="d-flex flex-column gap-2">
+              <a href="{% url 'dashboard' %}" style="display:flex;align-items:center;gap:9px;padding:.7rem 1rem;border-radius:var(--radius-pill);border:1.5px solid var(--border);color:var(--text-dark);text-decoration:none;font-size:.87rem;font-weight:600;transition:all .2s;">
+                <i class="bi bi-speedometer2" style="color:var(--pink);"></i> Dashboard
+              </a>
+              <a href="{% url 'wall' %}" style="display:flex;align-items:center;gap:9px;padding:.7rem 1rem;border-radius:var(--radius-pill);border:1.5px solid var(--border);color:var(--text-dark);text-decoration:none;font-size:.87rem;font-weight:600;transition:all .2s;">
+                <i class="bi bi-journals" style="color:var(--pink);"></i> Knowledge Wall
+              </a>
+              <a href="{% url 'workspace' %}" style="display:flex;align-items:center;gap:9px;padding:.7rem 1rem;border-radius:var(--radius-pill);border:1.5px solid var(--border);color:var(--text-dark);text-decoration:none;font-size:.87rem;font-weight:600;transition:all .2s;">
+                <i class="bi bi-layout-text-sidebar" style="color:var(--pink);"></i> Workspace
+              </a>
+              <a href="{% url 'chat_inbox' %}" style="display:flex;align-items:center;gap:9px;padding:.7rem 1rem;border-radius:var(--radius-pill);border:1.5px solid var(--border);color:var(--text-dark);text-decoration:none;font-size:.87rem;font-weight:600;transition:all .2s;">
+                <i class="bi bi-chat-dots-fill" style="color:var(--pink);"></i> Messages
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Panel: Edit Profile ─────────────────────────────── -->
+    <div class="prof-panel" id="panel-edit">
+      <div class="row g-3 justify-content-center">
+        <div class="col-lg-7">
+          <div class="prof-card reveal">
+            <div class="prof-card-title"><i class="bi bi-person-fill"></i> Edit Profile</div>
+            <form method="post" action="{% url 'update_profile' %}" enctype="multipart/form-data">
+              {% csrf_token %}
+
+              <!-- Avatar -->
+              <div class="avatar-upload-wrap">
+                {% if user.avatar %}
+                  <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-preview-sm" id="avatarPreview">
+                {% else %}
+                  <div class="avatar-initials-sm" id="avatarInitials">{{ user.username|slice:":1"|upper }}</div>
+                  <img src="" alt="Avatar" class="avatar-preview-sm" id="avatarPreview" style="display:none;">
+                {% endif %}
+                <div class="avatar-upload-ctrl">
+                  <label for="avatarInput" class="avatar-upload-btn">
+                    <i class="bi bi-camera-fill"></i> Change Photo
+                  </label>
+                  <input type="file" name="avatar" id="avatarInput" accept="image/*">
+                  <span class="prof-hint">Optional. JPG, PNG or WebP. Max 5 MB.</span>
+                </div>
+              </div>
+
+              <hr class="prof-divider">
+
+              <!-- Display Name -->
+              <div class="prof-field">
+                <label class="prof-label" for="id_display_name">Display Name <span style="color:var(--text-light);font-weight:500;">(optional)</span></label>
+                <input
+                  type="text"
+                  name="display_name"
+                  id="id_display_name"
+                  class="prof-input"
+                  value="{{ user.display_name }}"
+                  maxlength="60"
+                  placeholder="e.g. Kebin · Leave blank to show username"
+                >
+                <span class="prof-hint">This is the name shown on your profile banner and across the site.</span>
+              </div>
+
+              <!-- Username (read-only info) -->
+              <div class="prof-field">
+                <label class="prof-label">Username <span style="color:var(--text-light);font-weight:500;">(cannot change)</span></label>
+                <input type="text" class="prof-input" value="{{ user.username }}" readonly>
+              </div>
+
+              <button type="submit" class="prof-save-btn">
+                <i class="bi bi-check-circle-fill"></i> Save Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Panel: Account Settings ────────────────────────── -->
+    <div class="prof-panel" id="panel-settings">
+      <div class="row g-3">
+
+        <!-- University -->
+        <div class="col-12">
+          <div class="prof-card reveal">
+            <div class="prof-card-title"><i class="bi bi-mortarboard-fill"></i> University</div>
+            {% if user.is_verified %}
+            <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:1.2rem;">
+              Set your university so others can find you via <strong>Random Chat</strong>.
+            </p>
+            <form method="post" action="{% url 'update_university' %}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              {% csrf_token %}
+              <select name="university" class="prof-select" style="flex:1;min-width:220px;max-width:400px;">
+                <option value="">— Select your university —</option>
+                <option value="CTU" {% if user.university == "CTU" %}selected{% endif %}>CTU — Cebu Technological University</option>
+                <option value="CEC" {% if user.university == "CEC" %}selected{% endif %}>CEC — Cebu Eastern College</option>
+                <option value="SWU" {% if user.university == "SWU" %}selected{% endif %}>SWU — Southwestern University</option>
+                <option value="ACT" {% if user.university == "ACT" %}selected{% endif %}>ACT — Asian College of Technology</option>
+                <option value="UV"  {% if user.university == "UV"  %}selected{% endif %}>UV — University of the Visayas</option>
+              </select>
+              <button type="submit" class="prof-save-btn"><i class="bi bi-floppy-fill"></i> Save</button>
+            </form>
+            {% else %}
+            <p style="font-size:0.85rem;color:var(--text-light);margin:0;">
+              <i class="bi bi-lock-fill me-1"></i> Please <strong>verify your email</strong> first to set your university.
+              <a href="{% url 'resend_verification' %}" style="color:var(--pink);font-weight:600;margin-left:6px;">Resend link →</a>
+            </p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Change Email -->
+        <div class="col-md-6">
+          <div class="prof-card reveal">
+            <div class="prof-card-title"><i class="bi bi-envelope-fill"></i> Change Email</div>
+            <p style="font-size:0.83rem;color:var(--text-light);margin-bottom:1.2rem;">
+              Current: <strong style="color:var(--text-dark);">{{ user.email }}</strong>
+            </p>
+            <form method="post" action="{% url 'change_email' %}">
+              {% csrf_token %}
+              <div class="prof-field">
+                <label class="prof-label">New Email Address</label>
+                <input type="email" name="new_email" class="prof-input" placeholder="you@university.edu" required>
+              </div>
+              <button type="submit" class="prof-save-btn"><i class="bi bi-envelope-check-fill"></i> Update Email</button>
+              <span class="prof-hint" style="display:block;margin-top:0.6rem;"><i class="bi bi-info-circle me-1"></i>Changing your email will require re-verification.</span>
+            </form>
+          </div>
+        </div>
+
+        <!-- Change Password -->
+        <div class="col-md-6">
+          <div class="prof-card reveal delay-1">
+            <div class="prof-card-title"><i class="bi bi-key-fill"></i> Change Password</div>
+            <form method="post" action="{% url 'change_password' %}">
+              {% csrf_token %}
+              <div class="prof-field">
+                <label class="prof-label">Current Password</label>
+                <input type="password" name="old_password" class="prof-input" required>
+              </div>
+              <div class="prof-field">
+                <label class="prof-label">New Password</label>
+                <input type="password" name="new_password" class="prof-input" required minlength="8">
+              </div>
+              <div class="prof-field">
+                <label class="prof-label">Confirm New Password</label>
+                <input type="password" name="confirm_password" class="prof-input" required minlength="8">
+              </div>
+              <button type="submit" class="prof-save-btn"><i class="bi bi-shield-lock-fill"></i> Update Password</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Sign Out -->
+        <div class="col-12">
+          <div class="danger-card reveal">
+            <div class="danger-info">
+              <h6><i class="bi bi-box-arrow-right me-2"></i>Sign Out</h6>
+              <p>You'll be signed out of your CUlink account on this device.</p>
+            </div>
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="danger-btn">
+                <i class="bi bi-box-arrow-right"></i> Sign Out
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</div><!-- /prof-page -->
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.prof-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.prof-panel').forEach(p => p.classList.remove('active'));
+  const tab = document.getElementById('tab-' + name);
+  const panel = document.getElementById('panel-' + name);
+  if (tab)   tab.classList.add('active');
+  if (panel) panel.classList.add('active');
+}
+
+// Avatar live preview
+document.getElementById('avatarInput')?.addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const preview = document.getElementById('avatarPreview');
+  const initials = document.getElementById('avatarInitials');
+  const reader = new FileReader();
+  reader.onload = e => {
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+    if (initials) initials.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+});
+
+// Auto-open correct tab from message (e.g. after save)
+{% if messages %}
+  {% for msg in messages %}
+    {% if 'Profile updated' in msg.message or 'display' in msg.message|lower %}
+      switchTab('edit');
+    {% elif 'Password' in msg.message or 'Email' in msg.message or 'University' in msg.message %}
+      switchTab('settings');
+    {% endif %}
+  {% endfor %}
+{% endif %}
+</script>
+{% endblock %}

@@ -28,6 +28,8 @@ class CustomUser(AbstractUser):
     is_verified  = models.BooleanField(default=False)
     role         = models.CharField(max_length=20, choices=ROLE_CHOICES, default=MEMBER)
     university   = models.CharField(max_length=10, blank=True, default='', choices=UNIVERSITY_CHOICES)
+    display_name = models.CharField(max_length=60, blank=True, default='')
+    avatar       = CloudinaryField('avatar', blank=True, null=True)
 
     def __str__(self):
         return self.username

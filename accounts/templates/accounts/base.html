@@ -663,8 +663,15 @@
     <div class="slide-menu-header">
       {% if user.is_authenticated %}
       <div class="slide-menu-user">
-        <div class="slide-menu-avatar">{{ user.username|slice:":1"|upper }}</div>
-        <span class="slide-menu-username">{{ user.username }}</span>
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="">
+        {% else %}
+          <div class="slide-menu-avatar">{{ user.username|slice:":1"|upper }}</div>
+        {% endif %}
+        <div>
+          <div class="slide-menu-username">{% if user.display_name %}{{ user.display_name }}{% else %}{{ user.username }}{% endif %}</div>
+          {% if user.display_name %}<div style="font-size:0.72rem;color:var(--text-light);">@{{ user.username }}</div>{% endif %}
+        </div>
       </div>
       {% else %}
       <span style="font-weight:700;font-size:1rem;">Menu</span>
@@ -675,6 +682,7 @@
       <a class="slide-nav-link" href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a>
       {% if user.is_authenticated %}
       <a class="slide-nav-link" href="{% url 'dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a>
+      <a class="slide-nav-link" href="{% url 'profile' %}"><i class="bi bi-person-circle"></i> Profile</a>
       {% endif %}
       <a class="slide-nav-link" href="{% url 'converter' %}"><i class="bi bi-arrow-left-right"></i> Converter</a>
       {% if user.is_authenticated %}
@@ -735,9 +743,18 @@
         {% if not user.is_authenticated %}
         <a href="{% url 'login' %}" class="btn-nav-outline d-none d-sm-inline-flex">Sign In</a>
         {% endif %}
-        <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'register' %}{% endif %}" class="btn-nav-primary">
-          {% if user.is_authenticated %}Dashboard{% else %}Get Started{% endif %}
+        {% if user.is_authenticated %}
+        <a href="{% url 'profile' %}" style="display:flex;align-items:center;gap:8px;text-decoration:none;padding:.38rem .85rem;border-radius:var(--radius-pill);border:1.5px solid var(--border);color:var(--text-dark);font-size:.85rem;font-weight:700;transition:all .2s;font-family:'Space Grotesk',sans-serif;" onmouseover="this.style.borderColor='var(--pink)';this.style.color='var(--pink)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dark)'">
+          {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" alt="">
+          {% else %}
+            <span style="width:24px;height:24px;border-radius:50%;background:var(--pink);color:#fff;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">{{ user.username|slice:":1"|upper }}</span>
+          {% endif %}
+          {% if user.display_name %}{{ user.display_name }}{% else %}Dashboard{% endif %}
         </a>
+        {% else %}
+        <a href="{% url 'register' %}" class="btn-nav-primary">Get Started</a>
+        {% endif %}
         <!-- Dark mode toggle -->
         <button class="dark-toggle" id="darkToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
           <i class="bi bi-moon-fill" id="darkIcon"></i>
