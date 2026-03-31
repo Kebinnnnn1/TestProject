@@ -629,12 +629,61 @@
   .ws-type-card-name { font-size: 0.82rem; font-weight: 700; color: var(--text-dark); }
   .ws-type-card-desc { font-size: 0.72rem; color: var(--text-light); }
 
-  /* ── Mobile ── */
-  @media (max-width: 640px) {
-    .ws-sidebar { position: absolute; z-index: 300; height: 100%; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
-    .ws-sidebar.collapsed { transform: translateX(-100%); }
-    .ws-content-area { padding: 1rem; }
+  /* ── Sidebar close button (hidden on desktop) ── */
+  .ws-sidebar-close {
+    display: none;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 30px; height: 30px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 1rem;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+  }
+  .ws-sidebar-close:hover { border-color: #ef4444; color: #ef4444; }
+
+  /* ── Backdrop overlay for mobile sidebar ── */
+  .ws-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 590;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.2s ease;
+  }
+  .ws-backdrop.visible { display: block; }
+
+  /* ── Tablet (<= 900px): sidebar slides over content ── */
+  @media (max-width: 900px) {
+    .ws-sidebar {
+      position: fixed;
+      left: 0; top: 0;
+      height: 100%;
+      z-index: 600;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 6px 0 32px rgba(0,0,0,0.22);
+    }
+    .ws-sidebar.open { transform: translateX(0); }
+    .ws-sidebar-close { display: flex !important; }
+    .ws-main { width: 100%; }
+  }
+
+  /* ── Phone (<= 480px) ── */
+  @media (max-width: 480px) {
+    .ws-content-area { padding: 0.75rem; }
     .ws-kanban { grid-template-columns: 1fr; }
+    .ws-brainstorm-grid { grid-template-columns: 1fr; }
+    .ws-type-grid { grid-template-columns: repeat(2, 1fr); }
+    .ws-doc-header { flex-wrap: wrap; gap: 0.5rem; }
+    .ws-title-input { font-size: 1.3rem; }
+    .ws-topbar { padding: 0.5rem 0.75rem; }
   }
 
   /* Dark mode adjustments */
@@ -645,12 +694,17 @@
 
 {% block content %}
 {% csrf_token %}
+<!-- Backdrop: tap to close sidebar on mobile/tablet -->
+<div class="ws-backdrop" id="wsBackdrop" onclick="closeSidebarMobile()"></div>
 <div class="ws-wrap" id="wsWrap">
 
   <!-- Sidebar -->
   <aside class="ws-sidebar" id="wsSidebar">
     <div class="ws-sidebar-header">
       <span class="ws-sidebar-title">My Workspace</span>
+      <button class="ws-sidebar-close" id="wsSidebarClose" onclick="closeSidebarMobile()" title="Close sidebar">
+        <i class="bi bi-x-lg"></i>
+      </button>
       <div style="position:relative;">
         <button class="ws-new-btn" id="wsNewBtn" onclick="toggleTypePicker()">
           <i class="bi bi-plus-lg"></i> New
@@ -701,8 +755,8 @@
 const WS = {
   docs: {{ docs_json|safe }},
   activeId: null,
-  sidebarOpen: true,
-  saving: {},   // item pk → debounce timer
+  sidebarOpen: window.innerWidth > 900,
+  saving: {},
   noteSaveTimer: null,
 };
 
@@ -727,6 +781,16 @@ function init() {
   document.addEventListener('click', e => {
     if (!e.target.closest('#wsNewBtn') && !e.target.closest('#wsTypePicker')) {
       document.getElementById('wsTypePicker').classList.remove('open');
+    }
+  });
+  // On resize to desktop: restore sidebar to normal flow
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900) {
+      const s = document.getElementById('wsSidebar');
+      s.classList.remove('open');
+      s.classList.remove('collapsed');
+      document.getElementById('wsBackdrop').classList.remove('visible');
+      WS.sidebarOpen = true;
     }
   });
 }
@@ -756,7 +820,21 @@ function renderSidebar() {
 
 function toggleSidebar() {
   WS.sidebarOpen = !WS.sidebarOpen;
-  document.getElementById('wsSidebar').classList.toggle('collapsed', !WS.sidebarOpen);
+  const sidebar   = document.getElementById('wsSidebar');
+  const backdrop  = document.getElementById('wsBackdrop');
+  const isMobile  = window.innerWidth <= 900;
+  if (isMobile) {
+    sidebar.classList.toggle('open', WS.sidebarOpen);
+    backdrop.classList.toggle('visible', WS.sidebarOpen);
+  } else {
+    sidebar.classList.toggle('collapsed', !WS.sidebarOpen);
+  }
+}
+
+function closeSidebarMobile() {
+  WS.sidebarOpen = false;
+  document.getElementById('wsSidebar').classList.remove('open');
+  document.getElementById('wsBackdrop').classList.remove('visible');
 }
 
 function toggleTypePicker() {
