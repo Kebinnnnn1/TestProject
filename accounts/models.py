@@ -129,3 +129,78 @@ class PostImage(models.Model):
 
     def __str__(self):
         return f"Image {self.order} for Post#{self.post_id}"
+
+
+# ──────────────────────────────────────────
+# Workspace (Notion-style personal workspace)
+# ──────────────────────────────────────────
+
+class WorkspaceDoc(models.Model):
+    """A Notion-like document / workspace page owned by one user."""
+    TYPE_TODO       = 'todo'
+    TYPE_PROJECT    = 'project'
+    TYPE_BRAINSTORM = 'brainstorm'
+    TYPE_GOAL       = 'goal'
+    TYPE_NOTE       = 'note'
+
+    TYPE_CHOICES = [
+        (TYPE_TODO,       'To-Do List'),
+        (TYPE_PROJECT,    'Project Tracker'),
+        (TYPE_BRAINSTORM, 'Brainstorm'),
+        (TYPE_GOAL,       'Goal Tracker'),
+        (TYPE_NOTE,       'Notes'),
+    ]
+
+    owner      = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='workspace_docs')
+    type       = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    title      = models.CharField(max_length=200, default='Untitled')
+    color      = models.CharField(max_length=20, default='#4E7C3F')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.owner.username} — {self.title}"
+
+
+class WorkspaceItem(models.Model):
+    """An individual item inside a WorkspaceDoc (task, card, sticky note, goal, etc.)."""
+    STATUS_TODO        = 'todo'
+    STATUS_IN_PROGRESS = 'in_progress'
+    STATUS_DONE        = 'done'
+    STATUS_BLOCKED     = 'blocked'
+
+    STATUS_CHOICES = [
+        (STATUS_TODO,        'To Do'),
+        (STATUS_IN_PROGRESS, 'In Progress'),
+        (STATUS_DONE,        'Done'),
+        (STATUS_BLOCKED,     'Blocked'),
+    ]
+
+    PRIORITY_LOW    = 'low'
+    PRIORITY_MEDIUM = 'medium'
+    PRIORITY_HIGH   = 'high'
+
+    PRIORITY_CHOICES = [
+        (PRIORITY_LOW,    'Low'),
+        (PRIORITY_MEDIUM, 'Medium'),
+        (PRIORITY_HIGH,   'High'),
+    ]
+
+    doc      = models.ForeignKey(WorkspaceDoc, on_delete=models.CASCADE, related_name='items')
+    content  = models.TextField()
+    is_done  = models.BooleanField(default=False)
+    status   = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_TODO)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default=PRIORITY_MEDIUM)
+    due_date = models.DateField(null=True, blank=True)
+    order    = models.IntegerField(default=0)
+    color    = models.CharField(max_length=20, default='#fef9c3')  # brainstorm sticky-note color
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'created_at']
+
+    def __str__(self):
+        return f"Item in '{self.doc.title}': {self.content[:40]}"

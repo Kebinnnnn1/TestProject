@@ -1,4 +1,5 @@
 from functools import wraps
+import json
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -13,7 +14,7 @@ from django.db.models import Q
 from django.conf import settings as django_settings
 
 from .forms import RegistrationForm, LoginForm
-from .models import CustomUser, EmailVerificationToken, DirectMessage, Post, PostComment, PostImage
+from .models import CustomUser, EmailVerificationToken, DirectMessage, Post, PostComment, PostImage, WorkspaceDoc, WorkspaceItem
 from .tokens import generate_token, send_verification_email
 
 
@@ -924,3 +925,131 @@ def delete_comment(request, pk):
         comment.delete()
     return redirect('wall')
 
+
+# ---------------------------------------------------------------------------
+# Workspace — Notion-style personal workspace
+# ---------------------------------------------------------------------------
+
+def _serialize_item(item):
+    return {
+        'pk':       item.pk,
+        'content':  item.content,
+        'is_done':  item.is_done,
+        'status':   item.status,
+        'priority': item.priority,
+        'due_date': item.due_date.isoformat() if item.due_date else None,
+        'order':    item.order,
+        'color':    item.color,
+    }
+
+
+def _serialize_doc(doc, include_items=True):
+    d = {
+        'pk':    doc.pk,
+        'type':  doc.type,
+        'title': doc.title,
+        'color': doc.color,
+    }
+    if include_items:
+        d['items'] = [_serialize_item(i) for i in doc.items.all()]
+    return d
+
+
+@login_required(login_url='/login/')
+@verified_required
+def workspace_view(request):
+    """Main workspace page — renders all docs as JSON into the template."""
+    docs = WorkspaceDoc.objects.filter(owner=request.user).prefetch_related('items')
+    docs_data = [_serialize_doc(d) for d in docs]
+    return render(request, 'accounts/workspace.html', {
+        'docs_json': json.dumps(docs_data),
+        'me': request.user,
+    })
+
+
+@login_required(login_url='/login/')
+@verified_required
+@require_POST
+def workspace_create_doc(request):
+    """Create a new workspace doc. Returns JSON."""
+    data  = json.loads(request.body)
+    doc   = WorkspaceDoc.objects.create(
+        owner=request.user,
+        type=data.get('type', 'note'),
+        title=data.get('title', 'Untitled')[:200],
+        color=data.get('color', '#4E7C3F'),
+    )
+    return JsonResponse({'ok': True, 'doc': _serialize_doc(doc)})
+
+
+@login_required(login_url='/login/')
+@verified_required
+@require_POST
+def workspace_update_doc(request, pk):
+    """Rename / recolour a workspace doc."""
+    doc  = get_object_or_404(WorkspaceDoc, pk=pk, owner=request.user)
+    data = json.loads(request.body)
+    if 'title' in data:
+        doc.title = data['title'][:200]
+    if 'color' in data:
+        doc.color = data['color']
+    doc.save()
+    return JsonResponse({'ok': True})
+
+
+@login_required(login_url='/login/')
+@verified_required
+@require_POST
+def workspace_delete_doc(request, pk):
+    """Delete a workspace doc and all its items."""
+    doc = get_object_or_404(WorkspaceDoc, pk=pk, owner=request.user)
+    doc.delete()
+    return JsonResponse({'ok': True})
+
+
+@login_required(login_url='/login/')
+@verified_required
+@require_POST
+def workspace_create_item(request, pk):
+    """Add an item to a doc."""
+    doc  = get_object_or_404(WorkspaceDoc, pk=pk, owner=request.user)
+    data = json.loads(request.body)
+    from django.db.models import Max
+    max_order = doc.items.aggregate(Max('order'))['order__max'] or 0
+    item = WorkspaceItem.objects.create(
+        doc=doc,
+        content=data.get('content', ''),
+        status=data.get('status', 'todo'),
+        priority=data.get('priority', 'medium'),
+        due_date=data.get('due_date') or None,
+        color=data.get('color', '#fef9c3'),
+        order=max_order + 1,
+    )
+    return JsonResponse({'ok': True, 'item': _serialize_item(item)})
+
+
+@login_required(login_url='/login/')
+@verified_required
+@require_POST
+def workspace_update_item(request, pk):
+    """Update an item (content, done-state, status, priority, due_date, color)."""
+    item = get_object_or_404(WorkspaceItem, pk=pk, doc__owner=request.user)
+    data = json.loads(request.body)
+    if 'content'  in data: item.content  = data['content']
+    if 'is_done'  in data: item.is_done  = bool(data['is_done'])
+    if 'status'   in data: item.status   = data['status']
+    if 'priority' in data: item.priority = data['priority']
+    if 'due_date' in data: item.due_date = data['due_date'] or None
+    if 'color'    in data: item.color    = data['color']
+    item.save()
+    return JsonResponse({'ok': True, 'item': _serialize_item(item)})
+
+
+@login_required(login_url='/login/')
+@verified_required
+@require_POST
+def workspace_delete_item(request, pk):
+    """Delete a workspace item."""
+    item = get_object_or_404(WorkspaceItem, pk=pk, doc__owner=request.user)
+    item.delete()
+    return JsonResponse({'ok': True})

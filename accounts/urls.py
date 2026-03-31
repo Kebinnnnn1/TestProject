@@ -34,6 +34,14 @@ urlpatterns = [
     path('wall/<int:pk>/like/', views.like_post, name='like_post'),
     path('wall/<int:pk>/comment/', views.add_comment, name='add_comment'),
     path('wall/comment/<int:pk>/delete/', views.delete_comment, name='delete_comment'),
+    # Workspace
+    path('workspace/', views.workspace_view, name='workspace'),
+    path('workspace/doc/create/', views.workspace_create_doc, name='workspace_create_doc'),
+    path('workspace/doc/<int:pk>/update/', views.workspace_update_doc, name='workspace_update_doc'),
+    path('workspace/doc/<int:pk>/delete/', views.workspace_delete_doc, name='workspace_delete_doc'),
+    path('workspace/doc/<int:pk>/item/', views.workspace_create_item, name='workspace_create_item'),
+    path('workspace/item/<int:pk>/update/', views.workspace_update_item, name='workspace_update_item'),
+    path('workspace/item/<int:pk>/delete/', views.workspace_delete_item, name='workspace_delete_item'),
     # Password reset (Django built-in, custom templates)
     path('password-reset/', auth_views.PasswordResetView.as_view(
         template_name='accounts/password_reset.html',

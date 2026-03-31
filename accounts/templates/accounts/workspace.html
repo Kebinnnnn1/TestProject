@@ -1,0 +1,1240 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Workspace — CUlink{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── Layout ── */
+  .ws-wrap {
+    display: flex;
+    height: calc(100vh - 68px);
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  /* ── Sidebar ── */
+  .ws-sidebar {
+    width: 268px;
+    min-width: 268px;
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.3s, min-width 0.3s;
+  }
+  .ws-sidebar.collapsed { width: 0; min-width: 0; }
+
+  .ws-sidebar-header {
+    padding: 1rem 1rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .ws-sidebar-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-light);
+  }
+  .ws-new-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.3rem 0.65rem;
+    background: var(--grad-main);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    position: relative;
+  }
+  .ws-new-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* Type picker dropdown */
+  .ws-type-picker {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    padding: 0.5rem;
+    z-index: 500;
+    min-width: 190px;
+    display: none;
+    animation: fadeInUp 0.15s ease;
+  }
+  .ws-type-picker.open { display: block; }
+  .ws-type-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.55rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.87rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .ws-type-option:hover { background: var(--surface-2); }
+  .ws-type-option .type-icon-sm {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  /* Sidebar doc list */
+  .ws-sidebar-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+  }
+  .ws-group-label {
+    padding: 0.6rem 1rem 0.2rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ws-doc-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    border-radius: 0;
+    transition: background 0.15s;
+    position: relative;
+    color: var(--text-mid);
+    font-size: 0.87rem;
+    font-weight: 500;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .ws-doc-item:hover { background: var(--surface-3); color: var(--text-dark); }
+  .ws-doc-item.active {
+    background: rgba(78,124,63,0.12);
+    color: var(--blue);
+    font-weight: 600;
+  }
+  .ws-doc-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--blue);
+    border-radius: 0 2px 2px 0;
+  }
+  .ws-doc-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .ws-doc-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── Main area ── */
+  .ws-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .ws-topbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--card-bg);
+    flex-shrink: 0;
+  }
+  .ws-toggle-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .ws-toggle-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+  .ws-content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+  }
+
+  /* ── Doc Header ── */
+  .ws-doc-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .ws-doc-emoji {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+  .ws-title-input {
+    flex: 1;
+    font-size: 1.75rem;
+    font-weight: 800;
+    border: none;
+    background: transparent;
+    color: var(--text-dark);
+    outline: none;
+    padding: 0;
+    min-width: 0;
+    letter-spacing: -0.5px;
+  }
+  .ws-title-input::placeholder { color: var(--text-light); }
+  .ws-del-doc-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .ws-del-doc-btn:hover { border-color: #ef4444; color: #ef4444; }
+
+  /* ── Progress bar ── */
+  .ws-progress-wrap { margin-bottom: 1.5rem; }
+  .ws-progress-bar {
+    height: 8px;
+    background: var(--surface-3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.4rem;
+  }
+  .ws-progress-fill {
+    height: 100%;
+    background: var(--grad-main);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .ws-progress-label {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    font-weight: 500;
+  }
+
+  /* ── Todo list ── */
+  .ws-todo-list { margin-bottom: 0.75rem; }
+  .ws-todo-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: 10px;
+    transition: background 0.15s;
+    group: true;
+  }
+  .ws-todo-item:hover { background: var(--surface-2); }
+  .ws-check-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.15rem;
+    color: var(--text-light);
+    display: flex;
+    padding: 0;
+    flex-shrink: 0;
+    transition: color 0.2s, transform 0.15s;
+  }
+  .ws-check-btn:hover { transform: scale(1.15); }
+  .ws-check-btn.done { color: var(--blue); }
+  .ws-item-text {
+    flex: 1;
+    font-size: 0.93rem;
+    color: var(--text-dark);
+    outline: none;
+    border: none;
+    background: transparent;
+    min-width: 0;
+    cursor: text;
+    padding: 0;
+    line-height: 1.5;
+  }
+  .ws-item-text.done-text { text-decoration: line-through; color: var(--text-light); }
+  .ws-priority-pill {
+    padding: 1px 8px;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .ws-due-badge {
+    font-size: 0.72rem;
+    color: var(--text-light);
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 3px;
+  }
+  .ws-due-badge.overdue { color: #ef4444; }
+  .ws-item-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: transparent;
+    font-size: 0.85rem;
+    padding: 2px 4px;
+    border-radius: 5px;
+    transition: color 0.15s, background 0.15s;
+    flex-shrink: 0;
+  }
+  .ws-todo-item:hover .ws-item-del { color: var(--text-light); }
+  .ws-item-del:hover { color: #ef4444 !important; background: rgba(239,68,68,0.08); }
+
+  /* Add item form */
+  .ws-add-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 10px;
+    border: 1.5px dashed var(--border);
+    margin-top: 0.5rem;
+    transition: border-color 0.2s;
+  }
+  .ws-add-row:focus-within { border-color: var(--blue); }
+  .ws-add-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    outline: none;
+    padding: 0;
+  }
+  .ws-add-input::placeholder { color: var(--text-light); }
+  .ws-add-submit {
+    background: var(--grad-main);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .ws-add-submit:hover { opacity: 0.88; }
+
+  /* ── Project Kanban ── */
+  .ws-kanban {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  @media (max-width: 700px) { .ws-kanban { grid-template-columns: 1fr; } }
+  .ws-kanban-col {
+    background: var(--surface-2);
+    border-radius: 14px;
+    padding: 0.85rem;
+    min-height: 200px;
+  }
+  .ws-kanban-col-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .ws-kanban-col-count {
+    background: var(--surface-3);
+    color: var(--text-light);
+    border-radius: 50px;
+    padding: 1px 7px;
+    font-size: 0.7rem;
+    margin-left: auto;
+  }
+  .ws-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem;
+    margin-bottom: 0.6rem;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.15s;
+    animation: fadeInUp 0.2s ease both;
+  }
+  .ws-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-1px); }
+  .ws-card-content {
+    font-size: 0.88rem;
+    color: var(--text-dark);
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+    outline: none;
+    border: none;
+    background: transparent;
+    width: 100%;
+    resize: none;
+    font-family: inherit;
+    padding: 0;
+  }
+  .ws-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .ws-card-status-btn {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.15s;
+  }
+
+  /* ── Brainstorm ── */
+  .ws-brainstorm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .ws-sticky {
+    border-radius: 14px;
+    padding: 1rem;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeInUp 0.25s ease both;
+  }
+  .ws-sticky:hover { transform: rotate(-0.5deg) scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.13); }
+  .ws-sticky-text {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: #333;
+    outline: none;
+    resize: none;
+    width: 100%;
+    font-family: inherit;
+    line-height: 1.55;
+    padding: 0;
+  }
+  .ws-sticky-del {
+    position: absolute;
+    top: 6px; right: 6px;
+    background: rgba(0,0,0,0.08);
+    border: none;
+    border-radius: 6px;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #555;
+    transition: background 0.15s;
+    opacity: 0;
+  }
+  .ws-sticky:hover .ws-sticky-del { opacity: 1; }
+  .ws-sticky-del:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
+  .ws-sticky-color-btns {
+    display: flex;
+    gap: 5px;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .ws-color-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .ws-color-dot:hover { transform: scale(1.3); }
+  .ws-add-sticky-btn {
+    border: 2px dashed var(--border);
+    border-radius: 14px;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: none;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    gap: 8px;
+    transition: border-color 0.2s, color 0.2s;
+    width: 100%;
+  }
+  .ws-add-sticky-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+  /* ── Goal tracker ── */
+  .ws-goal-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: box-shadow 0.2s;
+    animation: fadeInUp 0.2s ease both;
+  }
+  .ws-goal-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+  .ws-goal-check {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    background: none;
+  }
+  .ws-goal-check.done { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .ws-goal-text {
+    flex: 1;
+    font-size: 0.93rem;
+    color: var(--text-dark);
+    outline: none;
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-family: inherit;
+  }
+  .ws-goal-text.done-text { text-decoration: line-through; color: var(--text-light); }
+
+  /* ── Note ── */
+  .ws-note-textarea {
+    width: 100%;
+    min-height: calc(100vh - 280px);
+    border: none;
+    background: transparent;
+    font-size: 0.97rem;
+    line-height: 1.85;
+    color: var(--text-dark);
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    padding: 0;
+  }
+  .ws-note-toolbar {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .ws-tb-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-mid);
+    transition: all 0.15s;
+  }
+  .ws-tb-btn:hover { background: var(--surface-3); color: var(--blue); border-color: var(--blue); }
+
+  /* ── Welcome screen ── */
+  .ws-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 2rem;
+  }
+  .ws-welcome-emoji { font-size: 4rem; margin-bottom: 1rem; }
+  .ws-welcome h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-dark); }
+  .ws-welcome p { color: var(--text-light); margin-bottom: 2rem; max-width: 380px; }
+  .ws-type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    max-width: 600px;
+    width: 100%;
+  }
+  .ws-type-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .ws-type-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    border-color: var(--blue);
+  }
+  .ws-type-card-icon { font-size: 1.8rem; }
+  .ws-type-card-name { font-size: 0.82rem; font-weight: 700; color: var(--text-dark); }
+  .ws-type-card-desc { font-size: 0.72rem; color: var(--text-light); }
+
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    .ws-sidebar { position: absolute; z-index: 300; height: 100%; box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
+    .ws-sidebar.collapsed { transform: translateX(-100%); }
+    .ws-content-area { padding: 1rem; }
+    .ws-kanban { grid-template-columns: 1fr; }
+  }
+
+  /* Dark mode adjustments */
+  [data-theme="dark"] .ws-sticky-text { color: #1a1a1a; }
+  [data-theme="dark"] .ws-sidebar { background: var(--surface-2); }
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="ws-wrap" id="wsWrap">
+
+  <!-- Sidebar -->
+  <aside class="ws-sidebar" id="wsSidebar">
+    <div class="ws-sidebar-header">
+      <span class="ws-sidebar-title">My Workspace</span>
+      <div style="position:relative;">
+        <button class="ws-new-btn" id="wsNewBtn" onclick="toggleTypePicker()">
+          <i class="bi bi-plus-lg"></i> New
+        </button>
+        <div class="ws-type-picker" id="wsTypePicker">
+          <button class="ws-type-option" onclick="createDoc('todo')">
+            <span class="type-icon-sm" style="background:#dcfce7;">✅</span>
+            To-Do List
+          </button>
+          <button class="ws-type-option" onclick="createDoc('project')">
+            <span class="type-icon-sm" style="background:#dbeafe;">📋</span>
+            Project Tracker
+          </button>
+          <button class="ws-type-option" onclick="createDoc('brainstorm')">
+            <span class="type-icon-sm" style="background:#fef9c3;">💡</span>
+            Brainstorm
+          </button>
+          <button class="ws-type-option" onclick="createDoc('goal')">
+            <span class="type-icon-sm" style="background:#f3e8ff;">🎯</span>
+            Goal Tracker
+          </button>
+          <button class="ws-type-option" onclick="createDoc('note')">
+            <span class="type-icon-sm" style="background:#fce7f3;">📝</span>
+            Notes
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="ws-sidebar-body" id="wsSidebarBody"></div>
+  </aside>
+
+  <!-- Main -->
+  <div class="ws-main">
+    <div class="ws-topbar">
+      <button class="ws-toggle-btn" onclick="toggleSidebar()" title="Toggle sidebar">
+        <i class="bi bi-layout-sidebar"></i>
+      </button>
+      <span id="wsTopbarTitle" style="font-size:0.88rem;font-weight:600;color:var(--text-light);"></span>
+    </div>
+    <div class="ws-content-area" id="wsContentArea"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+const WS = {
+  docs: {{ docs_json|safe }},
+  activeId: null,
+  sidebarOpen: true,
+  saving: {},   // item pk → debounce timer
+  noteSaveTimer: null,
+};
+
+const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+const TYPE_META = {
+  todo:       { icon: '✅', label: 'To-Do List',      color: '#16a34a', bg: '#dcfce7' },
+  project:    { icon: '📋', label: 'Project Tracker', color: '#2563eb', bg: '#dbeafe' },
+  brainstorm: { icon: '💡', label: 'Brainstorm',      color: '#d97706', bg: '#fef9c3' },
+  goal:       { icon: '🎯', label: 'Goal Tracker',    color: '#7c3aed', bg: '#f3e8ff' },
+  note:       { icon: '📝', label: 'Notes',           color: '#db2777', bg: '#fce7f3' },
+};
+
+const STICKY_COLORS = ['#fef9c3','#fce7f3','#dbeafe','#dcfce7','#ffedd5','#f3e8ff','#e0f2fe','#fef2f2'];
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+function init() {
+  const stored = parseInt(localStorage.getItem('ws_active')) || null;
+  if (stored && WS.docs.find(d => d.pk === stored)) WS.activeId = stored;
+  renderSidebar();
+  renderMain();
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#wsNewBtn') && !e.target.closest('#wsTypePicker')) {
+      document.getElementById('wsTypePicker').classList.remove('open');
+    }
+  });
+}
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const body = document.getElementById('wsSidebarBody');
+  const groups = ['todo','project','brainstorm','goal','note'];
+  let html = '';
+  groups.forEach(type => {
+    const docs = WS.docs.filter(d => d.type === type);
+    if (!docs.length) return;
+    const m = TYPE_META[type];
+    html += `<div class="ws-group-label">${m.icon} ${m.label}</div>`;
+    docs.forEach(doc => {
+      const active = doc.pk === WS.activeId ? 'active' : '';
+      html += `
+        <button class="ws-doc-item ${active}" onclick="selectDoc(${doc.pk})">
+          <span class="ws-doc-dot" style="background:${doc.color};"></span>
+          <span class="ws-doc-name">${esc(doc.title)}</span>
+        </button>`;
+    });
+  });
+  if (!html) html = `<div style="padding:1rem;font-size:0.82rem;color:var(--text-light);text-align:center;">No docs yet.<br>Click + New to start.</div>`;
+  body.innerHTML = html;
+}
+
+function toggleSidebar() {
+  WS.sidebarOpen = !WS.sidebarOpen;
+  document.getElementById('wsSidebar').classList.toggle('collapsed', !WS.sidebarOpen);
+}
+
+function toggleTypePicker() {
+  document.getElementById('wsTypePicker').classList.toggle('open');
+}
+
+// ─── Select / navigate ────────────────────────────────────────────────────────
+function selectDoc(pk) {
+  WS.activeId = pk;
+  localStorage.setItem('ws_active', pk);
+  renderSidebar();
+  renderMain();
+}
+
+function getActiveDoc() {
+  return WS.docs.find(d => d.pk === WS.activeId) || null;
+}
+
+// ─── Main render (dispatcher) ─────────────────────────────────────────────────
+function renderMain() {
+  const doc = getActiveDoc();
+  const topbarTitle = document.getElementById('wsTopbarTitle');
+  if (!doc) {
+    topbarTitle.textContent = '';
+    renderWelcome();
+    return;
+  }
+  const m = TYPE_META[doc.type];
+  topbarTitle.textContent = m.label;
+  switch (doc.type) {
+    case 'todo':       renderTodo(doc);       break;
+    case 'project':    renderProject(doc);    break;
+    case 'brainstorm': renderBrainstorm(doc); break;
+    case 'goal':       renderGoal(doc);       break;
+    case 'note':       renderNote(doc);       break;
+  }
+}
+
+// ─── Welcome screen ───────────────────────────────────────────────────────────
+function renderWelcome() {
+  document.getElementById('wsContentArea').innerHTML = `
+    <div class="ws-welcome">
+      <div class="ws-welcome-emoji">📚</div>
+      <h2>Your Personal Workspace</h2>
+      <p>Organize your tasks, projects, ideas, goals and notes — all in one place. Create your first doc below.</p>
+      <div class="ws-type-grid">
+        ${Object.entries(TYPE_META).map(([type, m]) => `
+          <div class="ws-type-card" onclick="createDoc('${type}')">
+            <div class="ws-type-card-icon">${m.icon}</div>
+            <div class="ws-type-card-name">${m.label}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+}
+
+// ─── Shared doc header HTML ───────────────────────────────────────────────────
+function docHeaderHTML(doc) {
+  const m = TYPE_META[doc.type];
+  return `
+    <div class="ws-doc-header">
+      <div class="ws-doc-emoji" style="background:${m.bg};">${m.icon}</div>
+      <input class="ws-title-input" id="docTitleInput" value="${esc(doc.title)}"
+             placeholder="Untitled"
+             onchange="saveDocTitle(${doc.pk}, this.value)">
+      <button class="ws-del-doc-btn" onclick="deleteDoc(${doc.pk})">
+        <i class="bi bi-trash3"></i> Delete
+      </button>
+    </div>`;
+}
+
+// ─── TODO ─────────────────────────────────────────────────────────────────────
+function renderTodo(doc) {
+  const done  = doc.items.filter(i => i.is_done).length;
+  const total = doc.items.length;
+  const pct   = total ? Math.round((done / total) * 100) : 0;
+  const progressHTML = total
+    ? `<div class="ws-progress-wrap">
+         <div class="ws-progress-bar"><div class="ws-progress-fill" id="progressFill" style="width:${pct}%"></div></div>
+         <div class="ws-progress-label" id="progressLabel">${done} of ${total} completed · ${pct}%</div>
+       </div>` : '';
+
+  document.getElementById('wsContentArea').innerHTML = `
+    ${docHeaderHTML(doc)}
+    ${progressHTML}
+    <div class="ws-todo-list" id="wsItemList">
+      ${doc.items.map(item => todoItemHTML(item, doc.pk)).join('')}
+    </div>
+    <form class="ws-add-row" onsubmit="addItem(event, ${doc.pk}, 'todo')">
+      <i class="bi bi-plus" style="color:var(--text-light);"></i>
+      <input class="ws-add-input" id="todoInput" placeholder="Add a task…">
+      <button type="submit" class="ws-add-submit">Add</button>
+    </form>`;
+}
+
+function todoItemHTML(item, docPk) {
+  const pColors = { low:'#16a34a', medium:'#d97706', high:'#dc2626' };
+  const pc = pColors[item.priority] || '#d97706';
+  const today = new Date().toISOString().slice(0,10);
+  const overdue = item.due_date && item.due_date < today && !item.is_done;
+  const dueHTML = item.due_date
+    ? `<span class="ws-due-badge ${overdue?'overdue':''}"><i class="bi bi-calendar3"></i>${item.due_date}</span>` : '';
+  return `
+    <div class="ws-todo-item" id="ti-${item.pk}">
+      <button class="ws-check-btn ${item.is_done?'done':''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})" title="Toggle complete">
+        <i class="bi bi-${item.is_done?'check-circle-fill':'circle'}"></i>
+      </button>
+      <input class="ws-item-text ${item.is_done?'done-text':''}" value="${esc(item.content)}"
+             onchange="saveItemContent(${item.pk},${docPk},this.value)">
+      <span class="ws-priority-pill" style="background:${pc}20;color:${pc};"
+            onclick="cyclePriority(${item.pk},${docPk},'${item.priority}')"
+            title="Click to cycle priority">${item.priority}</span>
+      ${dueHTML}
+      <button class="ws-item-del" onclick="deleteItem(${item.pk},${docPk})" title="Delete"><i class="bi bi-x"></i></button>
+    </div>`;
+}
+
+function updateTodoProgress(doc) {
+  const fill  = document.getElementById('progressFill');
+  const label = document.getElementById('progressLabel');
+  if (!fill) return;
+  const done  = doc.items.filter(i => i.is_done).length;
+  const total = doc.items.length;
+  const pct   = total ? Math.round((done / total) * 100) : 0;
+  fill.style.width = pct + '%';
+  if (label) label.textContent = `${done} of ${total} completed · ${pct}%`;
+}
+
+// ─── PROJECT (Kanban) ─────────────────────────────────────────────────────────
+function renderProject(doc) {
+  const cols = [
+    { status: 'todo',        label: 'To Do',       color: '#64748b', dot: '#64748b' },
+    { status: 'in_progress', label: 'In Progress',  color: '#2563eb', dot: '#3b82f6' },
+    { status: 'done',        label: 'Done',         color: '#16a34a', dot: '#22c55e' },
+    { status: 'blocked',     label: 'Blocked',      color: '#dc2626', dot: '#ef4444' },
+  ];
+
+  const colHtml = cols.map(col => {
+    const items = doc.items.filter(i => i.status === col.status);
+    const cards = items.map(item => projectCardHTML(item, doc.pk)).join('');
+    return `
+      <div class="ws-kanban-col">
+        <div class="ws-kanban-col-title" style="color:${col.color};">
+          <span style="width:8px;height:8px;border-radius:50%;background:${col.dot};display:inline-block;"></span>
+          ${col.label}
+          <span class="ws-kanban-col-count">${items.length}</span>
+        </div>
+        <div id="col-${col.status}">
+          ${cards}
+        </div>
+        <form class="ws-add-row" style="margin-top:0.5rem;" onsubmit="addItem(event,${doc.pk},'project','${col.status}')">
+          <i class="bi bi-plus" style="color:var(--text-light);font-size:0.9rem;"></i>
+          <input class="ws-add-input" placeholder="Add card…" style="font-size:0.85rem;">
+          <button type="submit" class="ws-add-submit">+</button>
+        </form>
+      </div>`;
+  }).join('');
+
+  document.getElementById('wsContentArea').innerHTML = `
+    ${docHeaderHTML(doc)}
+    <div class="ws-kanban">${colHtml}</div>`;
+}
+
+function projectCardHTML(item, docPk) {
+  const pColors = { low:'#16a34a', medium:'#d97706', high:'#dc2626' };
+  const pc = pColors[item.priority] || '#d97706';
+  const nextStatus = { todo:'in_progress', in_progress:'done', done:'blocked', blocked:'todo' };
+  const nextLabel  = { todo:'▶ Start', in_progress:'✓ Done', done:'🚫 Block', blocked:'↩ Reset' };
+  return `
+    <div class="ws-card" id="kc-${item.pk}">
+      <div class="ws-card-content" contenteditable="true"
+           onblur="saveItemContent(${item.pk},${docPk},this.textContent.trim())">${esc(item.content)}</div>
+      <div class="ws-card-footer">
+        <button class="ws-card-status-btn" style="background:${pc}20;color:${pc};"
+                onclick="cyclePriority(${item.pk},${docPk},'${item.priority}')">${item.priority}</button>
+        <button class="ws-card-status-btn" style="background:var(--surface-3);color:var(--text-mid);"
+                onclick="moveCard(${item.pk},${docPk},'${nextStatus[item.status]}')">${nextLabel[item.status]}</button>
+        <button class="ws-item-del" style="margin-left:auto;color:var(--text-light);"
+                onclick="deleteItem(${item.pk},${docPk})"><i class="bi bi-x"></i></button>
+      </div>
+    </div>`;
+}
+
+function moveCard(pk, docPk, newStatus) {
+  const doc  = WS.docs.find(d => d.pk === docPk);
+  const item = doc.items.find(i => i.pk === pk);
+  if (!item) return;
+  item.status = newStatus;
+  api(`/workspace/item/${pk}/update/`, { status: newStatus });
+  renderProject(doc);
+}
+
+// ─── BRAINSTORM ───────────────────────────────────────────────────────────────
+function renderBrainstorm(doc) {
+  const stickies = doc.items.map(item => stickyHTML(item, doc.pk)).join('');
+  document.getElementById('wsContentArea').innerHTML = `
+    ${docHeaderHTML(doc)}
+    <div class="ws-brainstorm-grid" id="wsBGrid">
+      ${stickies}
+      <button class="ws-add-sticky-btn" onclick="addSticky(${doc.pk})">
+        <i class="bi bi-plus-circle" style="font-size:1.5rem;"></i>
+        Add idea
+      </button>
+    </div>`;
+}
+
+function stickyHTML(item, docPk) {
+  const colorDots = STICKY_COLORS.map(c =>
+    `<span class="ws-color-dot" style="background:${c};" onclick="changeStickyColor(${item.pk},${docPk},'${c}')"></span>`
+  ).join('');
+  return `
+    <div class="ws-sticky" id="st-${item.pk}" style="background:${item.color};">
+      <button class="ws-sticky-del" onclick="deleteItem(${item.pk},${docPk})"><i class="bi bi-x"></i></button>
+      <textarea class="ws-sticky-text" rows="5"
+                onblur="saveItemContent(${item.pk},${docPk},this.value)">${esc(item.content)}</textarea>
+      <div class="ws-sticky-color-btns">${colorDots}</div>
+    </div>`;
+}
+
+function changeStickyColor(pk, docPk, color) {
+  const doc  = WS.docs.find(d => d.pk === docPk);
+  const item = doc.items.find(i => i.pk === pk);
+  if (!item) return;
+  item.color = color;
+  const el = document.getElementById(`st-${pk}`);
+  if (el) el.style.background = color;
+  api(`/workspace/item/${pk}/update/`, { color });
+}
+
+async function addSticky(docPk) {
+  const colors = STICKY_COLORS;
+  const color  = colors[Math.floor(Math.random() * colors.length)];
+  const data   = await api(`/workspace/doc/${docPk}/item/`, { content: '', color, status: 'todo', priority: 'medium' });
+  if (data.ok) {
+    const doc = WS.docs.find(d => d.pk === docPk);
+    doc.items.push(data.item);
+    renderBrainstorm(doc);
+    // Focus the new sticky
+    setTimeout(() => {
+      const el = document.querySelector(`#st-${data.item.pk} .ws-sticky-text`);
+      if (el) el.focus();
+    }, 50);
+  }
+}
+
+// ─── GOAL ─────────────────────────────────────────────────────────────────────
+function renderGoal(doc) {
+  const done  = doc.items.filter(i => i.is_done).length;
+  const total = doc.items.length;
+  const pct   = total ? Math.round(done / total * 100) : 0;
+  const progressHTML = total
+    ? `<div class="ws-progress-wrap">
+         <div class="ws-progress-bar"><div class="ws-progress-fill" id="progressFill" style="width:${pct}%;background:linear-gradient(90deg,#7c3aed,#ec4899);"></div></div>
+         <div class="ws-progress-label" id="progressLabel">${pct}% of goals achieved</div>
+       </div>` : '';
+
+  document.getElementById('wsContentArea').innerHTML = `
+    ${docHeaderHTML(doc)}
+    ${progressHTML}
+    <div id="wsItemList">
+      ${doc.items.map(item => goalItemHTML(item, doc.pk)).join('')}
+    </div>
+    <form class="ws-add-row" onsubmit="addItem(event,${doc.pk},'goal')">
+      <i class="bi bi-plus" style="color:var(--text-light);"></i>
+      <input class="ws-add-input" id="goalInput" placeholder="Add a goal…">
+      <button type="submit" class="ws-add-submit">Add</button>
+    </form>`;
+}
+
+function goalItemHTML(item, docPk) {
+  return `
+    <div class="ws-goal-item" id="gi-${item.pk}">
+      <button class="ws-goal-check ${item.is_done?'done':''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})">
+        ${item.is_done ? '<i class="bi bi-check"></i>' : ''}
+      </button>
+      <input class="ws-goal-text ${item.is_done?'done-text':''}" value="${esc(item.content)}"
+             onchange="saveItemContent(${item.pk},${docPk},this.value)">
+      <button class="ws-item-del" style="color:var(--text-light);" onclick="deleteItem(${item.pk},${docPk})">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>`;
+}
+
+// ─── NOTE ─────────────────────────────────────────────────────────────────────
+function renderNote(doc) {
+  const content = doc.items.length ? doc.items[0].content : '';
+  const itemPk  = doc.items.length ? doc.items[0].pk : null;
+
+  document.getElementById('wsContentArea').innerHTML = `
+    ${docHeaderHTML(doc)}
+    <div class="ws-note-toolbar">
+      <button class="ws-tb-btn" onclick="insertText('**','**')" title="Bold"><b>B</b></button>
+      <button class="ws-tb-btn" onclick="insertText('*','*')" title="Italic"><i>I</i></button>
+      <button class="ws-tb-btn" onclick="insertTextLine('## ')" title="Heading">H</button>
+      <button class="ws-tb-btn" onclick="insertTextLine('- ')" title="Bullet list">• List</button>
+      <button class="ws-tb-btn" onclick="insertTextLine('- [ ] ')" title="Checkbox">☐ Task</button>
+      <button class="ws-tb-btn" onclick="insertTextLine('> ')" title="Quote">" Quote</button>
+      <span id="noteSaveStatus" style="font-size:0.75rem;color:var(--text-light);margin-left:auto;align-self:center;"></span>
+    </div>
+    <textarea class="ws-note-textarea" id="noteArea"
+              oninput="autoSaveNote(${doc.pk},${itemPk},this.value)"
+              placeholder="Start typing your notes here…">${esc(content)}</textarea>`;
+}
+
+function insertText(before, after) {
+  const ta = document.getElementById('noteArea');
+  if (!ta) return;
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const selected = ta.value.slice(s, e);
+  ta.value = ta.value.slice(0, s) + before + selected + after + ta.value.slice(e);
+  ta.selectionStart = s + before.length;
+  ta.selectionEnd   = s + before.length + selected.length;
+  ta.focus();
+  ta.dispatchEvent(new Event('input'));
+}
+
+function insertTextLine(prefix) {
+  const ta = document.getElementById('noteArea');
+  if (!ta) return;
+  const s = ta.selectionStart;
+  const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+  ta.value = ta.value.slice(0, lineStart) + prefix + ta.value.slice(lineStart);
+  ta.selectionStart = ta.selectionEnd = lineStart + prefix.length;
+  ta.focus();
+  ta.dispatchEvent(new Event('input'));
+}
+
+async function autoSaveNote(docPk, itemPk, content) {
+  if (WS.noteSaveTimer) clearTimeout(WS.noteSaveTimer);
+  const statusEl = document.getElementById('noteSaveStatus');
+  if (statusEl) statusEl.textContent = 'Saving…';
+  WS.noteSaveTimer = setTimeout(async () => {
+    const doc = WS.docs.find(d => d.pk === docPk);
+    if (!doc) return;
+    if (itemPk) {
+      await api(`/workspace/item/${itemPk}/update/`, { content });
+      const item = doc.items.find(i => i.pk === itemPk);
+      if (item) item.content = content;
+    } else {
+      // First note item — create it
+      const data = await api(`/workspace/doc/${docPk}/item/`, { content, status:'todo', priority:'medium', color:'#fce7f3' });
+      if (data.ok) { doc.items.push(data.item); }
+    }
+    if (statusEl) { statusEl.textContent = 'Saved ✓'; setTimeout(() => { statusEl.textContent = ''; }, 2000); }
+  }, 800);
+}
+
+// ─── CRUD operations ──────────────────────────────────────────────────────────
+async function createDoc(type) {
+  document.getElementById('wsTypePicker').classList.remove('open');
+  const m    = TYPE_META[type];
+  const data = await api('/workspace/doc/create/', { type, title: `My ${m.label}`, color: m.color });
+  if (data.ok) {
+    WS.docs.unshift(data.doc);
+    selectDoc(data.doc.pk);
+  }
+}
+
+async function saveDocTitle(pk, title) {
+  const doc = WS.docs.find(d => d.pk === pk);
+  if (doc) doc.title = title;
+  await api(`/workspace/doc/${pk}/update/`, { title });
+  renderSidebar();
+  // Re-highlight active
+  document.querySelectorAll('.ws-doc-item').forEach(el => {
+    if (el.onclick && el.getAttribute('onclick')?.includes(`(${pk})`)) el.classList.add('active');
+  });
+}
+
+async function deleteDoc(pk) {
+  if (!confirm('Delete this doc and all its items?')) return;
+  const data = await api(`/workspace/doc/${pk}/delete/`, {});
+  if (data.ok) {
+    WS.docs = WS.docs.filter(d => d.pk !== pk);
+    if (WS.activeId === pk) {
+      WS.activeId = WS.docs.length ? WS.docs[0].pk : null;
+      localStorage.setItem('ws_active', WS.activeId || '');
+    }
+    renderSidebar();
+    renderMain();
+  }
+}
+
+async function addItem(e, docPk, type, status='todo') {
+  e.preventDefault();
+  const inputEl = e.target.querySelector('input');
+  const content = inputEl ? inputEl.value.trim() : '';
+  if (!content) return;
+  inputEl.value = '';
+  const color = type === 'brainstorm' ? STICKY_COLORS[Math.floor(Math.random()*STICKY_COLORS.length)] : '#fef9c3';
+  const data  = await api(`/workspace/doc/${docPk}/item/`, { content, status, priority:'medium', color });
+  if (data.ok) {
+    const doc = WS.docs.find(d => d.pk === docPk);
+    doc.items.push(data.item);
+    // Optimistic insert
+    const listEl = document.getElementById('wsItemList') || document.getElementById('col-todo');
+    if (type === 'todo' && listEl) {
+      listEl.insertAdjacentHTML('beforeend', todoItemHTML(data.item, docPk));
+      updateTodoProgress(doc);
+    } else if (type === 'project') {
+      const col = document.getElementById(`col-${status}`);
+      if (col) col.insertAdjacentHTML('beforebegin', projectCardHTML(data.item, docPk));
+      else renderProject(doc);
+    } else if (type === 'goal' && listEl) {
+      listEl.insertAdjacentHTML('beforeend', goalItemHTML(data.item, docPk));
+      updateTodoProgress(doc);
+    } else {
+      renderMain();
+    }
+    inputEl.focus();
+  }
+}
+
+async function toggleDone(pk, docPk, isDone) {
+  const doc  = WS.docs.find(d => d.pk === docPk);
+  const item = doc.items.find(i => i.pk === pk);
+  if (!item) return;
+  item.is_done = isDone;
+  await api(`/workspace/item/${pk}/update/`, { is_done: isDone });
+  // Update UI in place
+  const el = document.getElementById(`ti-${pk}`) || document.getElementById(`gi-${pk}`);
+  if (el) {
+    el.querySelectorAll('.ws-check-btn, .ws-goal-check').forEach(btn => {
+      btn.classList.toggle('done', isDone);
+      const ic = btn.querySelector('i');
+      if (ic && el.id.startsWith('ti-')) ic.className = `bi bi-${isDone?'check-circle-fill':'circle'}`;
+      if (el.id.startsWith('gi-')) btn.innerHTML = isDone ? '<i class="bi bi-check"></i>' : '';
+      btn.setAttribute('onclick', `toggleDone(${pk},${docPk},${!isDone})`);
+    });
+    el.querySelectorAll('.ws-item-text, .ws-goal-text').forEach(t => t.classList.toggle('done-text', isDone));
+  }
+  updateTodoProgress(doc);
+}
+
+async function saveItemContent(pk, docPk, content) {
+  const doc  = WS.docs.find(d => d.pk === docPk);
+  const item = doc ? doc.items.find(i => i.pk === pk) : null;
+  if (item) item.content = content;
+  await api(`/workspace/item/${pk}/update/`, { content });
+}
+
+const PRIORITIES = ['low','medium','high'];
+async function cyclePriority(pk, docPk, current) {
+  const next = PRIORITIES[(PRIORITIES.indexOf(current) + 1) % PRIORITIES.length];
+  const doc  = WS.docs.find(d => d.pk === docPk);
+  const item = doc.items.find(i => i.pk === pk);
+  if (item) item.priority = next;
+  await api(`/workspace/item/${pk}/update/`, { priority: next });
+  renderMain(); // re-render to update colors
+}
+
+async function deleteItem(pk, docPk) {
+  const data = await api(`/workspace/item/${pk}/delete/`, {});
+  if (data.ok) {
+    const doc = WS.docs.find(d => d.pk === docPk);
+    doc.items = doc.items.filter(i => i.pk !== pk);
+    const el = document.getElementById(`ti-${pk}`) ||
+               document.getElementById(`kc-${pk}`) ||
+               document.getElementById(`st-${pk}`) ||
+               document.getElementById(`gi-${pk}`);
+    if (el) { el.style.animation = 'none'; el.style.opacity = '0'; el.style.transform = 'scale(0.9)'; el.style.transition = '0.2s'; setTimeout(() => el.remove(), 200); }
+    updateTodoProgress(doc);
+  }
+}
+
+// ─── API helper ───────────────────────────────────────────────────────────────
+async function api(url, body) {
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF() },
+      body: JSON.stringify(body),
+    });
+    return await res.json();
+  } catch (e) { console.error('WS API error:', e); return { ok: false }; }
+}
+
+// ─── Escape helper ────────────────────────────────────────────────────────────
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Boot ────────────────────────────────────────────────────────────────────
+init();
+</script>
+{% endblock %}
