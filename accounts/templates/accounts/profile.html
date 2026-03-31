@@ -405,9 +405,9 @@
 
     <!-- ─── Panel: Overview ─────────────────────────────────── -->
     <div class="prof-panel active" id="panel-overview">
-      <div class="row g-3">
+      <div class="row g-3 align-items-stretch">
         <div class="col-md-8">
-          <div class="prof-card reveal">
+          <div class="prof-card reveal h-100" style="margin-bottom:0;">
             <div class="prof-card-title"><i class="bi bi-person-vcard-fill"></i> Account Details</div>
             <div class="prof-info-row">
               <span class="prof-ir-label">Username</span>
@@ -454,7 +454,7 @@
           </div>
         </div>
         <div class="col-md-4">
-          <div class="prof-card reveal delay-1">
+          <div class="prof-card reveal delay-1 h-100" style="margin-bottom:0;">
             <div class="prof-card-title"><i class="bi bi-lightning-charge-fill"></i> Quick Actions</div>
             <div class="d-flex flex-column gap-2">
               <a href="{% url 'dashboard' %}" style="display:flex;align-items:center;gap:9px;padding:.7rem 1rem;border-radius:var(--radius-pill);border:1.5px solid var(--border);color:var(--text-dark);text-decoration:none;font-size:.87rem;font-weight:600;transition:all .2s;">
@@ -477,56 +477,61 @@
 
     <!-- ─── Panel: Edit Profile ─────────────────────────────── -->
     <div class="prof-panel" id="panel-edit">
-      <div class="row g-3 justify-content-center">
-        <div class="col-lg-7">
+      <div class="row g-3">
+        <div class="col-12">
           <div class="prof-card reveal">
             <div class="prof-card-title"><i class="bi bi-person-fill"></i> Edit Profile</div>
             <form method="post" action="{% url 'update_profile' %}" enctype="multipart/form-data">
               {% csrf_token %}
 
-              <!-- Avatar -->
-              <div class="avatar-upload-wrap">
-                {% if user.avatar %}
-                  <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-preview-sm" id="avatarPreview">
-                {% else %}
-                  <div class="avatar-initials-sm" id="avatarInitials">{{ user.username|slice:":1"|upper }}</div>
-                  <img src="" alt="Avatar" class="avatar-preview-sm" id="avatarPreview" style="display:none;">
-                {% endif %}
-                <div class="avatar-upload-ctrl">
-                  <label for="avatarInput" class="avatar-upload-btn">
-                    <i class="bi bi-camera-fill"></i> Change Photo
-                  </label>
-                  <input type="file" name="avatar" id="avatarInput" accept="image/*">
-                  <span class="prof-hint">Optional. JPG, PNG or WebP. Max 5 MB.</span>
+              <!-- Avatar preview + upload side by side -->
+              <div style="display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap;margin-bottom:1.4rem;">
+                <!-- Current avatar preview -->
+                <div style="text-align:center;flex-shrink:0;">
+                  {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-preview-sm" id="avatarPreview" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--border);">
+                  {% else %}
+                    <div class="avatar-initials-sm" id="avatarInitials" style="width:90px;height:90px;font-size:2rem;">{{ user.username|slice:":1"|upper }}</div>
+                    <img src="" alt="Avatar" id="avatarPreview" style="display:none;width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--border);">
+                  {% endif %}
+                  <div style="margin-top:0.6rem;font-size:0.72rem;color:var(--text-light);">Preview</div>
+                </div>
+
+                <!-- Upload controls + fields -->
+                <div style="flex:1;min-width:220px;">
+                  <div class="prof-field">
+                    <label class="prof-label">Profile Picture</label>
+                    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                      <label for="avatarInput" class="avatar-upload-btn">
+                        <i class="bi bi-camera-fill"></i> Change Photo
+                      </label>
+                      <span class="prof-hint" style="margin-top:0;">Optional · JPG, PNG or WebP · Max 5 MB</span>
+                    </div>
+                    <input type="file" name="avatar" id="avatarInput" accept="image/*">
+                  </div>
+
+                  <hr class="prof-divider">
+
+                  <!-- Display Name -->
+                  <div class="prof-field">
+                    <label class="prof-label" for="id_display_name">Display Name <span style="color:var(--text-light);font-weight:500;">(optional)</span></label>
+                    <input type="text" name="display_name" id="id_display_name" class="prof-input"
+                      value="{{ user.display_name }}" maxlength="60"
+                      placeholder="e.g. Kebin · Leave blank to show username">
+                    <span class="prof-hint">Shown on your profile banner and across the site.</span>
+                  </div>
+
+                  <!-- Username read-only -->
+                  <div class="prof-field">
+                    <label class="prof-label">Username <span style="color:var(--text-light);font-weight:500;">(cannot change)</span></label>
+                    <input type="text" class="prof-input" value="{{ user.username }}" readonly>
+                  </div>
+
+                  <button type="submit" class="prof-save-btn">
+                    <i class="bi bi-check-circle-fill"></i> Save Changes
+                  </button>
                 </div>
               </div>
-
-              <hr class="prof-divider">
-
-              <!-- Display Name -->
-              <div class="prof-field">
-                <label class="prof-label" for="id_display_name">Display Name <span style="color:var(--text-light);font-weight:500;">(optional)</span></label>
-                <input
-                  type="text"
-                  name="display_name"
-                  id="id_display_name"
-                  class="prof-input"
-                  value="{{ user.display_name }}"
-                  maxlength="60"
-                  placeholder="e.g. Kebin · Leave blank to show username"
-                >
-                <span class="prof-hint">This is the name shown on your profile banner and across the site.</span>
-              </div>
-
-              <!-- Username (read-only info) -->
-              <div class="prof-field">
-                <label class="prof-label">Username <span style="color:var(--text-light);font-weight:500;">(cannot change)</span></label>
-                <input type="text" class="prof-input" value="{{ user.username }}" readonly>
-              </div>
-
-              <button type="submit" class="prof-save-btn">
-                <i class="bi bi-check-circle-fill"></i> Save Changes
-              </button>
             </form>
           </div>
         </div>
@@ -568,28 +573,30 @@
 
         <!-- Change Email -->
         <div class="col-md-6">
-          <div class="prof-card reveal">
+          <div class="prof-card reveal h-100" style="margin-bottom:0;display:flex;flex-direction:column;">
             <div class="prof-card-title"><i class="bi bi-envelope-fill"></i> Change Email</div>
             <p style="font-size:0.83rem;color:var(--text-light);margin-bottom:1.2rem;">
               Current: <strong style="color:var(--text-dark);">{{ user.email }}</strong>
             </p>
-            <form method="post" action="{% url 'change_email' %}">
+            <form method="post" action="{% url 'change_email' %}" style="display:flex;flex-direction:column;flex:1;">
               {% csrf_token %}
               <div class="prof-field">
                 <label class="prof-label">New Email Address</label>
                 <input type="email" name="new_email" class="prof-input" placeholder="you@university.edu" required>
               </div>
-              <button type="submit" class="prof-save-btn"><i class="bi bi-envelope-check-fill"></i> Update Email</button>
-              <span class="prof-hint" style="display:block;margin-top:0.6rem;"><i class="bi bi-info-circle me-1"></i>Changing your email will require re-verification.</span>
+              <span class="prof-hint" style="display:block;margin-bottom:1rem;"><i class="bi bi-info-circle me-1"></i>Changing your email will require re-verification.</span>
+              <div style="margin-top:auto;">
+                <button type="submit" class="prof-save-btn"><i class="bi bi-envelope-check-fill"></i> Update Email</button>
+              </div>
             </form>
           </div>
         </div>
 
         <!-- Change Password -->
         <div class="col-md-6">
-          <div class="prof-card reveal delay-1">
+          <div class="prof-card reveal delay-1 h-100" style="margin-bottom:0;display:flex;flex-direction:column;">
             <div class="prof-card-title"><i class="bi bi-key-fill"></i> Change Password</div>
-            <form method="post" action="{% url 'change_password' %}">
+            <form method="post" action="{% url 'change_password' %}" style="display:flex;flex-direction:column;flex:1;">
               {% csrf_token %}
               <div class="prof-field">
                 <label class="prof-label">Current Password</label>
@@ -603,7 +610,9 @@
                 <label class="prof-label">Confirm New Password</label>
                 <input type="password" name="confirm_password" class="prof-input" required minlength="8">
               </div>
-              <button type="submit" class="prof-save-btn"><i class="bi bi-shield-lock-fill"></i> Update Password</button>
+              <div style="margin-top:auto;">
+                <button type="submit" class="prof-save-btn"><i class="bi bi-shield-lock-fill"></i> Update Password</button>
+              </div>
             </form>
           </div>
         </div>

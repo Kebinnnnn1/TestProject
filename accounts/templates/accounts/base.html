@@ -681,9 +681,14 @@
     <nav class="slide-menu-links">
       <a class="slide-nav-link" href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a>
       {% if user.is_authenticated %}
-      <a class="slide-nav-link" href="{% url 'dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a>
       <a class="slide-nav-link" href="{% url 'profile' %}"><i class="bi bi-person-circle"></i> Profile</a>
+      <a class="slide-nav-link" href="{% url 'dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a>
       {% endif %}
+
+      <!-- Essentials group -->
+      <div style="padding:0.6rem 1rem 0.25rem;font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-light);">
+        Essentials
+      </div>
       <a class="slide-nav-link" href="{% url 'converter' %}"><i class="bi bi-arrow-left-right"></i> Converter</a>
       {% if user.is_authenticated %}
       {% if user.is_verified %}
@@ -694,10 +699,6 @@
       <a class="slide-nav-link" href="{% url 'workspace' %}">
         <i class="bi bi-journal-bookmark-fill"></i> Workspace
       </a>
-      <a class="slide-nav-link" href="{% url 'chat_inbox' %}">
-        <i class="bi bi-chat-dots"></i> Messages
-        {% if unread_dm_count %}<span class="slide-notif-dot"></span>{% endif %}
-      </a>
       {% else %}
       <a class="slide-nav-link" href="#" onclick="event.preventDefault();document.getElementById('verifyModal').style.display='flex';closeMenu();" style="opacity:0.5;">
         <i class="bi bi-lock"></i> Knowledge Wall <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
@@ -705,7 +706,16 @@
       <a class="slide-nav-link" href="#" onclick="event.preventDefault();document.getElementById('verifyModal').style.display='flex';closeMenu();" style="opacity:0.5;">
         <i class="bi bi-lock"></i> Workspace <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
       </a>
-      <a class="slide-nav-link" href="#" onclick="event.preventDefault();document.getElementById('verifyModal').style.display='flex';closeMenu();" style="opacity:0.5;">
+      {% endif %}
+
+      <!-- Messages -->
+      {% if user.is_verified %}
+      <a class="slide-nav-link" href="{% url 'chat_inbox' %}" style="margin-top:0.4rem;">
+        <i class="bi bi-chat-dots"></i> Messages
+        {% if unread_dm_count %}<span class="slide-notif-dot"></span>{% endif %}
+      </a>
+      {% else %}
+      <a class="slide-nav-link" href="#" onclick="event.preventDefault();document.getElementById('verifyModal').style.display='flex';closeMenu();" style="opacity:0.5;margin-top:0.4rem;">
         <i class="bi bi-lock"></i> Messages <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
       </a>
       {% endif %}
