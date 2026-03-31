@@ -17,7 +17,7 @@
   .inbox-header .icon-wrap {
     width: 48px; height: 48px;
     border-radius: 14px;
-    background: var(--grad-cool);
+    background: var(--pink);
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-size: 1.3rem;
     flex-shrink: 0;
@@ -37,22 +37,18 @@
     align-items: center;
     gap: 12px;
     padding: 1rem 1.25rem;
-    border-radius: 16px;
+    border-radius: var(--radius-md);
     border: 1.5px solid var(--border);
-    background: var(--card-bg);
+    background: var(--bg-white);
     color: var(--text-dark);
     cursor: pointer;
     transition: all 0.2s;
     text-align: left;
-    font-family: inherit;
-  }
-  [data-theme="light"] .inbox-action-btn {
-    background: #f5f8fe;
-    border-color: #c5cfe0;
+    font-family: 'Space Grotesk', sans-serif;
   }
   .inbox-action-btn:hover {
-    border-color: var(--blue);
-    box-shadow: 0 4px 20px rgba(67,97,238,0.14);
+    border-color: var(--pink);
+    box-shadow: 0 4px 20px rgba(255,63,164,0.12);
     transform: translateY(-2px);
   }
   .inbox-action-btn .btn-icon {
@@ -62,10 +58,10 @@
     font-size: 1.2rem;
     flex-shrink: 0;
   }
-  .inbox-action-btn .btn-icon.blue { background: rgba(78,124,63,0.14); color: var(--blue); }
+  .inbox-action-btn .btn-icon.blue   { background: rgba(255,63,164,0.1); color: var(--pink); }
   .inbox-action-btn .btn-icon.purple { background: rgba(168,85,247,0.12); color: #a855f7; }
-  .inbox-action-btn .btn-icon.green { background: rgba(16,185,129,0.14); color: #10b981; }
-  .inbox-action-btn .btn-label { font-weight: 600; font-size: 0.88rem; }
+  .inbox-action-btn .btn-icon.green  { background: rgba(16,185,129,0.14); color: #10b981; }
+  .inbox-action-btn .btn-label { font-weight: 600; font-size: 0.88rem; color: var(--text-dark); }
   .inbox-action-btn .btn-sub { font-size: 0.75rem; color: var(--text-light); }
 
   .inbox-section-title {
@@ -81,38 +77,34 @@
     align-items: center;
     gap: 14px;
     padding: 0.85rem 1.1rem;
-    border-radius: 14px;
-    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    background: var(--bg-white);
     border: 1.5px solid var(--border);
     text-decoration: none;
     color: var(--text-dark);
     transition: all 0.2s;
     margin-bottom: 0.5rem;
   }
-  [data-theme="light"] .user-row {
-    border-color: #c5cfe0;
-    background: #f5f8fe;
-  }
   .user-row:hover {
-    border-color: var(--blue);
-    box-shadow: 0 4px 16px rgba(67,97,238,0.12);
+    border-color: var(--pink);
+    box-shadow: 0 4px 16px rgba(255,63,164,0.1);
     transform: translateY(-1px);
     color: var(--text-dark);
   }
   .avatar {
     width: 42px; height: 42px;
     border-radius: 50%;
-    background: var(--grad-main);
+    background: var(--pink);
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-weight: 700; font-size: 1rem;
     flex-shrink: 0;
   }
-  .user-row .name { font-weight: 600; font-size: 0.95rem; }
+  .user-row .name { font-weight: 600; font-size: 0.95rem; color: var(--text-dark); }
   .user-row .role-tag {
     font-size: 0.75rem;
     color: var(--text-light);
     margin-left: auto;
-    background: var(--surface-3);
+    background: var(--bg-card);
     padding: 2px 10px;
     border-radius: 20px;
   }
@@ -124,7 +116,7 @@
   }
   .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.4; }
 
-  /* ── Modals ── */
+  /* Modals */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -139,8 +131,8 @@
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
   .modal-box {
-    background: var(--card-bg);
-    border-radius: 20px;
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
     padding: 2rem;
     width: 100%;
     max-width: 420px;
@@ -150,7 +142,7 @@
     position: relative;
   }
   @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .modal-box h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 0.35rem; }
+  .modal-box h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 0.35rem; color: var(--text-dark); }
   .modal-box p  { font-size: 0.85rem; color: var(--text-light); margin: 0 0 1.25rem; }
   .modal-close {
     position: absolute; top: 1rem; right: 1rem;
@@ -162,33 +154,34 @@
   .modal-close:hover { color: var(--text-dark); }
   .modal-input {
     width: 100%;
-    background: var(--input-bg) !important;
-    border: 1.5px solid var(--input-border) !important;
+    background: var(--bg) !important;
+    border: 1.5px solid var(--border) !important;
     color: var(--text-dark) !important;
-    border-radius: 12px !important;
+    border-radius: var(--radius-sm) !important;
     padding: 0.7rem 1rem !important;
     font-size: 0.92rem !important;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
     margin-bottom: 1rem;
     transition: border-color 0.2s;
+    outline: none;
   }
-  .modal-input:focus { border-color: var(--blue) !important; outline: none; }
+  .modal-input:focus { border-color: var(--pink) !important; }
   .modal-btn {
     width: 100%;
     padding: 0.75rem;
-    border-radius: 12px;
+    border-radius: var(--radius-pill);
     border: none;
-    background: var(--grad-main);
+    background: var(--pink);
     color: #fff;
     font-weight: 700;
     font-size: 0.92rem;
     cursor: pointer;
     transition: opacity 0.2s, transform 0.15s;
+    font-family: 'Space Grotesk', sans-serif;
   }
   .modal-btn:hover { opacity: 0.88; transform: scale(1.01); }
   .modal-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
-  /* Error/info toast inside modal */
   .modal-alert {
     border-radius: 10px;
     padding: 0.65rem 1rem;
@@ -200,6 +193,7 @@
   .modal-alert.error { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
   .modal-alert.show { display: block; }
 </style>
+
 {% endblock %}
 
 {% block content %}
@@ -245,7 +239,7 @@
     <div class="avatar">{{ item.user.username|slice:":1"|upper }}</div>
     <span class="name">{{ item.user.username }}</span>
     {% if item.unread %}
-    <span style="background:var(--grad-main);color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto;margin-right:4px;">
+    <span style="background:var(--pink);color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto;margin-right:4px;">
       {% if item.unread > 9 %}9+{% else %}{{ item.unread }}{% endif %}
     </span>
     {% else %}

@@ -18,22 +18,19 @@
     align-items: center;
     gap: 14px;
     padding: 1rem 1.25rem;
-    border-bottom: 1.5px solid var(--border);
-    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-white);
     flex-shrink: 0;
-  }
-  [data-theme="light"] .chat-header {
-    background: #f0f4fb;
-    border-bottom-color: #c5cfe0;
   }
   .chat-header .avatar {
     width: 42px; height: 42px;
     border-radius: 50%;
-    background: var(--grad-cool);
+    background: var(--pink);
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-weight: 700; font-size: 1rem;
+    flex-shrink: 0;
   }
-  .chat-header .info h2 { font-size: 1rem; font-weight: 700; margin: 0; }
+  .chat-header .info h2 { font-size: 1rem; font-weight: 700; margin: 0; color: var(--text-dark); }
   .chat-header .info p { font-size: 0.78rem; color: var(--text-light); margin: 0; }
   .chat-header .back-btn {
     color: var(--text-light);
@@ -42,7 +39,7 @@
     margin-right: 4px;
     transition: color 0.2s;
   }
-  .chat-header .back-btn:hover { color: var(--blue); }
+  .chat-header .back-btn:hover { color: var(--pink); }
 
   /* Messages area */
   .messages-area {
@@ -52,11 +49,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-    background: var(--surface-2);
-  }
-  /* Darken in light mode so it's not blindingly white */
-  [data-theme="light"] .messages-area {
-    background: #e8edf5;
+    background: var(--bg);
   }
 
   /* Bubbles */
@@ -75,35 +68,30 @@
   .bubble-avatar {
     width: 28px; height: 28px;
     border-radius: 50%;
-    background: var(--grad-main);
+    background: var(--text-light);
     display: flex; align-items: center; justify-content: center;
     color: #fff; font-size: 0.7rem; font-weight: 700;
     flex-shrink: 0;
   }
-  .msg-row.mine .bubble-avatar { background: var(--grad-cool); }
+  .msg-row.mine .bubble-avatar { background: var(--pink); }
 
   .bubble {
     max-width: 62%;
-    padding: 0.45rem 0.8rem;
-    border-radius: 16px;
+    padding: 0.55rem 0.9rem;
+    border-radius: 18px;
     font-size: 0.87rem;
     line-height: 1.45;
     word-break: break-word;
     position: relative;
   }
   .msg-row.theirs .bubble {
-    background: var(--card-bg);
+    background: var(--bg-white);
     border: 1px solid var(--border);
     border-bottom-left-radius: 4px;
     color: var(--text-dark);
   }
-  /* Light mode: give theirs-bubbles a slightly off-white so they don't vanish */
-  [data-theme="light"] .msg-row.theirs .bubble {
-    background: #ffffff;
-    border-color: #d0d8e8;
-  }
   .msg-row.mine .bubble {
-    background: var(--grad-main);
+    background: var(--pink);
     color: #fff;
     border-bottom-right-radius: 4px;
   }
@@ -126,13 +114,9 @@
   /* Input */
   .chat-input-area {
     padding: 0.9rem 1.25rem;
-    background: var(--card-bg);
-    border-top: 1.5px solid var(--border);
+    background: var(--bg-white);
+    border-top: 1px solid var(--border);
     flex-shrink: 0;
-  }
-  [data-theme="light"] .chat-input-area {
-    background: #f0f4fb;
-    border-top-color: #c5cfe0;
   }
   .chat-form {
     display: flex;
@@ -141,8 +125,8 @@
   }
   .chat-textarea {
     flex: 1;
-    background: var(--input-bg) !important;
-    border: 1.5px solid var(--input-border) !important;
+    background: var(--bg) !important;
+    border: 1.5px solid var(--border) !important;
     color: var(--text-dark) !important;
     border-radius: 14px !important;
     padding: 0.7rem 1rem !important;
@@ -150,17 +134,17 @@
     resize: none;
     max-height: 120px;
     transition: border-color 0.2s, box-shadow 0.2s !important;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
   }
   .chat-textarea:focus {
-    border-color: var(--blue) !important;
-    box-shadow: 0 0 0 3px rgba(67,97,238,0.12) !important;
+    border-color: var(--pink) !important;
+    box-shadow: 0 0 0 3px rgba(255,63,164,0.12) !important;
     outline: none;
   }
   .send-btn {
     width: 44px; height: 44px;
-    border-radius: 12px;
-    background: var(--grad-main);
+    border-radius: var(--radius-pill);
+    background: var(--pink);
     border: none;
     color: #fff;
     font-size: 1.1rem;
@@ -181,6 +165,7 @@
   }
   .connection-dot.offline { background: #ef4444; }
 </style>
+
 {% endblock %}
 
 {% block content %}
