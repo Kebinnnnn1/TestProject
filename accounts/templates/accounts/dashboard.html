@@ -1,17 +1,17 @@
 {% extends 'accounts/base.html' %}
-{% block title %}Dashboard — AuthApp{% endblock %}
+{% block title %}Dashboard — CUlink{% endblock %}
 
 {% block extra_head %}
 <style>
     .dash-wrap {
-        background: var(--surface-2);
+        background: var(--bg);
         min-height: calc(100vh - 70px);
         padding: 2.5rem 0 4rem;
     }
 
     .dash-header {
-        background: linear-gradient(135deg, #4361ee, #7209b7);
-        border-radius: 20px;
+        background: var(--bg-dark);
+        border-radius: var(--radius-lg);
         padding: 2rem 2.5rem;
         color: #fff;
         position: relative;
@@ -24,15 +24,24 @@
         position: absolute;
         right: -40px;
         top: -40px;
-        width: 200px;
-        height: 200px;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent 70%);
+        width: 220px;
+        height: 220px;
+        background: radial-gradient(circle, rgba(255,63,164,0.2), transparent 70%);
         border-radius: 50%;
+    }
+
+    .dash-header .dash-eyebrow {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 0.4rem;
     }
 
     .dash-header h1 {
         font-size: 1.7rem;
-        font-weight: 800;
+        font-weight: 700;
         margin: 0;
         position: relative;
         z-index: 1;
@@ -41,15 +50,15 @@
     .dash-header p {
         margin: 0.3rem 0 0;
         font-size: 0.9rem;
-        opacity: 0.8;
+        color: rgba(255,255,255,0.55);
         position: relative;
         z-index: 1;
     }
 
     .stat-card {
-        background: var(--surface);
+        background: #fff;
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: var(--radius-md);
         padding: 1.5rem;
         box-shadow: var(--shadow-sm);
         transition: all 0.25s;
@@ -71,7 +80,7 @@
 
     .stat-card .sc-value {
         font-size: 1.6rem;
-        font-weight: 800;
+        font-weight: 700;
         color: var(--text-dark);
     }
 
@@ -87,9 +96,9 @@
     }
 
     .info-card {
-        background: var(--surface);
+        background: #fff;
         border: 1px solid var(--border);
-        border-radius: 16px;
+        border-radius: var(--radius-md);
         padding: 1.5rem;
         box-shadow: var(--shadow-sm);
         height: 100%;
@@ -112,9 +121,7 @@
         border-bottom: 1px solid var(--border);
     }
 
-    .info-row:last-child {
-        border-bottom: none;
-    }
+    .info-row:last-child { border-bottom: none; }
 
     .info-row .ir-label {
         font-size: 0.82rem;
@@ -133,43 +140,107 @@
         align-items: center;
         gap: 10px;
         padding: 0.9rem 1rem;
-        border-radius: 12px;
+        border-radius: var(--radius-pill);
         font-weight: 600;
         font-size: 0.88rem;
         text-decoration: none;
         transition: all 0.2s;
-        border: 1px solid transparent;
-        background: var(--surface-2);
+        border: 1.5px solid var(--border);
+        background: transparent;
+        color: var(--text-dark);
     }
 
     .quick-link:hover {
+        border-color: var(--text-dark);
+        color: var(--text-dark);
         transform: translateX(4px);
     }
 
-    .quick-link-blue {
-        background: rgba(67, 97, 238, 0.06);
-        border-color: rgba(67, 97, 238, 0.15);
-        color: var(--blue);
+    .quick-link-pink {
+        background: var(--pink);
+        border-color: var(--pink);
+        color: #fff;
     }
 
-    .quick-link-purple {
-        background: rgba(114, 9, 183, 0.06);
-        border-color: rgba(114, 9, 183, 0.15);
-        color: var(--purple);
+    .quick-link-pink:hover {
+        background: var(--pink-dark);
+        border-color: var(--pink-dark);
+        color: #fff;
     }
 
     .quick-link-red {
-        background: #fef2f2;
-        border-color: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239,68,68,0.2);
         color: #dc2626;
         width: 100%;
         cursor: pointer;
         text-align: left;
+        background: #fef2f2;
+        font-family: 'Space Grotesk', sans-serif;
     }
 
-    [data-theme="dark"] .quick-link-red {
-        background: rgba(220, 38, 38, 0.12);
+    .quick-link-red:hover {
+        border-color: #ef4444;
+        color: #dc2626;
     }
+
+    select {
+        background: #fff;
+        border: 1.5px solid var(--border);
+        color: var(--text-dark);
+        border-radius: var(--radius-sm);
+        padding: 0.65rem 1rem;
+        font-size: 0.88rem;
+        font-family: 'Space Grotesk', sans-serif;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    select:focus { border-color: var(--pink); }
+
+    input[type="password"] {
+        width: 100%;
+        background: #fff;
+        border: 1.5px solid var(--border);
+        color: var(--text-dark);
+        border-radius: var(--radius-sm);
+        padding: 0.65rem 1rem;
+        font-size: 0.88rem;
+        font-family: 'Space Grotesk', sans-serif;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    input[type="password"]:focus { border-color: var(--pink); }
+    input[type="email"] {
+        width: 100%;
+        background: #fff;
+        border: 1.5px solid var(--border);
+        color: var(--text-dark);
+        border-radius: var(--radius-sm);
+        padding: 0.65rem 1rem;
+        font-size: 0.88rem;
+        font-family: 'Space Grotesk', sans-serif;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+    input[type="email"]:focus { border-color: var(--pink); }
+
+    .dash-save-btn {
+        padding: 0.65rem 1.5rem;
+        border-radius: var(--radius-pill);
+        border: none;
+        background: var(--pink);
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+        font-family: 'Space Grotesk', sans-serif;
+        transition: background 0.2s;
+        white-space: nowrap;
+    }
+    .dash-save-btn:hover { background: var(--pink-dark); }
 </style>
 {% endblock %}
 
@@ -178,7 +249,7 @@
     <div class="container">
 
         <div class="dash-header reveal">
-            <p style="font-size:0.82rem;opacity:0.7;margin-bottom:0.2rem;">WELCOME BACK</p>
+            <div class="dash-eyebrow">Welcome back</div>
             <h1>{{ user.username }}</h1>
             <p>Here's an overview of your account.</p>
         </div>
@@ -284,10 +355,10 @@
                     <h5><i class="bi bi-grid me-2" style="color:var(--orange);"></i>Quick Actions</h5>
                     <div class="d-flex flex-column gap-2">
                         {% if user.is_staff or user.is_superuser %}
-                        <a href="{% url 'admin_dashboard' %}" class="quick-link quick-link-blue">
+                        <a href="{% url 'admin_dashboard' %}" class="quick-link">
                             <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i> Admin Dashboard
                         </a>
-                        <a href="/django-admin/" target="_blank" class="quick-link quick-link-purple">
+                        <a href="/django-admin/" target="_blank" class="quick-link">
                             <i class="bi bi-gear-fill" style="font-size:1.1rem;"></i> Django Admin
                         </a>
                         {% endif %}
@@ -313,7 +384,7 @@
                     </p>
                     <form method="post" action="{% url 'update_university' %}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
                         {% csrf_token %}
-                        <select name="university" style="flex:1;min-width:220px;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:12px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                        <select name="university" style="flex:1;min-width:220px;">
                             <option value="">— Select your university —</option>
                             <option value="CTU" {% if user.university == "CTU" %}selected{% endif %}>CTU — Cebu Technological University</option>
                             <option value="CEC" {% if user.university == "CEC" %}selected{% endif %}>CEC — Cebu Eastern College</option>
@@ -321,7 +392,7 @@
                             <option value="ACT" {% if user.university == "ACT" %}selected{% endif %}>ACT — Asian College of Technology</option>
                             <option value="UV"  {% if user.university == "UV"  %}selected{% endif %}>UV — University of the Visayas</option>
                         </select>
-                        <button type="submit" style="padding:0.65rem 1.5rem;border-radius:12px;border:none;background:var(--grad-main);color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;white-space:nowrap;">Save University</button>
+                        <button type="submit" class="dash-save-btn">Save University</button>
                     </form>
                     {% else %}
                     <p style="font-size:0.85rem;color:var(--text-light);margin:0;">
@@ -341,20 +412,17 @@
                         {% csrf_token %}
                         <div style="margin-bottom:0.9rem;">
                             <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">Current Password</label>
-                            <input type="password" name="old_password" required
-                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                            <input type="password" name="old_password" required>
                         </div>
                         <div style="margin-bottom:0.9rem;">
                             <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">New Password</label>
-                            <input type="password" name="new_password" required minlength="8"
-                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                            <input type="password" name="new_password" required minlength="8">
                         </div>
                         <div style="margin-bottom:1rem;">
                             <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">Confirm New Password</label>
-                            <input type="password" name="confirm_password" required minlength="8"
-                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                            <input type="password" name="confirm_password" required minlength="8">
                         </div>
-                        <button type="submit" style="padding:0.65rem 1.5rem;border-radius:12px;border:none;background:var(--grad-main);color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;">Update Password</button>
+                        <button type="submit" class="dash-save-btn">Update Password</button>
                     </form>
                 </div>
             </div>
@@ -368,10 +436,9 @@
                         {% csrf_token %}
                         <div style="margin-bottom:1rem;">
                             <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">New Email Address</label>
-                            <input type="email" name="new_email" required
-                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                            <input type="email" name="new_email" required>
                         </div>
-                        <button type="submit" style="padding:0.65rem 1.5rem;border-radius:12px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;">Update Email</button>
+                        <button type="submit" class="dash-save-btn">Update Email</button>
                         <p style="font-size:0.75rem;color:var(--text-light);margin-top:0.75rem;margin-bottom:0;">
                             <i class="bi bi-info-circle me-1"></i>Changing your email will require re-verification.
                         </p>
