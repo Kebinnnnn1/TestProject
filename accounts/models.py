@@ -189,18 +189,52 @@ class WorkspaceItem(models.Model):
         (PRIORITY_HIGH,   'High'),
     ]
 
-    doc      = models.ForeignKey(WorkspaceDoc, on_delete=models.CASCADE, related_name='items')
-    content  = models.TextField()
-    is_done  = models.BooleanField(default=False)
-    status   = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_TODO)
-    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default=PRIORITY_MEDIUM)
-    due_date = models.DateField(null=True, blank=True)
-    order    = models.IntegerField(default=0)
-    color    = models.CharField(max_length=20, default='#fef9c3')  # brainstorm sticky-note color
-    created_at = models.DateTimeField(auto_now_add=True)
+    TYPE_FEATURE  = 'feature'
+    TYPE_BUG      = 'bug'
+    TYPE_RESEARCH = 'research'
+    TYPE_MEETING  = 'meeting'
+    TYPE_PERSONAL = 'personal'
+    TYPE_OTHER    = 'other'
+
+    TASK_TYPE_CHOICES = [
+        (TYPE_FEATURE,  'Feature'),
+        (TYPE_BUG,      'Bug'),
+        (TYPE_RESEARCH, 'Research'),
+        (TYPE_MEETING,  'Meeting'),
+        (TYPE_PERSONAL, 'Personal'),
+        (TYPE_OTHER,    'Other'),
+    ]
+
+    EFFORT_XS = 'xs'
+    EFFORT_S  = 's'
+    EFFORT_M  = 'm'
+    EFFORT_L  = 'l'
+    EFFORT_XL = 'xl'
+
+    EFFORT_CHOICES = [
+        (EFFORT_XS, 'XS'),
+        (EFFORT_S,  'S'),
+        (EFFORT_M,  'M'),
+        (EFFORT_L,  'L'),
+        (EFFORT_XL, 'XL'),
+    ]
+
+    doc         = models.ForeignKey(WorkspaceDoc, on_delete=models.CASCADE, related_name='items')
+    content     = models.TextField()
+    description = models.TextField(blank=True, default='')
+    is_done     = models.BooleanField(default=False)
+    status      = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_TODO)
+    priority    = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default=PRIORITY_MEDIUM)
+    task_type   = models.CharField(max_length=20, choices=TASK_TYPE_CHOICES, default=TYPE_OTHER, blank=True)
+    effort      = models.CharField(max_length=5,  choices=EFFORT_CHOICES,    default=EFFORT_M,   blank=True)
+    due_date    = models.DateField(null=True, blank=True)
+    order       = models.IntegerField(default=0)
+    color       = models.CharField(max_length=20, default='#fef9c3')  # brainstorm sticky-note color
+    created_at  = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['order', 'created_at']
 
     def __str__(self):
         return f"Item in '{self.doc.title}': {self.content[:40]}"
+

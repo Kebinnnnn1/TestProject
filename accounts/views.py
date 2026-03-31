@@ -932,14 +932,17 @@ def delete_comment(request, pk):
 
 def _serialize_item(item):
     return {
-        'pk':       item.pk,
-        'content':  item.content,
-        'is_done':  item.is_done,
-        'status':   item.status,
-        'priority': item.priority,
-        'due_date': item.due_date.isoformat() if item.due_date else None,
-        'order':    item.order,
-        'color':    item.color,
+        'pk':          item.pk,
+        'content':     item.content,
+        'description': item.description,
+        'is_done':     item.is_done,
+        'status':      item.status,
+        'priority':    item.priority,
+        'task_type':   item.task_type,
+        'effort':      item.effort,
+        'due_date':    item.due_date.isoformat() if item.due_date else None,
+        'order':       item.order,
+        'color':       item.color,
     }
 
 
@@ -1032,15 +1035,18 @@ def workspace_create_item(request, pk):
 @verified_required
 @require_POST
 def workspace_update_item(request, pk):
-    """Update an item (content, done-state, status, priority, due_date, color)."""
+    """Update an item (content, description, done-state, status, priority, task_type, effort, due_date, color)."""
     item = get_object_or_404(WorkspaceItem, pk=pk, doc__owner=request.user)
     data = json.loads(request.body)
-    if 'content'  in data: item.content  = data['content']
-    if 'is_done'  in data: item.is_done  = bool(data['is_done'])
-    if 'status'   in data: item.status   = data['status']
-    if 'priority' in data: item.priority = data['priority']
-    if 'due_date' in data: item.due_date = data['due_date'] or None
-    if 'color'    in data: item.color    = data['color']
+    if 'content'     in data: item.content     = data['content']
+    if 'description' in data: item.description = data['description']
+    if 'is_done'     in data: item.is_done     = bool(data['is_done'])
+    if 'status'      in data: item.status      = data['status']
+    if 'priority'    in data: item.priority    = data['priority']
+    if 'task_type'   in data: item.task_type   = data['task_type']
+    if 'effort'      in data: item.effort      = data['effort']
+    if 'due_date'    in data: item.due_date    = data['due_date'] or None
+    if 'color'       in data: item.color       = data['color']
     item.save()
     return JsonResponse({'ok': True, 'item': _serialize_item(item)})
 

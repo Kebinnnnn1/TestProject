@@ -689,6 +689,254 @@
   /* Dark mode adjustments */
   [data-theme="dark"] .ws-sticky-text { color: #1a1a1a; }
   [data-theme="dark"] .ws-sidebar { background: var(--surface-2); }
+
+  /* ── Item Detail Panel ── */
+  .ws-detail-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(3px);
+    animation: fadeIn 0.2s ease;
+  }
+  .ws-detail-backdrop.visible { display: block; }
+
+  .ws-detail-panel {
+    position: fixed;
+    right: -520px;
+    top: 0;
+    width: 480px;
+    max-width: 100vw;
+    height: 100%;
+    background: var(--card-bg);
+    border-left: 1px solid var(--border);
+    box-shadow: -12px 0 48px rgba(0,0,0,0.15);
+    z-index: 950;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.32s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+  }
+  .ws-detail-panel.open { right: 0; }
+
+  .ws-detail-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .ws-detail-type-badge {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .ws-detail-title {
+    flex: 1;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: none;
+    background: transparent;
+    color: var(--text-dark);
+    outline: none;
+    min-width: 0;
+  }
+  .ws-detail-close {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .ws-detail-close:hover { border-color: #ef4444; color: #ef4444; }
+
+  .ws-detail-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* Overdue banner */
+  .ws-overdue-banner {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.85rem;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
+    color: #ef4444;
+    font-size: 0.83rem;
+    font-weight: 600;
+    animation: fadeInUp 0.2s ease;
+  }
+  .ws-overdue-banner.show { display: flex; }
+
+  /* Description */
+  .ws-detail-desc-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-light);
+    margin-bottom: 0.4rem;
+  }
+  .ws-detail-desc {
+    width: 100%;
+    min-height: 100px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background: var(--surface-2);
+    outline: none;
+    resize: vertical;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .ws-detail-desc:focus { border-color: var(--blue); }
+  .ws-detail-desc::placeholder { color: var(--text-light); }
+
+  /* Properties grid */
+  .ws-props-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+  }
+  @media (max-width: 480px) { .ws-props-grid { grid-template-columns: 1fr; } }
+
+  .ws-prop-field { display: flex; flex-direction: column; gap: 0.3rem; }
+  .ws-prop-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-light);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .ws-prop-select {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.87rem;
+    color: var(--text-dark);
+    background: var(--surface-2);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    width: 100%;
+  }
+  .ws-prop-select:focus { border-color: var(--blue); }
+
+  /* Effort segmented control */
+  .ws-effort-seg {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+  }
+  .ws-effort-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-light);
+  }
+  .ws-effort-btn.active {
+    background: var(--blue);
+    color: #fff;
+  }
+  .ws-effort-btn:hover:not(.active) { background: var(--surface-3); color: var(--text-dark); }
+
+  /* Date field */
+  .ws-prop-date {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.87rem;
+    color: var(--text-dark);
+    background: var(--surface-2);
+    outline: none;
+    width: 100%;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .ws-prop-date:focus { border-color: var(--blue); }
+
+  /* Detail panel footer */
+  .ws-detail-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .ws-detail-save {
+    flex: 1;
+    background: var(--grad-main);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .ws-detail-save:hover { opacity: 0.88; transform: translateY(-1px); }
+  .ws-detail-del {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .ws-detail-del:hover { border-color: #ef4444; color: #ef4444; }
+  .ws-detail-created {
+    font-size: 0.72rem;
+    color: var(--text-light);
+    margin-left: auto;
+  }
+
+  /* Expand icon on list items */
+  .ws-expand-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: transparent;
+    font-size: 0.88rem;
+    padding: 2px 4px;
+    border-radius: 5px;
+    transition: color 0.15s, background 0.15s;
+    flex-shrink: 0;
+  }
+  .ws-todo-item:hover .ws-expand-btn,
+  .ws-goal-item:hover .ws-expand-btn { color: var(--text-light); }
+  .ws-expand-btn:hover { color: var(--blue) !important; }
 </style>
 {% endblock %}
 
@@ -696,6 +944,87 @@
 {% csrf_token %}
 <!-- Backdrop: tap to close sidebar on mobile/tablet -->
 <div class="ws-backdrop" id="wsBackdrop" onclick="closeSidebarMobile()"></div>
+
+<!-- Item detail panel backdrop -->
+<div class="ws-detail-backdrop" id="wsDetailBackdrop" onclick="closeDetail()"></div>
+
+<!-- Item detail slide panel -->
+<div class="ws-detail-panel" id="wsDetailPanel">
+  <div class="ws-detail-head">
+    <div class="ws-detail-type-badge" id="detailTypeBadge"></div>
+    <input class="ws-detail-title" id="detailTitle" placeholder="Task name">
+    <button class="ws-detail-close" onclick="closeDetail()" title="Close">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+  <div class="ws-detail-body">
+    <!-- Overdue banner -->
+    <div class="ws-overdue-banner" id="detailOverdue">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span id="detailOverdueText"></span>
+    </div>
+    <!-- Description -->
+    <div>
+      <div class="ws-detail-desc-label"><i class="bi bi-text-left"></i> Description</div>
+      <textarea class="ws-detail-desc" id="detailDesc" placeholder="Add a description…" rows="4"></textarea>
+    </div>
+    <!-- Properties grid -->
+    <div class="ws-props-grid">
+      <!-- Priority -->
+      <div class="ws-prop-field">
+        <div class="ws-prop-label"><i class="bi bi-flag-fill"></i> Priority</div>
+        <select class="ws-prop-select" id="detailPriority">
+          <option value="low">🟢 Low</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="high">🔴 High</option>
+        </select>
+      </div>
+      <!-- Task Type -->
+      <div class="ws-prop-field">
+        <div class="ws-prop-label"><i class="bi bi-tag-fill"></i> Task Type</div>
+        <select class="ws-prop-select" id="detailTaskType">
+          <option value="feature">✨ Feature</option>
+          <option value="bug">🐛 Bug</option>
+          <option value="research">🔬 Research</option>
+          <option value="meeting">📅 Meeting</option>
+          <option value="personal">👤 Personal</option>
+          <option value="other">📌 Other</option>
+        </select>
+      </div>
+      <!-- Status -->
+      <div class="ws-prop-field">
+        <div class="ws-prop-label"><i class="bi bi-toggles"></i> Status</div>
+        <select class="ws-prop-select" id="detailStatus">
+          <option value="todo">⬜ To Do</option>
+          <option value="in_progress">🔷 In Progress</option>
+          <option value="done">✅ Done</option>
+          <option value="blocked">🚫 Blocked</option>
+        </select>
+      </div>
+      <!-- Due Date -->
+      <div class="ws-prop-field">
+        <div class="ws-prop-label"><i class="bi bi-calendar-event"></i> Due Date</div>
+        <input type="date" class="ws-prop-date" id="detailDueDate">
+      </div>
+    </div>
+    <!-- Effort (full width) -->
+    <div class="ws-prop-field">
+      <div class="ws-prop-label"><i class="bi bi-speedometer2"></i> Effort Level</div>
+      <div class="ws-effort-seg" id="detailEffortSeg">
+        <button class="ws-effort-btn" data-effort="xs" onclick="selectEffort('xs')">XS</button>
+        <button class="ws-effort-btn" data-effort="s"  onclick="selectEffort('s')">S</button>
+        <button class="ws-effort-btn" data-effort="m"  onclick="selectEffort('m')">M</button>
+        <button class="ws-effort-btn" data-effort="l"  onclick="selectEffort('l')">L</button>
+        <button class="ws-effort-btn" data-effort="xl" onclick="selectEffort('xl')">XL</button>
+      </div>
+    </div>
+  </div>
+  <div class="ws-detail-footer">
+    <button class="ws-detail-save" onclick="saveDetail()"><i class="bi bi-check-lg"></i> Save Changes</button>
+    <button class="ws-detail-del" id="detailDelBtn"><i class="bi bi-trash3"></i></button>
+    <span class="ws-detail-created" id="detailCreated"></span>
+  </div>
+</div>
 <div class="ws-wrap" id="wsWrap">
 
   <!-- Sidebar -->
@@ -938,7 +1267,10 @@ function todoItemHTML(item, docPk) {
   const today = new Date().toISOString().slice(0,10);
   const overdue = item.due_date && item.due_date < today && !item.is_done;
   const dueHTML = item.due_date
-    ? `<span class="ws-due-badge ${overdue?'overdue':''}"><i class="bi bi-calendar3"></i>${item.due_date}</span>` : '';
+    ? `<span class="ws-due-badge ${overdue?'overdue':''}">${overdue?'<i class="bi bi-alarm-fill"></i>':'<i class="bi bi-calendar3"></i>'}${item.due_date}</span>` : '';
+  const effortMap = { xs:'XS', s:'S', m:'M', l:'L', xl:'XL' };
+  const effortHTML = item.effort && item.effort !== 'm'
+    ? `<span style="font-size:0.68rem;font-weight:700;padding:1px 6px;border-radius:50px;background:var(--surface-3);color:var(--text-light);flex-shrink:0;">${effortMap[item.effort]||item.effort}</span>` : '';
   return `
     <div class="ws-todo-item" id="ti-${item.pk}">
       <button class="ws-check-btn ${item.is_done?'done':''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})" title="Toggle complete">
@@ -949,7 +1281,9 @@ function todoItemHTML(item, docPk) {
       <span class="ws-priority-pill" style="background:${pc}20;color:${pc};"
             onclick="cyclePriority(${item.pk},${docPk},'${item.priority}')"
             title="Click to cycle priority">${item.priority}</span>
+      ${effortHTML}
       ${dueHTML}
+      <button class="ws-expand-btn" onclick="openDetail(${item.pk},${docPk})" title="Open detail"><i class="bi bi-arrow-up-right-square"></i></button>
       <button class="ws-item-del" onclick="deleteItem(${item.pk},${docPk})" title="Delete"><i class="bi bi-x"></i></button>
     </div>`;
 }
@@ -1005,6 +1339,11 @@ function projectCardHTML(item, docPk) {
   const pc = pColors[item.priority] || '#d97706';
   const nextStatus = { todo:'in_progress', in_progress:'done', done:'blocked', blocked:'todo' };
   const nextLabel  = { todo:'<i class="bi bi-play-fill"></i> Start', in_progress:'<i class="bi bi-check-lg"></i> Done', done:'<i class="bi bi-slash-circle"></i> Block', blocked:'<i class="bi bi-arrow-counterclockwise"></i> Reset' };
+  const today   = new Date().toISOString().slice(0, 10);
+  const overdue = item.due_date && item.due_date < today && !item.is_done;
+  const dueTag  = item.due_date
+    ? `<span style="font-size:0.7rem;color:${overdue?'#ef4444':'var(--text-light)'};display:flex;align-items:center;gap:3px;"><i class="bi bi-${overdue?'alarm-fill':'calendar3'}"></i>${item.due_date}</span>` : '';
+  const effortMap = { xs:'XS', s:'S', m:'M', l:'L', xl:'XL' };
   return `
     <div class="ws-card" id="kc-${item.pk}">
       <div class="ws-card-content" contenteditable="true"
@@ -1012,9 +1351,12 @@ function projectCardHTML(item, docPk) {
       <div class="ws-card-footer">
         <button class="ws-card-status-btn" style="background:${pc}20;color:${pc};"
                 onclick="cyclePriority(${item.pk},${docPk},'${item.priority}')">${item.priority}</button>
+        ${item.effort ? `<span style="font-size:0.68rem;font-weight:700;padding:1px 7px;border-radius:50px;background:var(--surface-3);color:var(--text-light);">${effortMap[item.effort]||item.effort}</span>` : ''}
         <button class="ws-card-status-btn" style="background:var(--surface-3);color:var(--text-mid);"
                 onclick="moveCard(${item.pk},${docPk},'${nextStatus[item.status]}')">${nextLabel[item.status]}</button>
-        <button class="ws-item-del" style="margin-left:auto;color:var(--text-light);"
+        ${dueTag}
+        <button class="ws-expand-btn" style="color:var(--text-light);margin-left:auto;" onclick="openDetail(${item.pk},${docPk})" title="Details"><i class="bi bi-arrow-up-right-square"></i></button>
+        <button class="ws-item-del" style="color:var(--text-light);"
                 onclick="deleteItem(${item.pk},${docPk})"><i class="bi bi-x"></i></button>
       </div>
     </div>`;
@@ -1107,6 +1449,10 @@ function renderGoal(doc) {
 }
 
 function goalItemHTML(item, docPk) {
+  const today   = new Date().toISOString().slice(0, 10);
+  const overdue = item.due_date && item.due_date < today && !item.is_done;
+  const dueHTML = item.due_date
+    ? `<span style="font-size:0.72rem;color:${overdue?'#ef4444':'var(--text-light)'};flex-shrink:0;display:flex;align-items:center;gap:3px;"><i class="bi bi-${overdue?'alarm-fill':'calendar3'}"></i>${item.due_date}</span>` : '';
   return `
     <div class="ws-goal-item" id="gi-${item.pk}">
       <button class="ws-goal-check ${item.is_done?'done':''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})">
@@ -1114,6 +1460,8 @@ function goalItemHTML(item, docPk) {
       </button>
       <input class="ws-goal-text ${item.is_done?'done-text':''}" value="${esc(item.content)}"
              onchange="saveItemContent(${item.pk},${docPk},this.value)">
+      ${dueHTML}
+      <button class="ws-expand-btn" onclick="openDetail(${item.pk},${docPk})" title="Open detail"><i class="bi bi-arrow-up-right-square"></i></button>
       <button class="ws-item-del" style="color:var(--text-light);" onclick="deleteItem(${item.pk},${docPk})">
         <i class="bi bi-x"></i>
       </button>
@@ -1317,6 +1665,108 @@ async function api(url, body) {
 // ─── Escape helper ────────────────────────────────────────────────────────────
 function esc(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Detail Panel ─────────────────────────────────────────────────────────────
+let DETAIL = { itemPk: null, docPk: null };
+
+function openDetail(itemPk, docPk) {
+  DETAIL = { itemPk, docPk };
+  const doc  = WS.docs.find(d => d.pk === docPk);
+  const item = doc && doc.items.find(i => i.pk === itemPk);
+  if (!item) return;
+
+  const m = TYPE_META[doc.type];
+
+  // Populate header
+  document.getElementById('detailTitle').value = item.content || '';
+  const badge = document.getElementById('detailTypeBadge');
+  badge.innerHTML = m.icon;
+  badge.style.background = m.bg;
+  badge.style.color      = m.color;
+
+  // Description
+  document.getElementById('detailDesc').value = item.description || '';
+
+  // Select fields
+  document.getElementById('detailPriority').value = item.priority  || 'medium';
+  document.getElementById('detailTaskType').value = item.task_type || 'other';
+  document.getElementById('detailStatus').value   = item.status    || 'todo';
+  document.getElementById('detailDueDate').value  = item.due_date  || '';
+
+  // Effort segmented control
+  selectEffort(item.effort || 'm', false);
+
+  // Overdue banner
+  const today   = new Date().toISOString().slice(0, 10);
+  const banner  = document.getElementById('detailOverdue');
+  const bannerT = document.getElementById('detailOverdueText');
+  if (item.due_date && item.due_date < today && !item.is_done) {
+    const diff = Math.round((new Date(today) - new Date(item.due_date)) / 86400000);
+    bannerT.textContent = `Overdue by ${diff} day${diff !== 1 ? 's' : ''}!`;
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+
+  // Delete button
+  document.getElementById('detailDelBtn').onclick = () => {
+    closeDetail();
+    deleteItem(itemPk, docPk);
+  };
+
+  // Open panel
+  document.getElementById('wsDetailPanel').classList.add('open');
+  document.getElementById('wsDetailBackdrop').classList.add('visible');
+  document.getElementById('detailTitle').focus();
+}
+
+function closeDetail() {
+  document.getElementById('wsDetailPanel').classList.remove('open');
+  document.getElementById('wsDetailBackdrop').classList.remove('visible');
+}
+
+function selectEffort(val, save=true) {
+  document.querySelectorAll('.ws-effort-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.effort === val);
+  });
+  if (save) document.getElementById('detailEffortSeg').dataset.value = val;
+  else      document.getElementById('detailEffortSeg').dataset.value = val;
+}
+
+async function saveDetail() {
+  const { itemPk, docPk } = DETAIL;
+  const doc  = WS.docs.find(d => d.pk === docPk);
+  const item = doc && doc.items.find(i => i.pk === itemPk);
+  if (!item) return;
+
+  const effort  = document.getElementById('detailEffortSeg').dataset.value || 'm';
+  const payload = {
+    content:     document.getElementById('detailTitle').value.trim(),
+    description: document.getElementById('detailDesc').value,
+    priority:    document.getElementById('detailPriority').value,
+    task_type:   document.getElementById('detailTaskType').value,
+    status:      document.getElementById('detailStatus').value,
+    due_date:    document.getElementById('detailDueDate').value || null,
+    effort,
+  };
+
+  // Sync to local state
+  Object.assign(item, payload);
+
+  const btn = document.querySelector('.ws-detail-save');
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving…';
+  btn.disabled = true;
+
+  await api(`/workspace/item/${itemPk}/update/`, payload);
+
+  btn.innerHTML = '<i class="bi bi-check-lg"></i> Saved!';
+  setTimeout(() => {
+    btn.innerHTML = '<i class="bi bi-check-lg"></i> Save Changes';
+    btn.disabled = false;
+    closeDetail();
+    renderMain();
+  }, 700);
 }
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
