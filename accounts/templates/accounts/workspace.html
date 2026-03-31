@@ -592,7 +592,7 @@
     text-align: center;
     padding: 2rem;
   }
-  .ws-welcome-emoji { font-size: 4rem; margin-bottom: 1rem; }
+  .ws-welcome-icon { margin-bottom: 1rem; }
   .ws-welcome h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-dark); }
   .ws-welcome p { color: var(--text-light); margin-bottom: 2rem; max-width: 380px; }
   .ws-type-grid {
@@ -620,7 +620,7 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     border-color: var(--blue);
   }
-  .ws-type-card-icon { font-size: 1.8rem; }
+  .ws-type-card-icon { font-size: 1.5rem; width: 44px; height: 44px; background: var(--surface-2); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
   .ws-type-card-name { font-size: 0.82rem; font-weight: 700; color: var(--text-dark); }
   .ws-type-card-desc { font-size: 0.72rem; color: var(--text-light); }
 
@@ -652,23 +652,23 @@
         </button>
         <div class="ws-type-picker" id="wsTypePicker">
           <button class="ws-type-option" onclick="createDoc('todo')">
-            <span class="type-icon-sm" style="background:#dcfce7;">✅</span>
+            <span class="type-icon-sm" style="background:#dcfce7;color:#16a34a;"><i class="bi bi-check2-square"></i></span>
             To-Do List
           </button>
           <button class="ws-type-option" onclick="createDoc('project')">
-            <span class="type-icon-sm" style="background:#dbeafe;">📋</span>
+            <span class="type-icon-sm" style="background:#dbeafe;color:#2563eb;"><i class="bi bi-kanban"></i></span>
             Project Tracker
           </button>
           <button class="ws-type-option" onclick="createDoc('brainstorm')">
-            <span class="type-icon-sm" style="background:#fef9c3;">💡</span>
+            <span class="type-icon-sm" style="background:#fef9c3;color:#d97706;"><i class="bi bi-lightbulb"></i></span>
             Brainstorm
           </button>
           <button class="ws-type-option" onclick="createDoc('goal')">
-            <span class="type-icon-sm" style="background:#f3e8ff;">🎯</span>
+            <span class="type-icon-sm" style="background:#f3e8ff;color:#7c3aed;"><i class="bi bi-bullseye"></i></span>
             Goal Tracker
           </button>
           <button class="ws-type-option" onclick="createDoc('note')">
-            <span class="type-icon-sm" style="background:#fce7f3;">📝</span>
+            <span class="type-icon-sm" style="background:#fce7f3;color:#db2777;"><i class="bi bi-journal-text"></i></span>
             Notes
           </button>
         </div>
@@ -704,11 +704,11 @@ const WS = {
 const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 const TYPE_META = {
-  todo:       { icon: '✅', label: 'To-Do List',      color: '#16a34a', bg: '#dcfce7' },
-  project:    { icon: '📋', label: 'Project Tracker', color: '#2563eb', bg: '#dbeafe' },
-  brainstorm: { icon: '💡', label: 'Brainstorm',      color: '#d97706', bg: '#fef9c3' },
-  goal:       { icon: '🎯', label: 'Goal Tracker',    color: '#7c3aed', bg: '#f3e8ff' },
-  note:       { icon: '📝', label: 'Notes',           color: '#db2777', bg: '#fce7f3' },
+  todo:       { icon: '<i class="bi bi-check2-square"></i>',  label: 'To-Do List',      color: '#16a34a', bg: '#dcfce7' },
+  project:    { icon: '<i class="bi bi-kanban"></i>',          label: 'Project Tracker', color: '#2563eb', bg: '#dbeafe' },
+  brainstorm: { icon: '<i class="bi bi-lightbulb"></i>',       label: 'Brainstorm',      color: '#d97706', bg: '#fef9c3' },
+  goal:       { icon: '<i class="bi bi-bullseye"></i>',        label: 'Goal Tracker',    color: '#7c3aed', bg: '#f3e8ff' },
+  note:       { icon: '<i class="bi bi-journal-text"></i>',    label: 'Notes',           color: '#db2777', bg: '#fce7f3' },
 };
 
 const STICKY_COLORS = ['#fef9c3','#fce7f3','#dbeafe','#dcfce7','#ffedd5','#f3e8ff','#e0f2fe','#fef2f2'];
@@ -735,7 +735,7 @@ function renderSidebar() {
     const docs = WS.docs.filter(d => d.type === type);
     if (!docs.length) return;
     const m = TYPE_META[type];
-    html += `<div class="ws-group-label">${m.icon} ${m.label}</div>`;
+    html += `<div class="ws-group-label"><span style="color:${m.color};">${m.icon}</span> ${m.label}</div>`;
     docs.forEach(doc => {
       const active = doc.pk === WS.activeId ? 'active' : '';
       html += `
@@ -794,13 +794,15 @@ function renderMain() {
 function renderWelcome() {
   document.getElementById('wsContentArea').innerHTML = `
     <div class="ws-welcome">
-      <div class="ws-welcome-emoji">📚</div>
+      <div class="ws-welcome-icon" style="width:72px;height:72px;background:linear-gradient(135deg,#dcfce7,#dbeafe);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:2rem;color:#4E7C3F;">
+        <i class="bi bi-journals"></i>
+      </div>
       <h2>Your Personal Workspace</h2>
       <p>Organize your tasks, projects, ideas, goals and notes — all in one place. Create your first doc below.</p>
       <div class="ws-type-grid">
         ${Object.entries(TYPE_META).map(([type, m]) => `
           <div class="ws-type-card" onclick="createDoc('${type}')">
-            <div class="ws-type-card-icon">${m.icon}</div>
+            <div class="ws-type-card-icon" style="color:${m.color};">${m.icon}</div>
             <div class="ws-type-card-name">${m.label}</div>
           </div>
         `).join('')}
@@ -813,7 +815,7 @@ function docHeaderHTML(doc) {
   const m = TYPE_META[doc.type];
   return `
     <div class="ws-doc-header">
-      <div class="ws-doc-emoji" style="background:${m.bg};">${m.icon}</div>
+      <div class="ws-doc-emoji" style="background:${m.bg};color:${m.color};">${m.icon}</div>
       <input class="ws-title-input" id="docTitleInput" value="${esc(doc.title)}"
              placeholder="Untitled"
              onchange="saveDocTitle(${doc.pk}, this.value)">
@@ -919,7 +921,7 @@ function projectCardHTML(item, docPk) {
   const pColors = { low:'#16a34a', medium:'#d97706', high:'#dc2626' };
   const pc = pColors[item.priority] || '#d97706';
   const nextStatus = { todo:'in_progress', in_progress:'done', done:'blocked', blocked:'todo' };
-  const nextLabel  = { todo:'▶ Start', in_progress:'✓ Done', done:'🚫 Block', blocked:'↩ Reset' };
+  const nextLabel  = { todo:'<i class="bi bi-play-fill"></i> Start', in_progress:'<i class="bi bi-check-lg"></i> Done', done:'<i class="bi bi-slash-circle"></i> Block', blocked:'<i class="bi bi-arrow-counterclockwise"></i> Reset' };
   return `
     <div class="ws-card" id="kc-${item.pk}">
       <div class="ws-card-content" contenteditable="true"
@@ -1047,7 +1049,7 @@ function renderNote(doc) {
       <button class="ws-tb-btn" onclick="insertText('*','*')" title="Italic"><i>I</i></button>
       <button class="ws-tb-btn" onclick="insertTextLine('## ')" title="Heading">H</button>
       <button class="ws-tb-btn" onclick="insertTextLine('- ')" title="Bullet list">• List</button>
-      <button class="ws-tb-btn" onclick="insertTextLine('- [ ] ')" title="Checkbox">☐ Task</button>
+      <button class="ws-tb-btn" onclick="insertTextLine('- [ ] ')" title="Checkbox"><i class="bi bi-ui-checks"></i> Task</button>
       <button class="ws-tb-btn" onclick="insertTextLine('> ')" title="Quote">" Quote</button>
       <span id="noteSaveStatus" style="font-size:0.75rem;color:var(--text-light);margin-left:auto;align-self:center;"></span>
     </div>
