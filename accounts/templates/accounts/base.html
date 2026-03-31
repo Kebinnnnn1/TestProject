@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8">
@@ -13,6 +13,14 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Anti-FOUC: apply dark mode before CSS renders -->
+  <script>
+    (function(){
+      if(localStorage.getItem('culink_dark_mode')==='1'){
+        document.documentElement.setAttribute('data-theme','dark');
+      }
+    })();
+  </script>
 
   <style>
     /* ─── Design Tokens ─── */
@@ -37,6 +45,22 @@
       --radius-md:   16px;
       --radius-lg:   24px;
       --radius-pill: 999px;
+    }
+
+    /* ─── Dark Mode Tokens ─── */
+    [data-theme="dark"] {
+      --bg:          #111114;
+      --bg-card:     #1a1a1f;
+      --bg-card-alt: #1f1f2a;
+      --bg-white:    #1a1a1f;
+      --bg-dark:     #0a0a0d;
+      --text-dark:   #f0f0f5;
+      --text-mid:    #a0a0b0;
+      --text-light:  #666680;
+      --border:      rgba(255,255,255,0.09);
+      --shadow-sm:   0 2px 8px rgba(0,0,0,0.3);
+      --shadow-md:   0 8px 32px rgba(0,0,0,0.4);
+      --shadow-lg:   0 24px 64px rgba(0,0,0,0.5);
     }
 
     /* ─── Base ─── */
@@ -69,7 +93,11 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      transition: box-shadow 0.3s;
+      transition: background 0.25s, box-shadow 0.3s;
+    }
+
+    [data-theme="dark"] .navbar {
+      background: rgba(17,17,20,0.92);
     }
 
     .navbar.scrolled {
@@ -214,10 +242,32 @@
       border-left: 1px solid var(--border);
       box-shadow: var(--shadow-lg);
       z-index: 1999;
-      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
+    }
+
+    /* ─── Dark Mode Toggle ─── */
+    .dark-toggle {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .dark-toggle:hover {
+      border-color: var(--pink);
+      color: var(--pink);
     }
 
     .slide-menu.open { right: 0; }
@@ -280,7 +330,7 @@
     }
 
     .slide-nav-link:hover {
-      background: var(--bg);
+      background: var(--bg-card);
       color: var(--text-dark);
     }
 
@@ -414,7 +464,7 @@
       padding: 0.75rem 1rem !important;
       font-size: 0.92rem !important;
       font-family: 'Space Grotesk', sans-serif !important;
-      transition: border-color 0.2s, box-shadow 0.2s !important;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.25s !important;
     }
 
     .form-control:focus {
@@ -678,6 +728,10 @@
         <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'register' %}{% endif %}" class="btn-nav-primary">
           {% if user.is_authenticated %}Dashboard{% else %}Get Started{% endif %}
         </a>
+        <!-- Dark mode toggle -->
+        <button class="dark-toggle" id="darkToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <i class="bi bi-moon-fill" id="darkIcon"></i>
+        </button>
         <button class="hamburger-btn" id="menuToggle" aria-label="Open menu">
           <i class="bi bi-list"></i>
           {% if unread_dm_count %}<span class="hamburger-dot"></span>{% endif %}
@@ -739,6 +793,30 @@
     }
     refreshWallBadge();
     window.addEventListener('storage', e => { if (e.key === 'wall_unseen') refreshWallBadge(); });
+
+    // ─── Dark Mode ───
+    (function () {
+      const html      = document.documentElement;
+      const toggle    = document.getElementById('darkToggle');
+      const icon      = document.getElementById('darkIcon');
+      const DARK_KEY  = 'culink_dark_mode';
+
+      function applyTheme(dark) {
+        html.setAttribute('data-theme', dark ? 'dark' : 'light');
+        icon.className = dark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+        localStorage.setItem(DARK_KEY, dark ? '1' : '0');
+      }
+
+      // Apply stored preference immediately
+      const stored = localStorage.getItem(DARK_KEY);
+      applyTheme(stored === '1');
+
+      if (toggle) {
+        toggle.addEventListener('click', () => {
+          applyTheme(html.getAttribute('data-theme') !== 'dark');
+        });
+      }
+    })();
 
     // ─── Navbar scroll effect ───
     const nav = document.getElementById('mainNav');
