@@ -1,0 +1,266 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Create Account — CUlink{% endblock %}
+
+{% block extra_head %}
+<style>
+    .auth-wrap {
+        min-height: 90vh;
+        display: flex;
+        align-items: stretch;
+    }
+
+    .auth-left {
+        flex: 1;
+        background: linear-gradient(135deg, #4361ee 0%, #7209b7 60%, #ff6b35 100%);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 4rem 3rem;
+        min-height: 300px;
+    }
+
+    .auth-left .blob-a {
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent 70%);
+        top: -100px;
+        right: -100px;
+        border-radius: 50%;
+        animation: blobPulse 7s ease-in-out infinite;
+    }
+
+    .auth-left .blob-b {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 107, 53, 0.2), transparent 70%);
+        bottom: -80px;
+        left: -80px;
+        border-radius: 50%;
+        animation: blobPulse 9s 2s ease-in-out infinite;
+    }
+
+    .auth-left-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        color: #fff;
+    }
+
+    .auth-left-content h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        letter-spacing: -0.5px;
+    }
+
+    .auth-left-content p {
+        font-size: 0.97rem;
+        opacity: 0.85;
+        line-height: 1.7;
+        max-width: 280px;
+        margin: 0 auto;
+    }
+
+    .auth-perks {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        text-align: left;
+    }
+
+    .perk {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .perk-icon {
+        width: 28px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    .auth-right {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        background: #fff;
+    }
+
+    .auth-form-box {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .auth-form-box h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--text-dark);
+        margin-bottom: 0.4rem;
+    }
+
+    .auth-form-box .sub {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+
+    .auth-form-box .sub a {
+        color: var(--blue);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+        .auth-wrap {
+            flex-direction: column;
+        }
+
+        .auth-left {
+            min-height: 220px;
+            padding: 2rem;
+        }
+
+        .auth-left-content h2 {
+            font-size: 1.4rem;
+        }
+
+        .auth-perks {
+            display: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .auth-right {
+            padding: 2rem 1.25rem;
+        }
+
+        .auth-form-box h1 {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* ─── Dark Mode ─── */
+    [data-theme="dark"] .auth-right {
+        background: var(--surface);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+    <!-- Left panel -->
+    <div class="auth-left d-none d-md-flex">
+        <div class="blob-a"></div>
+        <div class="blob-b"></div>
+        <div class="auth-left-content">
+            <div
+                style="width: 64px; height: 64px; background: rgba(15,21,33,0.5); border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; backdrop-filter: blur(12px); box-shadow: 0 4px 24px rgba(0,0,0,0.25);">
+                <i class="bi bi-arrow-repeat" style="font-size: 1.8rem; color: #fff;"></i>
+            </div>
+            <h2>Join CUlink today</h2>
+            <p>Convert files instantly in your browser — free, private, and no software needed.</p>
+            <div class="auth-perks">
+                <div class="perk">
+                    <div class="perk-icon"><i class="bi bi-file-earmark-image-fill"></i></div> Convert images instantly
+                </div>
+                <div class="perk">
+                    <div class="perk-icon"><i class="bi bi-shield-lock-fill"></i></div> Files stay on your device
+                </div>
+                <div class="perk">
+                    <div class="perk-icon"><i class="bi bi-lightning-fill"></i></div> No installs required
+                </div>
+                <div class="perk">
+                    <div class="perk-icon"><i class="bi bi-infinity"></i></div> Always free
+                </div>
+                <div class="perk">
+                    <div class="perk-icon"><i class="bi bi-people-fill"></i></div> Connect with students across
+                    universities
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right panel: form -->
+    <div class="auth-right">
+        <div class="auth-form-box" style="animation: fadeInRight 0.7s ease both;">
+            <h1>Create account</h1>
+            <p class="sub">Already have one? <a href="{% url 'login' %}">Sign in</a></p>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label"><i class="bi bi-person me-1"></i>Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                    <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.3rem;">
+                        {% for e in form.username.errors %}{{ e }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><i class="bi bi-envelope me-1"></i>Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.3rem;">
+                        {% for e in form.email.errors %}{{ e }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><i class="bi bi-lock me-1"></i>Password</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                    <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.3rem;">
+                        {% for e in form.password1.errors %}{{ e }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label"><i class="bi bi-lock-fill me-1"></i>Confirm Password</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                    <div style="color: #dc2626; font-size: 0.8rem; margin-top: 0.3rem;">
+                        {% for e in form.password2.errors %}{{ e }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger mb-3">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+                {% endif %}
+
+                <button type="submit" class="btn-primary-grad w-100" style="justify-content: center;">
+                    <i class="bi bi-person-plus-fill"></i> Create Account
+                </button>
+            </form>
+
+            <p style="text-align: center; margin-top: 1.5rem; font-size: 0.78rem; color: var(--text-light);">
+                A verification email will be sent after registration.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

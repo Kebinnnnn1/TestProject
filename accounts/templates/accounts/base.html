@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CUlink{% endblock %}</title>
+  {% load static %}
+  <link rel="icon" type="image/svg+xml" href="{% static 'accounts/favicon.svg' %}">
+  <meta name="description"
+    content="{% block meta_description %}CUlink — Convert files and connect with students across Cebu universities.{% endblock %}">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ─── Light Theme Variables ─── */
+    :root,
+    [data-theme="light"] {
+      --orange: #8BBF7C;           /* sage warm */
+      --orange-light: #A8D49A;
+      --blue: #4E7C3F;             /* sage primary / forest */
+      --blue-light: #6B9960;
+      --purple: #2E5C23;           /* deep forest */
+      --purple-light: #4E7C3F;
+      --grad-main: linear-gradient(135deg, #8BBF7C, #3A6B2E);
+      --grad-warm: linear-gradient(135deg, #A8C49A, #3A6B2E);
+      --grad-cool: linear-gradient(135deg, #5A9048, #1E4A18);
+      --text-dark: #1a2016;
+      --text-mid: #4a5544;
+      --text-light: #6b7a64;
+      --surface: #fafaf8;
+      --surface-2: #f2f5ef;
+      --surface-3: #e8ede4;
+      --border: rgba(60, 90, 48, 0.18);
+      --shadow-sm: 0 2px 12px rgba(40, 70, 30, 0.07);
+      --shadow-md: 0 8px 40px rgba(40, 70, 30, 0.12);
+      --shadow-lg: 0 24px 72px rgba(40, 70, 30, 0.16);
+      --nav-bg: rgba(250, 250, 248, 0.88);
+      --nav-border: rgba(60, 90, 48, 0.09);
+      --card-bg: #ffffff;
+      --input-bg: #f2f5ef;
+      --input-border: #dce8d6;
+    }
+
+    /* ─── Dark Theme Variables ─── */
+    [data-theme="dark"] {
+      --orange: #8BBF7C;
+      --orange-light: #A8D49A;
+      --blue: #8FBB82;             /* lighter sage for dark bg readability */
+      --blue-light: #AAD19F;
+      --purple: #6B9960;
+      --purple-light: #8FBB82;
+      --grad-main: linear-gradient(135deg, #8FBB82, #5A8F4A);
+      --grad-warm: linear-gradient(135deg, #A8D49A, #5A8F4A);
+      --grad-cool: linear-gradient(135deg, #6B9960, #3A6B2E);
+      --text-dark: #edf2ea;
+      --text-mid: #9db898;
+      --text-light: #6b8a64;
+      --surface: #111510;
+      --surface-2: #181e15;
+      --surface-3: #1f2a1b;
+      --border: rgba(143, 187, 130, 0.10);
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 8px 40px rgba(0, 0, 0, 0.45);
+      --shadow-lg: 0 24px 72px rgba(0, 0, 0, 0.55);
+      --nav-bg: rgba(17, 21, 16, 0.93);
+      --nav-border: rgba(143, 187, 130, 0.09);
+      --card-bg: #181e15;
+      --input-bg: #1f2a1b;
+      --input-border: rgba(143, 187, 130, 0.12);
+    }
+
+    /* ─── Base ─── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--surface);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--surface-2);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(#8BBF7C, #3A6B2E);
+      border-radius: 3px;
+    }
+
+    /* ─── Navbar ─── */
+    .navbar {
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--nav-border);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: box-shadow 0.3s, background 0.3s;
+    }
+
+    .navbar.scrolled {
+      box-shadow: var(--shadow-md);
+    }
+
+    .navbar-brand {
+      font-weight: 800;
+      font-size: 1.4rem;
+      background: var(--grad-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .navbar-brand .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--grad-main);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-text-fill-color: white;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .nav-link {
+      color: var(--text-mid) !important;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+      padding: 0.4rem 0.8rem !important;
+    }
+
+    .nav-link:hover {
+      color: var(--blue) !important;
+    }
+
+    .btn-nav-outline {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-dark) !important;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 0.45rem 1.1rem;
+      background: transparent;
+      transition: all 0.2s;
+    }
+
+    .btn-nav-outline:hover {
+      border-color: var(--blue);
+      color: var(--blue) !important;
+    }
+
+    .btn-nav-primary {
+      background: var(--grad-main);
+      color: #fff !important;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      padding: 0.5rem 1.2rem;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 15px rgba(78, 124, 63, 0.30);
+    }
+
+    .btn-nav-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(78, 124, 63, 0.40);
+    }
+
+    /* Dark mode toggle */
+    .btn-theme-toggle {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1rem;
+    }
+
+    .btn-theme-toggle:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--surface-3);
+    }
+
+    /* ─── Hamburger Button ─── */
+    .hamburger-btn {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 1.2rem;
+    }
+
+    .hamburger-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: var(--surface-3);
+    }
+
+    .hamburger-dot {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 2px solid var(--surface-2);
+      animation: pulse-dot 1.8s infinite;
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+      }
+    }
+
+    /* ─── Slide Menu ─── */
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1998;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(2px);
+      animation: fadeIn 0.2s ease;
+    }
+
+    .menu-overlay.open {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .slide-menu {
+      position: fixed;
+      top: 0;
+      right: -320px;
+      width: 290px;
+      height: 100vh;
+      background: var(--card-bg);
+      border-left: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      z-index: 1999;
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      overflow-y: auto;
+    }
+
+    .slide-menu.open {
+      right: 0;
+    }
+
+    .slide-menu-header {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .slide-menu-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slide-menu-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--grad-main);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .slide-menu-username {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+    }
+
+    .slide-menu-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: var(--text-light);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 8px;
+      transition: color 0.2s;
+    }
+
+    .slide-menu-close:hover {
+      color: var(--text-dark);
+    }
+
+    .slide-menu-links {
+      flex: 1;
+      padding: 0.75rem 0;
+    }
+
+    .slide-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.75rem 1.25rem;
+      color: var(--text-mid);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.92rem;
+      transition: background 0.15s, color 0.15s;
+      position: relative;
+    }
+
+    .slide-nav-link:hover {
+      background: var(--surface-2);
+      color: var(--blue);
+    }
+
+    .slide-nav-link i {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .slide-notif-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-left: auto;
+      flex-shrink: 0;
+      animation: pulse-dot 1.8s infinite;
+    }
+
+    .slide-menu-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ─── Buttons ─── */
+    .btn-primary-grad {
+      background: var(--grad-main);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.75rem 2rem;
+      font-size: 0.95rem;
+      transition: all 0.25s;
+      box-shadow: 0 6px 24px rgba(78, 124, 63, 0.30);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .btn-primary-grad:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(78, 124, 63, 0.40);
+      color: #fff;
+    }
+
+    .btn-secondary-outline {
+      background: transparent;
+      color: var(--text-dark);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-weight: 600;
+      padding: 0.75rem 2rem;
+      font-size: 0.95rem;
+      transition: all 0.25s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-secondary-outline:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      transform: translateY(-1px);
+    }
+
+    /* ─── Cards ─── */
+    .card-clean {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .card-clean:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-glass {
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* ─── Forms ─── */
+    .form-control {
+      background: var(--input-bg) !important;
+      border: 1.5px solid var(--input-border) !important;
+      color: var(--text-dark) !important;
+      border-radius: 10px !important;
+      padding: 0.75rem 1rem !important;
+      font-size: 0.92rem !important;
+      transition: border-color 0.2s, box-shadow 0.2s !important;
+    }
+
+    .form-control:focus {
+      border-color: var(--blue) !important;
+      box-shadow: 0 0 0 3px rgba(78, 124, 63, 0.12) !important;
+      background: var(--surface) !important;
+    }
+
+    .form-control::placeholder {
+      color: var(--text-light) !important;
+    }
+
+    .form-label {
+      color: var(--text-mid);
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.45rem;
+    }
+
+    /* ─── Alerts ─── */
+    .messages-container {
+      position: relative;
+      z-index: 100;
+    }
+
+    .alert {
+      border-radius: 12px !important;
+      border: none !important;
+      font-weight: 500;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .alert-success {
+      background: #f0fdf4 !important;
+      color: #166534 !important;
+      border-left: 4px solid #22c55e !important;
+    }
+
+    .alert-danger {
+      background: #fef2f2 !important;
+      color: #991b1b !important;
+      border-left: 4px solid #ef4444 !important;
+    }
+
+    .alert-warning {
+      background: #fffbeb !important;
+      color: #92400e !important;
+      border-left: 4px solid #f59e0b !important;
+    }
+
+    .alert-info {
+      background: #eff6ff !important;
+      color: #1e3a8a !important;
+      border-left: 4px solid #3b82f6 !important;
+    }
+
+    .alert a {
+      color: inherit;
+      font-weight: 700;
+      word-break: break-all;
+    }
+
+    /* ─── Badges ─── */
+    .badge-verified {
+      background: #f0fdf4;
+      color: #16a34a;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-unverified {
+      background: #fef2f2;
+      color: #dc2626;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-active {
+      background: #f0fdf4;
+      color: #16a34a;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-inactive {
+      background: #fffbeb;
+      color: #d97706;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-staff {
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    /* Dark mode badge overrides */
+    [data-theme="dark"] .badge-verified {
+      background: rgba(22, 163, 74, 0.15);
+    }
+
+    [data-theme="dark"] .badge-unverified {
+      background: rgba(220, 38, 38, 0.15);
+    }
+
+    [data-theme="dark"] .badge-active {
+      background: rgba(22, 163, 74, 0.15);
+    }
+
+    [data-theme="dark"] .badge-inactive {
+      background: rgba(217, 119, 6, 0.15);
+    }
+
+    [data-theme="dark"] .badge-staff {
+      background: rgba(37, 99, 235, 0.15);
+    }
+
+    /* ─── Gradient tag ─── */
+    .tag-gradient {
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.12), rgba(67, 97, 238, 0.12));
+      color: var(--blue);
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      background: var(--surface-2);
+      border-top: 1px solid var(--border);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.84rem;
+      margin-top: auto;
+      transition: background 0.3s;
+    }
+
+    footer a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* ─── Utility ─── */
+    main {
+      flex: 1;
+    }
+
+    .text-grad {
+      background: var(--grad-main);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .text-grad-warm {
+      background: var(--grad-warm);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ─── Animations ─── */
+    @keyframes floatY {
+
+      0%,
+      100% {
+        transform: translateY(0px)
+      }
+
+      50% {
+        transform: translateY(-12px)
+      }
+    }
+
+    @keyframes floatX {
+
+      0%,
+      100% {
+        transform: translateX(0px)
+      }
+
+      50% {
+        transform: translateX(8px)
+      }
+    }
+
+    @keyframes blobPulse {
+
+      0%,
+      100% {
+        transform: scale(1) rotate(0deg)
+      }
+
+      33% {
+        transform: scale(1.05) rotate(3deg)
+      }
+
+      66% {
+        transform: scale(0.97) rotate(-2deg)
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    @keyframes spin-slow {
+      from {
+        transform: rotate(0deg)
+      }
+
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0.6
+      }
+
+      50% {
+        transform: translateY(-40px) translateX(20px) scale(1.2);
+        opacity: 1
+      }
+
+      100% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0.6
+      }
+    }
+
+    @keyframes marquee {
+      from {
+        transform: translateX(0)
+      }
+
+      to {
+        transform: translateX(-50%)
+      }
+    }
+
+    /* ─── Global Reveal ─── */
+    .reveal,
+    .reveal-left,
+    .reveal-right {
+      transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+
+    .reveal.visible,
+    .reveal-left.visible,
+    .reveal-right.visible {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+
+    .delay-1 {
+      transition-delay: 0.08s !important;
+    }
+
+    .delay-2 {
+      transition-delay: 0.16s !important;
+    }
+
+    .delay-3 {
+      transition-delay: 0.24s !important;
+    }
+
+    .delay-4 {
+      transition-delay: 0.32s !important;
+    }
+
+    .delay-5 {
+      transition-delay: 0.40s !important;
+    }
+
+    /* ─── Global Responsive ─── */
+    html,
+    body {
+      overflow-x: hidden;
+    }
+
+    /* Disable side-slide animations on small screens (prevent layout shift) */
+    @media (max-width: 767px) {
+
+      .reveal-left,
+      .reveal-right {
+        transform: translateY(20px) !important;
+      }
+
+      .reveal-left.visible,
+      .reveal-right.visible {
+        transform: translate(0, 0) !important;
+      }
+    }
+
+    /* Navbar mobile: stack action buttons nicely */
+    @media (max-width: 991px) {
+      .navbar .d-flex {
+        flex-wrap: wrap;
+        gap: .5rem;
+        margin-top: .5rem;
+        padding-bottom: .5rem;
+      }
+
+      .navbar-nav {
+        gap: 0 !important;
+      }
+    }
+
+    /* Footer: stack on small screens */
+    @media (max-width: 576px) {
+      footer p {
+        font-size: .78rem;
+        text-align: center;
+        line-height: 1.8;
+      }
+
+      footer p br {
+        display: block;
+        content: '';
+        margin: .25rem 0;
+      }
+    }
+
+    /* Section padding shrink on mobile */
+    @media (max-width: 767px) {
+      .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+  <!-- Slide Menu Overlay -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+
+  <!-- Slide Menu Panel -->
+  <div class="slide-menu" id="slideMenu">
+    <div class="slide-menu-header">
+      {% if user.is_authenticated %}
+      <div class="slide-menu-user">
+        <div class="slide-menu-avatar">{{ user.username|slice:":1"|upper }}</div>
+        <span class="slide-menu-username">{{ user.username }}</span>
+      </div>
+      {% else %}
+      <span style="font-weight:700;font-size:1rem;">Menu</span>
+      {% endif %}
+      <button class="slide-menu-close" id="menuClose"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <nav class="slide-menu-links">
+      <a class="slide-nav-link" href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a>
+      {% if user.is_authenticated %}
+      <a class="slide-nav-link" href="{% url 'dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a>
+      {% endif %}
+      <a class="slide-nav-link" href="{% url 'converter' %}"><i class="bi bi-arrow-left-right"></i> Converter</a>
+      {% if user.is_authenticated %}
+      {% if user.is_verified %}
+      <a class="slide-nav-link" href="{% url 'wall' %}" style="position:relative;">
+        <i class="bi bi-journals"></i> Knowledge Wall
+        <span id="wall-nav-badge" style="display:none; background:#22c55e; color:#fff; font-size:0.65rem; font-weight:700; border-radius:50px; padding:1px 6px; margin-left:5px; vertical-align:middle;">0</span>
+      </a>
+      <a class="slide-nav-link" href="{% url 'chat_inbox' %}">
+        <i class="bi bi-chat-dots"></i> Messages
+        {% if unread_dm_count %}<span class="slide-notif-dot"></span>{% endif %}
+      </a>
+      {% else %}
+      <a class="slide-nav-link" href="#" onclick="event.preventDefault();document.getElementById('verifyModal').style.display='flex';closeMenu();" style="opacity:0.5;">
+        <i class="bi bi-lock"></i> Knowledge Wall <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
+      </a>
+      <a class="slide-nav-link" href="#" onclick="event.preventDefault();document.getElementById('verifyModal').style.display='flex';closeMenu();" style="opacity:0.5;">
+        <i class="bi bi-lock"></i> Messages <span style="font-size:0.7rem;color:var(--text-light);margin-left:auto;">Verify to unlock</span>
+      </a>
+      {% endif %}
+      {% if user.is_staff or user.is_superuser %}
+      <a class="slide-nav-link" href="{% url 'admin_dashboard' %}"><i class="bi bi-shield-check"></i> Admin</a>
+      {% endif %}
+      {% endif %}
+    </nav>
+    <div class="slide-menu-footer">
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit"
+          style="width:100%;display:flex;align-items:center;gap:10px;padding:0.7rem 1rem;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text-mid);font-weight:500;font-size:0.92rem;cursor:pointer;transition:all 0.2s;"
+          onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-mid)'">
+          <i class="bi bi-box-arrow-right"></i> Sign Out
+        </button>
+      </form>
+      {% else %}
+      <a href="{% url 'login' %}" class="btn-nav-outline nav-link"
+        style="display:block;text-align:center;margin-bottom:0.5rem;">Sign In</a>
+      <a href="{% url 'register' %}" class="btn-nav-primary nav-link" style="display:block;text-align:center;">Get
+        Started</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="mainNav">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
+      <a class="navbar-brand" href="{% url 'home' %}">
+        <div class="brand-icon"><i class="bi bi-arrow-repeat"></i></div>
+        CUlink
+      </a>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn-theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+          <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+        </button>
+        <button class="hamburger-btn" id="menuToggle" aria-label="Open menu">
+          <i class="bi bi-list"></i>
+          {% if unread_dm_count %}<span class="hamburger-dot"></span>{% endif %}
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages -->
+  {% if messages %}
+  <div class="messages-container container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>{% endif %}
+      {% if message.tags == 'error' or message.tags == 'danger' %}<i class="bi bi-x-circle-fill me-2"></i>{% endif %}
+      {% if message.tags == 'warning' %}<i class="bi bi-exclamation-triangle-fill me-2"></i>{% endif %}
+      {% if message.tags == 'info' %}<i class="bi bi-info-circle-fill me-2"></i>{% endif %}
+      {{ message|urlize }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <p style="margin:0;">&copy; 2026 <strong
+        style="background: var(--grad-main); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">CUlink</strong>
+      — Convert files quickly and easily.
+      &nbsp;|&nbsp; <a href="mailto:support@convertly.app">support@convertly.app</a>
+    </p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  {% if user.is_authenticated and pusher_key %}
+  <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+  {% endif %}
+  <script>
+    // ─── Dark Mode ───
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+
+    function setTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+    }
+
+    // Load saved preference (default: light)
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+
+    // ─── Wall unseen badge ───
+    function refreshWallBadge() {
+      try {
+        const n = parseInt(localStorage.getItem('wall_unseen') || '0');
+        // Nav link pill
+        const badge = document.getElementById('wall-nav-badge');
+        if (badge) { badge.textContent = n; badge.style.display = n > 0 ? 'inline-flex' : 'none'; }
+        // Hamburger dot — same red dot used for DM notifications
+        const hamburger = document.getElementById('menuToggle');
+        if (hamburger) {
+          let dot = hamburger.querySelector('.hamburger-dot');
+          if (n > 0 && !dot) {
+            dot = document.createElement('span');
+            dot.className = 'hamburger-dot';
+            hamburger.appendChild(dot);
+          } else if (n === 0 && dot) {
+            dot.remove();
+          }
+        }
+      } catch(e) {}
+    }
+    refreshWallBadge();
+    window.addEventListener('storage', e => { if (e.key === 'wall_unseen') refreshWallBadge(); });
+
+
+    btn.addEventListener('click', () => {
+      setTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+
+    // ─── Navbar scroll effect ───
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // ─── Hamburger Slide Menu ───
+    const menuToggle = document.getElementById('menuToggle');
+    const menuClose = document.getElementById('menuClose');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const slideMenu = document.getElementById('slideMenu');
+
+    function openMenu() {
+      slideMenu.classList.add('open');
+      menuOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMenu() {
+      slideMenu.classList.remove('open');
+      menuOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    if (menuToggle) menuToggle.addEventListener('click', openMenu);
+    if (menuClose) menuClose.addEventListener('click', closeMenu);
+    if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
+
+    // ─── Global Scroll-Reveal (Intersection Observer) ───
+    const revealObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          revealObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    function initReveal() {
+      document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => {
+        revealObs.observe(el);
+      });
+    }
+    initReveal();
+    setTimeout(initReveal, 250);
+
+    // ─── Live DM badge via Pusher ───
+    {% if user.is_authenticated and pusher_key %}
+    (function () {
+      const PK = "{{ pusher_key }}";
+      const PC = "{{ pusher_cluster }}";
+      const UID = "{{ user.pk }}";
+      if (!PK) return;
+
+      const _p = new Pusher(PK, { cluster: PC });
+      const _ch = _p.subscribe('user-notif-' + UID);
+      const hamburgerBtn = document.getElementById('menuToggle');
+
+      _ch.bind('new-dm', function () {
+        // Show red dot on hamburger if not already there
+        if (hamburgerBtn && !hamburgerBtn.querySelector('.hamburger-dot')) {
+          const dot = document.createElement('span');
+          dot.className = 'hamburger-dot';
+          hamburgerBtn.appendChild(dot);
+        }
+        // Show red dot in slide menu Messages link if not already there
+        const msgLink = document.querySelector('.slide-menu-links .slide-notif-dot');
+        if (!msgLink) {
+          const links = document.querySelectorAll('.slide-nav-link');
+          links.forEach(function (l) {
+            if (l.textContent.trim().startsWith('Messages') && !l.querySelector('.slide-notif-dot')) {
+              const d = document.createElement('span');
+              d.className = 'slide-notif-dot';
+              l.appendChild(d);
+            }
+          });
+        }
+      });
+
+      // ── Wall comment/reply notification for post owner ──
+      _ch.bind('wall-reply', function (data) {
+        const verb = data.is_reply ? 'replied on' : 'commented on';
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position:fixed; bottom:24px; right:24px; z-index:9999;
+          background:var(--card-bg,#1e1e2e); border:1.5px solid var(--border,#333);
+          border-radius:14px; padding:14px 18px; max-width:300px;
+          box-shadow:0 8px 32px rgba(0,0,0,0.35);
+          animation: slideUp 0.3s ease; cursor:pointer;
+          display:flex; align-items:flex-start; gap:10px;
+        `;
+        toast.innerHTML = `
+          <span style="font-size:1.3rem;">💬</span>
+          <div>
+            <div style="font-size:0.85rem;font-weight:700;color:var(--text-dark,#fff);margin-bottom:2px;">
+              <strong>${data.author}</strong> ${verb} your post
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-light,#aaa);">${data.preview}</div>
+            <a href="/wall/" style="font-size:0.75rem;color:#3b82f6;font-weight:600;text-decoration:none;">View post →</a>
+          </div>`;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.4s'; setTimeout(() => toast.remove(), 400); }, 5000);
+        toast.onclick = () => { window.location.href = '/wall/'; };
+      });
+    })();
+
+    {% endif %}
+  </script>
+  {% if user.is_authenticated and not user.is_verified %}
+  <!-- Verification Required Modal -->
+  <div id="verifyModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:var(--card-bg,#fff);border:1.5px solid var(--border,#e5e7eb);border-radius:20px;padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;animation:fadeInUp 0.3s ease;">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <i class="bi bi-shield-lock" style="font-size:1.8rem;color:#d97706;"></i>
+      </div>
+      <h3 style="color:var(--text-dark,#111);margin-bottom:0.5rem;font-size:1.2rem;">Verification Required</h3>
+      <p style="color:var(--text-mid,#666);font-size:0.9rem;margin-bottom:1.5rem;line-height:1.5;">
+        You need to verify your email to access <strong>Chat</strong> and <strong>Knowledge Wall</strong>.
+        Check your inbox for the verification link.
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <a href="{% url 'resend_verification' %}" style="background:var(--grad-main);color:#fff;border:none;border-radius:12px;padding:0.7rem 1.5rem;font-weight:600;font-size:0.9rem;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+          <i class="bi bi-envelope"></i> Resend Email
+        </a>
+        <button onclick="document.getElementById('verifyModal').style.display='none'" style="background:transparent;border:1.5px solid var(--border,#e5e7eb);border-radius:12px;padding:0.7rem 1.5rem;font-weight:600;font-size:0.9rem;color:var(--text-mid,#666);cursor:pointer;">
+          Dismiss
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

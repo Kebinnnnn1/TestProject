@@ -1,0 +1,8 @@
+django>=4.2
+python-decouple
+whitenoise
+dj-database-url
+psycopg2-binary
+pusher
+cloudinary
+django-cloudinary-storage

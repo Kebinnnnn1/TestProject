@@ -1,0 +1,385 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Dashboard — AuthApp{% endblock %}
+
+{% block extra_head %}
+<style>
+    .dash-wrap {
+        background: var(--surface-2);
+        min-height: calc(100vh - 70px);
+        padding: 2.5rem 0 4rem;
+    }
+
+    .dash-header {
+        background: linear-gradient(135deg, #4361ee, #7209b7);
+        border-radius: 20px;
+        padding: 2rem 2.5rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .dash-header::after {
+        content: '';
+        position: absolute;
+        right: -40px;
+        top: -40px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent 70%);
+        border-radius: 50%;
+    }
+
+    .dash-header h1 {
+        font-size: 1.7rem;
+        font-weight: 800;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .dash-header p {
+        margin: 0.3rem 0 0;
+        font-size: 0.9rem;
+        opacity: 0.8;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.25s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-card .sc-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .sc-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--text-dark);
+    }
+
+    .stat-card .sc-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+    }
+
+    .info-card h5 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.2rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.75rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-row .ir-label {
+        font-size: 0.82rem;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .info-row .ir-value {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .quick-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0.9rem 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        background: var(--surface-2);
+    }
+
+    .quick-link:hover {
+        transform: translateX(4px);
+    }
+
+    .quick-link-blue {
+        background: rgba(67, 97, 238, 0.06);
+        border-color: rgba(67, 97, 238, 0.15);
+        color: var(--blue);
+    }
+
+    .quick-link-purple {
+        background: rgba(114, 9, 183, 0.06);
+        border-color: rgba(114, 9, 183, 0.15);
+        color: var(--purple);
+    }
+
+    .quick-link-red {
+        background: #fef2f2;
+        border-color: rgba(239, 68, 68, 0.2);
+        color: #dc2626;
+        width: 100%;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    [data-theme="dark"] .quick-link-red {
+        background: rgba(220, 38, 38, 0.12);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-wrap">
+    <div class="container">
+
+        <div class="dash-header reveal">
+            <p style="font-size:0.82rem;opacity:0.7;margin-bottom:0.2rem;">WELCOME BACK</p>
+            <h1>{{ user.username }}</h1>
+            <p>Here's an overview of your account.</p>
+        </div>
+
+        {% if not user.is_verified %}
+        <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fbbf24;border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:1.5rem;" class="reveal">
+            <i class="bi bi-exclamation-triangle-fill" style="color:#d97706;font-size:1.2rem;"></i>
+            <div style="flex:1;min-width:200px;">
+                <strong style="color:#92400e;">Email not verified</strong>
+                <span style="color:#a16207;font-size:0.88rem;"> — Verify your email to unlock Chat & Knowledge Wall.</span>
+            </div>
+            <a href="{% url 'resend_verification' %}" style="color:#d97706;font-weight:600;font-size:0.85rem;text-decoration:none;white-space:nowrap;">Resend verification →</a>
+        </div>
+        {% endif %}
+
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card reveal delay-1">
+                    <div class="sc-icon"
+                        style="background:linear-gradient(135deg,rgba(67,97,238,0.15),rgba(94,122,245,0.07));">
+                        <i class="bi bi-person-fill" style="color:var(--blue);"></i>
+                    </div>
+                    <div class="sc-label">Account</div>
+                    <div class="sc-value" style="font-size:1.1rem;">{{ user.username }}</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card reveal delay-2">
+                    <div class="sc-icon"
+                        style="background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(52,211,153,0.07));">
+                        <i class="bi bi-patch-check-fill" style="color:#10b981;"></i>
+                    </div>
+                    <div class="sc-label">Email Status</div>
+                    <div class="sc-value" style="font-size:1rem;">
+                        {% if user.is_verified %}
+                        <span class="badge-verified">Verified</span>
+                        {% else %}
+                        <span class="badge-unverified">Unverified</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card reveal delay-3">
+                    <div class="sc-icon"
+                        style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,191,36,0.07));">
+                        <i class="bi bi-calendar-check-fill" style="color:#f59e0b;"></i>
+                    </div>
+                    <div class="sc-label">Member Since</div>
+                    <div class="sc-value" style="font-size:1rem;">{{ user.date_joined|date:"M j, Y" }}</div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card reveal delay-4">
+                    <div class="sc-icon"
+                        style="background:linear-gradient(135deg,rgba(114,9,183,0.15),rgba(155,47,224,0.07));">
+                        <i class="bi bi-shield-fill-check" style="color:var(--purple);"></i>
+                    </div>
+                    <div class="sc-label">Role</div>
+                    <div class="sc-value" style="font-size:1rem;">
+                        {% if user.role == 'admin' %}
+                        <span class="badge-staff">Admin</span>
+                        {% elif user.role == 'moderator' %}
+                        <span class="badge-staff">Moderator</span>
+                        {% else %}
+                        <span class="badge-active">Member</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="info-card reveal">
+                    <h5><i class="bi bi-person-circle me-2" style="color:var(--blue);"></i>Profile Details</h5>
+                    <div class="info-row">
+                        <span class="ir-label">Username</span>
+                        <span class="ir-value">{{ user.username }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="ir-label">Email</span>
+                        <span class="ir-value">{{ user.email }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="ir-label">Last Login</span>
+                        <span class="ir-value">{{ user.last_login|date:"N j, Y g:i A"|default:"—" }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="ir-label">Account Status</span>
+                        <span class="ir-value">
+                            {% if user.is_active %}
+                            <span class="badge-active">Active</span>
+                            {% else %}
+                            <span class="badge-inactive">Inactive</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-card reveal delay-1">
+                    <h5><i class="bi bi-grid me-2" style="color:var(--orange);"></i>Quick Actions</h5>
+                    <div class="d-flex flex-column gap-2">
+                        {% if user.is_staff or user.is_superuser %}
+                        <a href="{% url 'admin_dashboard' %}" class="quick-link quick-link-blue">
+                            <i class="bi bi-speedometer2" style="font-size:1.1rem;"></i> Admin Dashboard
+                        </a>
+                        <a href="/django-admin/" target="_blank" class="quick-link quick-link-purple">
+                            <i class="bi bi-gear-fill" style="font-size:1.1rem;"></i> Django Admin
+                        </a>
+                        {% endif %}
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="quick-link quick-link-red">
+                                <i class="bi bi-box-arrow-right" style="font-size:1.1rem;"></i> Sign Out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-12">
+                <div class="info-card reveal">
+                    <h5><i class="bi bi-mortarboard-fill me-2" style="color:#a855f7;"></i>University Settings</h5>
+                    {% if user.is_verified %}
+                    <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:1.25rem;">
+                        Set your university so others can find you via <strong>Random Chat</strong>.
+                        {% if user.university %}Currently: <strong>{{ user.university }}</strong>{% endif %}
+                    </p>
+                    <form method="post" action="{% url 'update_university' %}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                        {% csrf_token %}
+                        <select name="university" style="flex:1;min-width:220px;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:12px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                            <option value="">— Select your university —</option>
+                            <option value="CTU" {% if user.university == "CTU" %}selected{% endif %}>CTU — Cebu Technological University</option>
+                            <option value="CEC" {% if user.university == "CEC" %}selected{% endif %}>CEC — Cebu Eastern College</option>
+                            <option value="SWU" {% if user.university == "SWU" %}selected{% endif %}>SWU — Southwestern University</option>
+                            <option value="ACT" {% if user.university == "ACT" %}selected{% endif %}>ACT — Asian College of Technology</option>
+                            <option value="UV"  {% if user.university == "UV"  %}selected{% endif %}>UV — University of the Visayas</option>
+                        </select>
+                        <button type="submit" style="padding:0.65rem 1.5rem;border-radius:12px;border:none;background:var(--grad-main);color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;white-space:nowrap;">Save University</button>
+                    </form>
+                    {% else %}
+                    <p style="font-size:0.85rem;color:var(--text-light);margin:0;">
+                        <i class="bi bi-lock-fill me-1"></i>Please <strong>verify your email</strong> to set your university.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Settings -->
+        <div class="row g-3 mt-1">
+            <div class="col-md-6">
+                <div class="info-card reveal">
+                    <h5><i class="bi bi-key-fill me-2" style="color:#f59e0b;"></i>Change Password</h5>
+                    <form method="post" action="{% url 'change_password' %}">
+                        {% csrf_token %}
+                        <div style="margin-bottom:0.9rem;">
+                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">Current Password</label>
+                            <input type="password" name="old_password" required
+                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                        </div>
+                        <div style="margin-bottom:0.9rem;">
+                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">New Password</label>
+                            <input type="password" name="new_password" required minlength="8"
+                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                        </div>
+                        <div style="margin-bottom:1rem;">
+                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">Confirm New Password</label>
+                            <input type="password" name="confirm_password" required minlength="8"
+                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                        </div>
+                        <button type="submit" style="padding:0.65rem 1.5rem;border-radius:12px;border:none;background:var(--grad-main);color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;">Update Password</button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-card reveal delay-1">
+                    <h5><i class="bi bi-envelope-fill me-2" style="color:#3b82f6;"></i>Change Email</h5>
+                    <p style="font-size:0.82rem;color:var(--text-light);margin-bottom:1rem;">
+                        Current: <strong style="color:var(--text-dark);">{{ user.email }}</strong>
+                    </p>
+                    <form method="post" action="{% url 'change_email' %}">
+                        {% csrf_token %}
+                        <div style="margin-bottom:1rem;">
+                            <label style="font-size:0.82rem;font-weight:600;color:var(--text-light);display:block;margin-bottom:0.35rem;">New Email Address</label>
+                            <input type="email" name="new_email" required
+                                style="width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);color:var(--text-dark);border-radius:10px;padding:0.65rem 1rem;font-size:0.88rem;font-family:inherit;">
+                        </div>
+                        <button type="submit" style="padding:0.65rem 1.5rem;border-radius:12px;border:none;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-weight:700;font-size:0.88rem;cursor:pointer;">Update Email</button>
+                        <p style="font-size:0.75rem;color:var(--text-light);margin-top:0.75rem;margin-bottom:0;">
+                            <i class="bi bi-info-circle me-1"></i>Changing your email will require re-verification.
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

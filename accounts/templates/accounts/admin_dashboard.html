@@ -1,0 +1,461 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Admin Dashboard — AuthApp{% endblock %}
+
+{% block extra_head %}
+<style>
+    .admin-wrap {
+        background: var(--surface-2);
+        min-height: calc(100vh - 70px);
+        padding: 2.5rem 0 4rem;
+    }
+
+    .admin-header {
+        background: linear-gradient(135deg, #0d1117, #1a1a2e);
+        border-radius: 20px;
+        padding: 2rem 2.5rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .admin-header::before {
+        content: '';
+        position: absolute;
+        right: -30px;
+        top: -30px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 107, 53, 0.2), transparent 70%);
+        border-radius: 50%;
+        animation: blobPulse 6s ease-in-out infinite;
+    }
+
+    .admin-header::after {
+        content: '';
+        position: absolute;
+        left: 30%;
+        bottom: -40px;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(67, 97, 238, 0.2), transparent 70%);
+        border-radius: 50%;
+        animation: blobPulse 8s 2s ease-in-out infinite;
+    }
+
+    .admin-header h1 {
+        font-weight: 800;
+        font-size: 1.6rem;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .admin-header p {
+        opacity: 0.6;
+        font-size: 0.88rem;
+        margin: 0.3rem 0 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-pill {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 0.75rem 1.25rem;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-pill .sp-n {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .stat-pill .sp-l {
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.55);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.1rem;
+    }
+
+    .users-card {
+        background: var(--surface);
+        border-radius: 20px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    .users-card-header {
+        padding: 1.25rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .btn-deactivate {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 8px;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .btn-deactivate:hover {
+        background: #fee2e2;
+    }
+
+    .btn-activate {
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid rgba(34, 197, 94, 0.25);
+        border-radius: 8px;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    .btn-activate:hover {
+        background: #dcfce7;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #4361ee, #7209b7);
+    }
+
+    .av-c0 {
+        background: linear-gradient(135deg, #ff6b35, #ff8c5a) !important;
+    }
+
+    .av-c1 {
+        background: linear-gradient(135deg, #4361ee, #5e7af5) !important;
+    }
+
+    .av-c2 {
+        background: linear-gradient(135deg, #7209b7, #9b2fe0) !important;
+    }
+
+    .av-c3 {
+        background: linear-gradient(135deg, #10b981, #34d399) !important;
+    }
+
+    .av-c4 {
+        background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
+    }
+
+    .admin-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .admin-table thead th {
+        padding: 0.85rem 1.1rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--text-light);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: var(--surface-2) !important;
+        border-bottom: 1px solid var(--border) !important;
+        border-top: none !important;
+        white-space: nowrap;
+    }
+
+    .admin-table tbody td {
+        padding: 0.9rem 1.1rem;
+        font-size: 0.86rem;
+        color: var(--text-dark);
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .admin-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .admin-table tbody tr:hover td {
+        background: var(--surface-2);
+        transition: background 0.15s;
+    }
+
+    .role-select {
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        padding: 0.3rem 2rem 0.3rem 0.6rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: var(--surface);
+        color: var(--text-dark);
+        cursor: pointer;
+        transition: all 0.2s;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23718096' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+    }
+
+    .role-select:focus {
+        outline: none;
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.12);
+    }
+
+    .role-member {
+        border-color: rgba(113, 128, 150, 0.3);
+    }
+
+    .role-moderator {
+        border-color: rgba(37, 99, 235, 0.4);
+        color: #2563eb;
+    }
+
+    .role-admin {
+        border-color: rgba(114, 9, 183, 0.4);
+        color: #7209b7;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-wrap">
+    <div class="container">
+
+        <div class="admin-header reveal">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-6">
+                    <p
+                        style="font-size:0.78rem;opacity:0.5;margin-bottom:0.2rem;text-transform:uppercase;letter-spacing:0.05em;position:relative;z-index:1;">
+                        Admin Panel</p>
+                    <h1><i class="bi bi-speedometer2 me-2" style="color:var(--orange);"></i>User Management</h1>
+                    <p>Manage roles, status, and access for all AuthApp users</p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row g-2" style="position:relative;z-index:1;">
+                        <div class="col-4">
+                            <div class="stat-pill">
+                                <div class="sp-n">{{ users|length }}</div>
+                                <div class="sp-l">Total</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-pill">
+                                <div class="sp-n" id="activeCount">0</div>
+                                <div class="sp-l">Active</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-pill">
+                                <div class="sp-n" id="inactiveCount">0</div>
+                                <div class="sp-l">Inactive</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="users-card reveal">
+            <div class="users-card-header">
+                <span><i class="bi bi-people-fill me-2" style="color:var(--blue);"></i>All Users</span>
+                <span style="font-size:0.78rem;color:var(--text-light);font-weight:500;">{{ users|length }} total</span>
+            </div>
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Verified</th>
+                            <th>Status</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr data-active="{{ u.is_active|lower }}" data-idx="{{ forloop.counter0 }}">
+                            <td style="color:var(--text-light);">{{ forloop.counter }}</td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div class="user-avatar" data-name="{{ u.username }}"></div>
+                                    <div>
+                                        <div style="font-size:0.88rem;font-weight:600;">{{ u.username }}</div>
+                                        {% if u == request.user %}
+                                        <div style="font-size:0.7rem;color:var(--blue);">you</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color:var(--text-mid);">{{ u.email }}</td>
+                            <td>
+                                {% if u.is_verified %}
+                                <span class="badge-verified">Verified</span>
+                                {% else %}
+                                <span class="badge-unverified">Unverified</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u.is_active %}
+                                <span class="badge-active">● Active</span>
+                                {% else %}
+                                <span class="badge-inactive">● Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u == request.user %}
+                                <span class="badge-staff">
+                                    {% if u.role == 'admin' %}
+                                    Admin
+                                    {% elif u.role == 'moderator' %}
+                                    Moderator
+                                    {% else %}
+                                    Member
+                                    {% endif %}
+                                </span>
+                                {% elif u.role == 'admin' %}
+                                <span
+                                    style="display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:600;color:#7209b7;background:rgba(114,9,183,0.1);border:1px solid rgba(114,9,183,0.25);padding:0.3rem 0.75rem;border-radius:20px;"
+                                    title="Admins cannot be modified">
+                                    <i class="bi bi-shield-lock-fill"></i> Admin
+                                </span>
+                                {% elif request.user.role == 'admin' %}
+                                <form method="post" action="{% url 'change_role' u.pk %}">
+                                    {% csrf_token %}
+                                    <select name="role" class="role-select role-{{ u.role }}"
+                                        data-current="{{ u.role }}" data-username="{{ u.username }}"
+                                        onchange="handleRoleChange(this)">
+                                        <option value="member">Member</option>
+                                        <option value="moderator">Moderator</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </form>
+                                {% else %}
+                                <span class="badge-staff">
+                                    {% if u.role == 'moderator' %}
+                                    Moderator
+                                    {% else %}
+                                    Member
+                                    {% endif %}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td style="color:var(--text-light);">{{ u.date_joined|date:"M j, Y" }}</td>
+                            <td>
+                                {% if u == request.user %}
+                                <span style="font-size:0.8rem;color:var(--text-light);">—</span>
+                                {% elif u.role == 'admin' %}
+                                <span style="font-size:0.8rem;color:var(--text-light);"
+                                    title="Admins cannot be deactivated"><i class="bi bi-shield-lock"
+                                        style="color:#7209b7;"></i></span>
+                                {% elif request.user.role == 'moderator' and u.role != 'member' %}
+                                <span style="font-size:0.78rem;color:var(--text-light);"
+                                    title="Moderators can only manage Members"><i class="bi bi-lock-fill"
+                                        style="color:var(--text-light);"></i></span>
+                                {% else %}
+                                <form method="post" action="{% url 'toggle_user_active' u.pk %}">
+                                    {% csrf_token %}
+                                    {% if u.is_active %}
+                                    <button type="submit" class="btn-deactivate"><i
+                                            class="bi bi-person-dash me-1"></i>Deactivate</button>
+                                    {% else %}
+                                    <button type="submit" class="btn-activate"><i
+                                            class="bi bi-person-check me-1"></i>Activate</button>
+                                    {% endif %}
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" style="text-align:center;padding:4rem;color:var(--text-light);">
+                                <i class="bi bi-people"
+                                    style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>No users found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Active / inactive count
+    var rows = document.querySelectorAll('tr[data-active]');
+    var a = 0, ic = 0;
+    rows.forEach(function (r) { r.dataset.active === 'true' ? a++ : ic++; });
+    document.getElementById('activeCount').textContent = a;
+    document.getElementById('inactiveCount').textContent = ic;
+
+    // Avatar colour + letter (no Django filters needed)
+    var colours = ['av-c0', 'av-c1', 'av-c2', 'av-c3', 'av-c4'];
+    document.querySelectorAll('.user-avatar[data-name]').forEach(function (el, i) {
+        el.textContent = el.dataset.name.charAt(0).toUpperCase();
+        el.classList.add(colours[i % colours.length]);
+    });
+
+    // Set selected option from data-current attribute (no Django if needed)
+    document.querySelectorAll('select[data-current]').forEach(function (sel) {
+        sel.value = sel.dataset.current;
+        sel.className = 'role-select role-' + sel.dataset.current;
+    });
+
+    // Handle role change: confirm before promoting to Admin, then submit
+    function handleRoleChange(sel) {
+        var newRole = sel.value;
+        sel.className = 'role-select role-' + newRole;
+        if (newRole === 'admin') {
+            var username = sel.dataset.username || 'this user';
+            var ok = confirm(
+                '⚠️ Promote "' + username + '" to Admin?\n\n' +
+                'This grants full superuser access including:\n' +
+                '• Access to admin dashboard\n' +
+                '• Ability to activate/deactivate users\n' +
+                '• Ability to change roles\n\n' +
+                'This action cannot be undone from the panel. Are you sure?'
+            );
+            if (!ok) {
+                sel.value = sel.dataset.current;
+                sel.className = 'role-select role-' + sel.dataset.current;
+                return;
+            }
+        }
+        sel.form.submit();
+    }
+</script>
+{% endblock %}

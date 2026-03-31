@@ -1,0 +1,359 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Chat with {{ other.username }} — CUlink{% endblock %}
+
+{% block extra_head %}
+<style>
+  .chat-wrap {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 70px);
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  /* Header */
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 1rem 1.25rem;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--card-bg);
+    flex-shrink: 0;
+  }
+  [data-theme="light"] .chat-header {
+    background: #f0f4fb;
+    border-bottom-color: #c5cfe0;
+  }
+  .chat-header .avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--grad-cool);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 1rem;
+  }
+  .chat-header .info h2 { font-size: 1rem; font-weight: 700; margin: 0; }
+  .chat-header .info p { font-size: 0.78rem; color: var(--text-light); margin: 0; }
+  .chat-header .back-btn {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 1.2rem;
+    margin-right: 4px;
+    transition: color 0.2s;
+  }
+  .chat-header .back-btn:hover { color: var(--blue); }
+
+  /* Messages area */
+  .messages-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    background: var(--surface-2);
+  }
+  /* Darken in light mode so it's not blindingly white */
+  [data-theme="light"] .messages-area {
+    background: #e8edf5;
+  }
+
+  /* Bubbles */
+  .msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    animation: popIn 0.18s ease;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .msg-row.mine { flex-direction: row-reverse; }
+
+  .bubble-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--grad-main);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 0.7rem; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .msg-row.mine .bubble-avatar { background: var(--grad-cool); }
+
+  .bubble {
+    max-width: 62%;
+    padding: 0.45rem 0.8rem;
+    border-radius: 16px;
+    font-size: 0.87rem;
+    line-height: 1.45;
+    word-break: break-word;
+    position: relative;
+  }
+  .msg-row.theirs .bubble {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    color: var(--text-dark);
+  }
+  /* Light mode: give theirs-bubbles a slightly off-white so they don't vanish */
+  [data-theme="light"] .msg-row.theirs .bubble {
+    background: #ffffff;
+    border-color: #d0d8e8;
+  }
+  .msg-row.mine .bubble {
+    background: var(--grad-main);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .bubble .ts {
+    font-size: 0.65rem;
+    opacity: 0.55;
+    margin-top: 3px;
+    display: block;
+    text-align: right;
+  }
+
+  /* Date divider */
+  .date-divider {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--text-light);
+    margin: 0.5rem 0;
+  }
+
+  /* Input */
+  .chat-input-area {
+    padding: 0.9rem 1.25rem;
+    background: var(--card-bg);
+    border-top: 1.5px solid var(--border);
+    flex-shrink: 0;
+  }
+  [data-theme="light"] .chat-input-area {
+    background: #f0f4fb;
+    border-top-color: #c5cfe0;
+  }
+  .chat-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  .chat-textarea {
+    flex: 1;
+    background: var(--input-bg) !important;
+    border: 1.5px solid var(--input-border) !important;
+    color: var(--text-dark) !important;
+    border-radius: 14px !important;
+    padding: 0.7rem 1rem !important;
+    font-size: 0.92rem !important;
+    resize: none;
+    max-height: 120px;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    font-family: 'Inter', sans-serif;
+  }
+  .chat-textarea:focus {
+    border-color: var(--blue) !important;
+    box-shadow: 0 0 0 3px rgba(67,97,238,0.12) !important;
+    outline: none;
+  }
+  .send-btn {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--grad-main);
+    border: none;
+    color: #fff;
+    font-size: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover { opacity: 0.88; transform: scale(1.07); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .connection-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    display: inline-block;
+    margin-right: 4px;
+  }
+  .connection-dot.offline { background: #ef4444; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-wrap">
+  <!-- Header -->
+  <div class="chat-header">
+    <a href="{% url 'chat_inbox' %}" class="back-btn" title="Back to inbox">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div class="avatar">{{ other.username|slice:":1"|upper }}</div>
+    <div class="info">
+      <h2>{{ other.username }}</h2>
+      <p><span class="connection-dot" id="connDot"></span><span id="connStatus">Connecting…</span></p>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages-area" id="msgArea">
+    {% for msg in messages_history %}
+    <div class="msg-row {% if msg.sender.username == me_username %}mine{% else %}theirs{% endif %}">
+      <div class="bubble-avatar">{{ msg.sender.username|slice:":1"|upper }}</div>
+      <div class="bubble">
+        {{ msg.content }}
+        <span class="ts">{{ msg.timestamp|date:"H:i" }}</span>
+      </div>
+    </div>
+    {% empty %}
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+      <p style="color:var(--text-light);font-size:0.9rem;text-align:center;">
+        <i class="bi bi-chat-heart" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+        No messages yet. Say hello!
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Input -->
+  <div class="chat-input-area">
+    <form class="chat-form" id="chatForm">
+      {% csrf_token %}
+      <textarea
+        id="msgInput"
+        class="chat-textarea form-control"
+        rows="1"
+        placeholder="Type a message…"
+        autocomplete="off"
+      ></textarea>
+      <button type="submit" class="send-btn" id="sendBtn" title="Send">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Pusher JS SDK -->
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+<script>
+  const PUSHER_KEY     = "{{ pusher_key }}";
+  const PUSHER_CLUSTER = "{{ pusher_cluster }}";
+  const CHANNEL_NAME   = "{{ channel }}";
+  const ME             = "{{ me_username }}";
+  const SEND_URL       = "{% url 'send_dm' other.username %}";
+  const CSRF_TOKEN     = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  const msgArea  = document.getElementById('msgArea');
+  const msgInput = document.getElementById('msgInput');
+  const sendBtn  = document.getElementById('sendBtn');
+  const connDot  = document.getElementById('connDot');
+  const connStatus = document.getElementById('connStatus');
+
+  // ── Auto-grow textarea ──
+  msgInput.addEventListener('input', () => {
+    msgInput.style.height = 'auto';
+    msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
+  });
+
+  // ── Scroll to bottom ──
+  function scrollBottom() {
+    msgArea.scrollTop = msgArea.scrollHeight;
+  }
+  scrollBottom();
+
+  // ── Render a message bubble ──
+  function renderBubble(sender, content, timestamp) {
+    const isMine = sender === ME;
+    const initial = sender.charAt(0).toUpperCase();
+    const row = document.createElement('div');
+    row.className = 'msg-row ' + (isMine ? 'mine' : 'theirs');
+    row.innerHTML = `
+      <div class="bubble-avatar">${initial}</div>
+      <div class="bubble">
+        ${escapeHtml(content)}
+        <span class="ts">${timestamp}</span>
+      </div>`;
+    // Remove "no messages" placeholder if present
+    const empty = msgArea.querySelector('div[style*="align-items:center"]');
+    if (empty) empty.remove();
+    msgArea.appendChild(row);
+    scrollBottom();
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+              .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  // ── Pusher connection ──
+  const pusher = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER });
+  const channel = pusher.subscribe(CHANNEL_NAME);
+
+  pusher.connection.bind('connected', () => {
+    connDot.classList.remove('offline');
+    connStatus.textContent = 'Connected';
+  });
+  pusher.connection.bind('disconnected', () => {
+    connDot.classList.add('offline');
+    connStatus.textContent = 'Disconnected';
+  });
+  pusher.connection.bind('unavailable', () => {
+    connDot.classList.add('offline');
+    connStatus.textContent = 'Unavailable';
+  });
+
+  channel.bind('new-message', (data) => {
+    // Only render if message is FROM the other user
+    // (our own messages are rendered optimistically on send)
+    if (data.sender !== ME) {
+      renderBubble(data.sender, data.content, data.timestamp);
+    }
+  });
+
+  // ── Send message ──
+  async function sendMessage() {
+    const content = msgInput.value.trim();
+    if (!content) return;
+
+    sendBtn.disabled = true;
+    // Optimistic render
+    const now = new Date();
+    const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    renderBubble(ME, content, ts);
+    msgInput.value = '';
+    msgInput.style.height = 'auto';
+
+    try {
+      const res = await fetch(SEND_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': CSRF_TOKEN,
+        },
+        body: 'content=' + encodeURIComponent(content),
+      });
+      if (!res.ok) console.error('Send failed', await res.text());
+    } catch (e) {
+      console.error('Send error', e);
+    } finally {
+      sendBtn.disabled = false;
+      msgInput.focus();
+    }
+  }
+
+  document.getElementById('chatForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    sendMessage();
+  });
+
+  // Ctrl+Enter or Enter (without shift) to send
+  msgInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+</script>
+{% endblock %}

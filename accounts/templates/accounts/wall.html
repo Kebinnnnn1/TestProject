@@ -1,0 +1,1493 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Knowledge Wall — CUlink{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ── Layout ── */
+  .wall-wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* ── Create Post Card ── */
+  .create-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+  .create-card textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    resize: vertical;
+    min-height: 90px;
+    background: var(--surface-2);
+    color: var(--text-dark);
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .create-card textarea:focus { outline: none; border-color: var(--blue); }
+  .create-card input[type="text"] {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.55rem 1rem;
+    font-size: 0.85rem;
+    background: var(--surface-2);
+    color: var(--text-dark);
+    font-family: inherit;
+    margin-top: 0.6rem;
+  }
+  .create-card input[type="text"]:focus { outline: none; border-color: var(--blue); }
+  .create-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.85rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .file-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.45rem 1rem;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.83rem;
+    color: var(--text-light);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .file-label:hover { border-color: var(--blue); color: var(--blue); }
+  .file-label input { display: none; }
+  .file-preview-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 0.75rem;
+  }
+  .file-preview-thumb {
+    position: relative;
+    display: inline-block;
+  }
+  .file-preview-thumb img {
+    display: block;
+    width: 72px; height: 72px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .file-preview-thumb:hover img { border-color: var(--blue); }
+  .file-preview-thumb .thumb-remove {
+    position: absolute;
+    top: -6px; right: -6px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+    padding: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    transition: background 0.15s;
+  }
+  .file-preview-thumb .thumb-remove:hover { background: #dc2626; }
+
+  /* ── Filters Bar ── */
+  .filters-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-chip {
+    padding: 0.35rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-mid);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .filter-chip:hover, .filter-chip.active {
+    border-color: var(--blue);
+    color: var(--blue);
+    background: rgba(78, 124, 63, 0.08);
+  }
+  .filter-chip.clear { color: #ef4444; border-color: #ef4444; }
+  .filter-chip.clear:hover { background: rgba(239,68,68,0.08); }
+
+  /* ── Post Card ── */
+  .post-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.4rem 1.4rem 1rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.4s ease both;
+  }
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+  .post-avatar {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--grad-main);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .post-meta { flex: 1; min-width: 0; }
+  .post-author {
+    font-weight: 700;
+    font-size: 0.93rem;
+    color: var(--text-dark);
+  }
+  .post-sub {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .uni-badge {
+    padding: 1px 8px;
+    border-radius: 50px;
+    background: rgba(78, 124, 63, 0.12);
+    color: var(--blue);
+    font-weight: 600;
+    font-size: 0.72rem;
+  }
+  .post-content {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-dark);
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-bottom: 0.85rem;
+  }
+  .post-image {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 0.85rem;
+    max-height: 400px;
+    object-fit: cover;
+  }
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.85rem;
+  }
+  .tag-chip {
+    padding: 2px 10px;
+    border-radius: 50px;
+    background: var(--surface-2);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .tag-chip:hover { color: var(--blue); border-color: var(--blue); background: rgba(78, 124, 63, 0.07); }
+
+  /* ── Post Actions ── */
+  .post-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.35rem 0.85rem;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--text-mid);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    font-family: inherit;
+  }
+  .action-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .action-btn.liked { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.06); }
+  .action-btn.danger:hover { border-color: #ef4444; color: #ef4444; }
+  .action-btn.comment-toggle { margin-left: auto; }
+
+  /* ── Comments ── */
+  .comments-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .comment-item {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+    align-items: flex-start;
+  }
+  .comment-avatar {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--grad-main);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .comment-bubble {
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 0.5rem 0.85rem;
+    flex: 1;
+    font-size: 0.87rem;
+    color: var(--text-dark);
+    line-height: 1.5;
+  }
+  .comment-author { font-weight: 700; font-size: 0.8rem; margin-bottom: 2px; color: var(--text-dark); }
+  .comment-time { font-size: 0.72rem; color: var(--text-light); }
+  .comment-form { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+  .comment-form input {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.85rem;
+    background: var(--surface-2);
+    color: var(--text-dark);
+    font-family: inherit;
+  }
+  .comment-form input:focus { outline: none; border-color: var(--blue); }
+
+  /* ── Reply Button & Form ── */
+  .reply-btn {
+    background: none; border: none; color: var(--text-light);
+    font-size: 0.75rem; font-weight: 600; cursor: pointer;
+    padding: 2px 6px; border-radius: 6px; margin-top: 4px;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: color 0.2s;
+  }
+  .reply-btn:hover { color: var(--blue); }
+  .reply-form {
+    display: none;
+    margin-top: 6px;
+  }
+  .reply-form.open { display: flex; gap: 0.5rem; }
+  .reply-form input {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.82rem;
+    background: var(--surface-2);
+    color: var(--text-dark);
+    font-family: inherit;
+  }
+  .reply-form input:focus { outline: none; border-color: var(--blue); }
+
+  /* ── Threaded Reply Item ── */
+  .comment-item.is-reply {
+    margin-left: 40px;
+    margin-top: 0.3rem;
+    position: relative;
+  }
+  .comment-item.is-reply::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+  .comment-item.is-reply .comment-avatar {
+    width: 26px; height: 26px;
+    font-size: 0.65rem;
+    border-radius: 7px;
+  }
+  .reply-quote {
+    font-size: 0.72rem;
+    color: var(--text-light);
+    margin-bottom: 2px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .reply-quote i { font-size: 0.7rem; }
+  .reply-bubble {
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.82rem;
+    color: var(--text-dark);
+    line-height: 1.45;
+  }
+
+  /* ── Image Grid (multi-image posts) ── */
+  .post-image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-bottom: 0.85rem;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .post-image-grid.single { grid-template-columns: 1fr; }
+  .post-image-grid img {
+    width: 100%; height: 200px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .post-image-grid img:hover { opacity: 0.9; }
+  .post-image-grid.single img { height: 340px; max-height: 400px; }
+  .img-more-overlay {
+    position: relative;
+    cursor: pointer;
+  }
+  .img-more-overlay .overlay-count {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.5rem; font-weight: 800;
+  }
+
+  /* ── Post Card clickable ── */
+  .post-content-area { cursor: pointer; }
+  .post-content-area:hover .post-content { color: var(--blue); }
+
+  /* ── Comment badge ── */
+  .comment-new-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #22c55e;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 700;
+    border-radius: 50px;
+    padding: 1px 6px;
+    margin-left: 5px;
+    animation: pulse 1.5s ease infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.7; transform: scale(1.1); }
+  }
+
+  /* ── Post Modal ── */
+  .post-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .post-modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.25s ease;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+  }
+  @keyframes slideUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+  .post-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: var(--card-bg);
+    border-radius: 20px 20px 0 0;
+    z-index: 1;
+  }
+  .post-modal-body { padding: 1.4rem; }
+  .post-modal-close {
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    width: 34px; height: 34px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-mid);
+    font-size: 1.1rem;
+    transition: all 0.2s;
+  }
+  .post-modal-close:hover { background: var(--border); color: var(--text-dark); }
+
+  /* ── Empty State ── */
+  .wall-empty {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--text-light);
+  }
+  .wall-empty i { font-size: 3rem; margin-bottom: 1rem; display: block; }
+
+  /* ── Infinite Scroll ── */
+  #scroll-sentinel { height: 1px; }
+  #wall-loader {
+    display: none;
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: center;
+  }
+  #wall-loader.active { display: flex; }
+  .wall-spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #wall-end-msg {
+    display: none;
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-light);
+    font-size: 0.8rem;
+  }
+
+  /* ── Dark Mode ── */
+  [data-theme="dark"] .create-card,
+  [data-theme="dark"] .post-card { box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+  [data-theme="dark"] .create-card textarea,
+  [data-theme="dark"] .create-card input[type="text"] { background: var(--surface); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wall-wrap">
+
+  <!-- Page Header -->
+  <div style="margin-bottom:1.5rem;">
+    <h1 style="font-size:1.75rem;font-weight:800;color:var(--text-dark);letter-spacing:-0.5px;margin:0 0 0.3rem;">
+      <i class="bi bi-journals" style="background:var(--grad-main);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+      Knowledge Wall
+    </h1>
+    <p style="color:var(--text-light);font-size:0.9rem;margin:0;">Share tips, tricks, and insights with students across Cebu universities.</p>
+  </div>
+
+  <!-- Create Post -->
+  <div class="create-card">
+    <form id="createPostForm" method="post" action="{% url 'create_post' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div style="display:flex;gap:0.75rem;align-items:flex-start;">
+        <div class="post-avatar" style="flex-shrink:0;">{{ me.username|slice:":1"|upper }}</div>
+        <textarea name="content" placeholder="Share something useful with your fellow students…" rows="3"></textarea>
+      </div>
+      <input type="text" name="tags" placeholder="#tags  (e.g. django, python, math)">
+      <div class="create-actions">
+        <label class="file-label">
+          <i class="bi bi-image"></i> Add Photos / GIF
+          <input type="file" name="images" accept="image/*,.gif" id="imgInput" multiple>
+        </label>
+        <button type="button" id="removeFilesBtn" onclick="clearFiles()" style="display:none; background:none; border:1.5px solid #ef4444; border-radius:8px; color:#ef4444; padding:0.35rem 0.75rem; font-size:0.8rem; cursor:pointer; align-items:center; gap:4px;">
+          <i class="bi bi-x-circle"></i> Remove
+        </button>
+        <span id="imgName" style="font-size:0.8rem;color:var(--text-light);"></span>
+        <button type="submit" class="btn-primary-grad" style="margin-left:auto;">
+          <i class="bi bi-send-fill"></i> Post
+        </button>
+      </div>
+      <div class="file-preview-grid" id="imgPreviewGrid"></div>
+    </form>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <span style="font-size:0.82rem;font-weight:600;color:var(--text-light);">Filter:</span>
+    {% for code, name in university_choices %}
+    <a href="?university={{ code }}"
+       class="filter-chip {% if uni_filter == code %}active{% endif %}">{{ code }}</a>
+    {% endfor %}
+    {% if uni_filter or tag_filter %}
+    <a href="{% url 'wall' %}" class="filter-chip clear"><i class="bi bi-x"></i> Clear</a>
+    {% endif %}
+    {% if tag_filter %}
+    <span class="filter-chip active">#{{ tag_filter }}</span>
+    {% endif %}
+  </div>
+
+  <!-- Feed -->
+  {% if posts %}
+  <div id="wall-feed">
+    {% for post in posts %}
+    <div class="post-card" id="post-{{ post.pk }}">
+      <!-- Header -->
+      <div class="post-header">
+        <div class="post-avatar">{{ post.author.username|slice:":1"|upper }}</div>
+        <div class="post-meta">
+          <div class="post-author">{{ post.author.username }}</div>
+          <div class="post-sub">
+            {% if post.university %}<span class="uni-badge">{{ post.university }}</span>{% endif %}
+            <span>{{ post.timestamp|timesince }} ago</span>
+          </div>
+        </div>
+        {% if post.author == me or me.is_staff %}
+        <form method="post" action="{% url 'delete_post' post.pk %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="action-btn danger"
+            onclick="return confirm('Delete this post?')" title="Delete post">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </form>
+        {% endif %}
+      </div>
+
+      <!-- Content (clickable → opens modal) -->
+      <div class="post-content-area" onclick="openPostModal('{{ post.pk }}')">
+        <div class="post-content">{{ post.content }}</div>
+
+        <!-- Image Grid -->
+        {% with imgs=post.extra_images.all %}
+        {% if post.image_url or imgs %}
+        <div class="post-image-grid {% if not imgs and post.image_url %}single{% endif %}" onclick="openPostModal('{{ post.pk }}')">
+          {% if post.image_url %}
+          <img src="{{ post.image_url }}" alt="Post image" loading="lazy">
+          {% endif %}
+          {% for pi in imgs|slice:":3" %}
+          <img src="{{ pi.image.url }}" alt="Post image" loading="lazy">
+          {% endfor %}
+          {% if imgs|length > 3 %}
+          <div class="img-more-overlay">
+            <img src="{{ imgs.3.image.url }}" alt="More images" loading="lazy">
+            <div class="overlay-count">+{{ imgs|length|add:"-3" }}</div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- Tags -->
+      {% if post.tag_list %}
+      <div class="post-tags">
+        {% for tag in post.tag_list %}
+        <a href="?tag={{ tag }}" class="tag-chip">#{{ tag }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Actions -->
+      <div class="post-actions">
+        <!-- Like -->
+        <button class="action-btn like-btn {% if me in post.likes.all %}liked{% endif %}"
+          data-post="{{ post.pk }}"
+          data-liked="{% if me in post.likes.all %}1{% else %}0{% endif %}">
+          <i class="bi bi-heart{% if me in post.likes.all %}-fill{% endif %}"></i>
+          <span class="like-count">{{ post.likes.count }}</span>
+        </button>
+
+        <!-- Comment toggle -->
+        <button class="action-btn comment-toggle" id="comment-toggle-{{ post.pk }}" onclick="toggleComments('{{ post.pk }}')">
+          <i class="bi bi-chat"></i> {{ post.comments.count }}
+          {% if post.comments.count == 1 %}comment{% else %}comments{% endif %}
+        </button>
+        <button class="action-btn" onclick="openPostModal('{{ post.pk }}')" style="border-color:var(--blue);color:var(--blue);">
+          <i class="bi bi-arrows-fullscreen"></i> Open
+        </button>
+      </div>
+
+      <!-- Comments section -->
+      <div class="comments-section" id="comments-{{ post.pk }}" style="display:none;">
+        {% for comment in post.comments.all %}
+        <div class="comment-item {% if comment.is_reply %}is-reply{% endif %}" id="comment-{{ comment.pk }}">
+          <div class="comment-avatar">{{ comment.author.username|slice:":1"|upper }}</div>
+          <div class="comment-bubble" style="flex:1;">
+            {% if comment.is_reply %}
+            <div class="reply-quote">
+              <i class="bi bi-reply-fill"></i>
+              {% with mention=comment.content|slice:"1:" %}
+              Replying to <strong>@{{ mention|truncatewords:1 }}</strong>
+              {% endwith %}
+            </div>
+            {% endif %}
+            <div class="comment-author">
+              {{ comment.author.username }}
+              <span class="comment-time">· {{ comment.timestamp|timesince }} ago</span>
+              {% if comment.author == me or me.is_staff %}
+              <form method="post" action="{% url 'delete_comment' comment.pk %}" style="display:inline;margin-left:4px;">
+                {% csrf_token %}
+                <button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.75rem;padding:0;" title="Delete comment">
+                  <i class="bi bi-x"></i>
+                </button>
+              </form>
+              {% endif %}
+            </div>
+            {{ comment.content }}
+            <button class="reply-btn" onclick="toggleReply('reply-form-{{ comment.pk }}', '{{ comment.author.username }}')">
+              <i class="bi bi-reply"></i> Reply
+            </button>
+            <form class="reply-form ajax-comment-form" id="reply-form-{{ comment.pk }}" data-post="{{ post.pk }}" style="display:none;">
+              {% csrf_token %}
+              <input type="text" name="content" placeholder="Replying to @{{ comment.author.username }}…" required>
+              <button type="submit" class="action-btn" style="flex-shrink:0;"><i class="bi bi-send"></i></button>
+            </form>
+          </div>
+        </div>
+        {% empty %}
+        <p style="color:var(--text-light);font-size:0.85rem;text-align:center;">No comments yet. Be the first!</p>
+        {% endfor %}
+
+        <!-- Add comment form -->
+        <form class="comment-form ajax-comment-form" data-post="{{ post.pk }}">
+          {% csrf_token %}
+          <input type="text" name="content" placeholder="Write a comment…" required>
+          <button type="submit" class="action-btn" style="flex-shrink:0;">
+            <i class="bi bi-send"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div id="wall-empty" class="wall-empty">
+    <i class="bi bi-journals"></i>
+    <p style="font-size:1.1rem;font-weight:600;color:var(--text-dark);">No posts yet!</p>
+    <p style="font-size:0.9rem;">Be the first to share something useful with your fellow students.</p>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Infinite scroll sentinel -->
+<div id="wall-loader"><div class="wall-spinner"></div> Loading more posts…</div>
+<div id="wall-end-msg">You've reached the end of the wall 🎉</div>
+<div id="scroll-sentinel"></div>
+
+<!-- ── Post Modal ── -->
+<div id="postModalBackdrop" class="post-modal-backdrop" style="display:none;" onclick="closeModalOnBackdrop(event)">
+  <div class="post-modal" id="postModal" onclick="event.stopPropagation()">
+    <div class="post-modal-header">
+      <div style="display:flex;align-items:center;gap:0.6rem;">
+        <div class="post-avatar" id="modalAvatar"></div>
+        <div>
+          <div class="post-author" id="modalAuthor"></div>
+          <div class="post-sub" id="modalMeta"></div>
+        </div>
+      </div>
+      <button class="post-modal-close" onclick="closePostModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="post-modal-body">
+      <div class="post-content" id="modalContent" style="margin-bottom:1rem;"></div>
+      <div id="modalImages" style="margin-bottom:1rem;"></div>
+      <div id="modalTags" style="margin-bottom:1rem;"></div>
+      <div style="border-top:1px solid var(--border);padding-top:1rem;">
+        <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:var(--text-light);margin-bottom:0.75rem;">Comments</div>
+        <div id="modalComments"></div>
+        <form class="comment-form" id="modalCommentForm" style="margin-top:0.75rem;">
+          <input type="hidden" name="csrfmiddlewaretoken" id="modalCsrf">
+          <input type="text" name="content" placeholder="Write a comment…" required id="modalCommentInput">
+          <button type="submit" class="action-btn" style="flex-shrink:0;"><i class="bi bi-send"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{# Critical Script 1: event delegation - runs independently #}
+<script>
+(function() {
+  'use strict';
+  function csrfToken() {
+    var el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : '';
+  }
+  // Like buttons via event delegation
+  document.addEventListener('click', async function(ev) {
+    var btn = ev.target.closest && ev.target.closest('.like-btn');
+    if (!btn) return;
+    ev.stopPropagation();
+    var pk = btn.dataset.post;
+    if (!pk) return;
+    btn.disabled = true;
+    try {
+      var res = await fetch('/wall/' + pk + '/like/', {method:'POST', headers:{'X-CSRFToken':csrfToken()}});
+      var d = await res.json();
+      var ic = btn.querySelector('i'), ct = btn.querySelector('.like-count');
+      if (d.liked) { btn.classList.add('liked'); if(ic) ic.className='bi bi-heart-fill'; }
+      else         { btn.classList.remove('liked'); if(ic) ic.className='bi bi-heart'; }
+      if(ct) ct.textContent = d.count;
+    } catch(e){console.error('Like error:',e);} finally{btn.disabled=false;}
+  });
+  // Comment forms via event delegation
+  document.addEventListener('submit', async function(ev) {
+    var form = ev.target.closest && ev.target.closest('.ajax-comment-form');
+    if (!form) return;
+    ev.preventDefault();
+    var pk = form.dataset.post, inp = form.querySelector('input[name=content]');
+    var text = inp ? inp.value.trim() : '';
+    if (!text || !pk) return;
+    var tok = (form.querySelector('[name=csrfmiddlewaretoken]')||{value:csrfToken()}).value;
+    if(inp) inp.value = '';
+    try {
+      var fd = new FormData(); fd.append('content',text); fd.append('csrfmiddlewaretoken',tok);
+      var res = await fetch('/wall/'+pk+'/comment/', {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'},body:fd});
+      var d = await res.json();
+      if (d.ok) {
+        var c = d.comment, sec = document.getElementById('comments-'+pk);
+        if(sec){var pl=sec.querySelector('p');if(pl)pl.remove();
+          form.insertAdjacentHTML('beforebegin','<div class="comment-item" id="comment-'+c.pk+'"><div class="comment-avatar">'+c.author[0].toUpperCase()+'</div><div class="comment-bubble" style="flex:1;"><div class="comment-author">'+c.author+'<span class="comment-time"> &middot; just now</span></div>'+c.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div></div>');}
+      } else { if(inp)inp.value=text; alert(d.error||'Could not post comment.'); }
+    } catch(e){console.error('Comment error:',e);if(inp)inp.value=text;}
+  });
+  // toggleComments - open/close comment section
+  window.toggleComments = function(pk) {
+    var el = document.getElementById('comments-' + pk);
+    if (!el) return;
+    var isOpen = el.style.display !== 'none';
+    el.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) {
+      var btn = document.getElementById('comment-toggle-' + pk);
+      if (btn) { var b = btn.querySelector('.comment-new-badge'); if (b) b.remove(); }
+    }
+  };
+
+  // openPostModal - show post in modal overlay
+  window.openPostModal = function(pk) {
+    var card = document.getElementById('post-' + pk);
+    if (!card) return;
+    window.modalPostPk = pk;
+    var author = (card.querySelector('.post-author') || {}).textContent || '';
+    var el;
+    el = document.getElementById('modalAvatar'); if(el) el.textContent = author[0] ? author[0].toUpperCase() : '?';
+    el = document.getElementById('modalAuthor'); if(el) el.textContent = author;
+    el = document.getElementById('modalMeta');   if(el) el.innerHTML = (card.querySelector('.post-sub')||{}).innerHTML || '';
+    el = document.getElementById('modalContent'); if(el) el.textContent = (card.querySelector('.post-content')||{}).textContent || '';
+    var imgEl = document.getElementById('modalImages');
+    if (imgEl) { imgEl.innerHTML = ''; var sg = card.querySelector('.post-image-grid'); if(sg){var cl=sg.cloneNode(true);cl.style.cursor='default';imgEl.appendChild(cl);} }
+    var tagsEl = document.getElementById('modalTags');
+    if(tagsEl) tagsEl.innerHTML = (card.querySelector('.post-tags')||{}).outerHTML || '';
+    var mc = document.getElementById('modalComments');
+    if(mc) {
+      mc.innerHTML = '';
+      var sec = document.getElementById('comments-' + pk);
+      if(sec) { sec.querySelectorAll('.comment-item').forEach(function(ci){ mc.appendChild(ci.cloneNode(true)); }); }
+      if(!mc.innerHTML.trim()) mc.innerHTML = '<p style="color:var(--text-light);font-size:0.85rem;text-align:center;">No comments yet. Be the first!</p>';
+    }
+    var csrf = document.getElementById('modalCsrf'); if(csrf) csrf.value = csrfToken();
+    var inp = document.getElementById('modalCommentInput'); if(inp) inp.value = '';
+    var bd = document.getElementById('postModalBackdrop'); if(bd) bd.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closePostModal = function() {
+    var bd = document.getElementById('postModalBackdrop'); if(bd) bd.style.display = 'none';
+    document.body.style.overflow = '';
+    window.modalPostPk = null;
+  };
+
+  document.addEventListener('keydown', function(e) { if(e.key==='Escape') window.closePostModal && window.closePostModal(); });
+
+  // Modal comment form submit
+  var mcf = document.getElementById('modalCommentForm');
+  if (mcf) mcf.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!window.modalPostPk) return;
+    var inp = document.getElementById('modalCommentInput');
+    var text = inp ? inp.value.trim() : '';
+    if (!text) return;
+    var fd = new FormData(); fd.append('content', text); fd.append('csrfmiddlewaretoken', csrfToken());
+    try {
+      var res = await fetch('/wall/' + window.modalPostPk + '/comment/', {method:'POST',headers:{'X-Requested-With':'XMLHttpRequest'},body:fd});
+      var d = await res.json();
+      if (d.ok) {
+        if(inp) inp.value = '';
+        var mc = document.getElementById('modalComments');
+        if(mc){ var p=mc.querySelector('p');if(p)p.remove();
+          mc.insertAdjacentHTML('beforeend','<div class="comment-item"><div class="comment-avatar">'+d.comment.author[0].toUpperCase()+'</div><div class="comment-bubble" style="flex:1;"><div class="comment-author">'+d.comment.author+'<span class="comment-time"> &middot; just now</span></div>'+d.comment.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div></div>');}
+      }
+    } catch(err) { console.error('Modal comment error:', err); }
+  });
+
+  console.log('[Wall] Critical event delegation ready.');
+})();</script>
+{# Script 2: Full wall functionality #}
+<script>
+const ME = "{{ me.username }}";
+const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+// ── Multi-image preview thumbnails ──
+let _selectedFiles = []; // Track files manually for individual removal
+
+function _rebuildPreviews() {
+  const grid = document.getElementById('imgPreviewGrid');
+  const label = document.getElementById('imgName');
+  const removeBtn = document.getElementById('removeFilesBtn');
+  grid.innerHTML = '';
+  if (!_selectedFiles.length) {
+    label.textContent = '';
+    removeBtn.style.display = 'none';
+    return;
+  }
+  label.textContent = `📎 ${_selectedFiles.length} file${_selectedFiles.length > 1 ? 's' : ''} selected`;
+  removeBtn.style.display = 'inline-flex';
+  _selectedFiles.forEach((f, idx) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'file-preview-thumb';
+    const removeX = document.createElement('button');
+    removeX.type = 'button';
+    removeX.className = 'thumb-remove';
+    removeX.title = 'Remove this image';
+    removeX.innerHTML = '✕';
+    removeX.addEventListener('click', function(e) {
+      e.stopPropagation();
+      _selectedFiles.splice(idx, 1);
+      _syncFilesToInput();
+      _rebuildPreviews();
+    });
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = document.createElement('img');
+      img.src = ev.target.result;
+      img.alt = f.name;
+      thumb.appendChild(img);
+      thumb.appendChild(removeX);
+      grid.appendChild(thumb);
+    };
+    reader.onerror = () => {
+      const img = document.createElement('img');
+      img.alt = f.name;
+      thumb.appendChild(img);
+      thumb.appendChild(removeX);
+      grid.appendChild(thumb);
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+function _syncFilesToInput() {
+  // Write the current _selectedFiles array back to the file input via DataTransfer
+  const input = document.getElementById('imgInput');
+  if (!input) return;
+  try {
+    const dt = new DataTransfer();
+    _selectedFiles.forEach(f => dt.items.add(f));
+    input.files = dt.files;
+  } catch(e) {
+    // DataTransfer not supported — clear and warn
+    console.warn('DataTransfer not supported; cannot sync file list.', e);
+  }
+}
+
+;(document.getElementById('imgInput') || {addEventListener:()=>{}}).addEventListener('change', function () {
+  // Merge newly picked files into _selectedFiles (avoid duplicates by name+size)
+  Array.from(this.files).forEach(f => {
+    const already = _selectedFiles.some(x => x.name === f.name && x.size === f.size);
+    if (!already) _selectedFiles.push(f);
+  });
+  _rebuildPreviews();
+});
+
+// ── Clear ALL files ──
+function clearFiles() {
+  _selectedFiles = [];
+  _syncFilesToInput();
+  document.getElementById('imgName').textContent = '';
+  document.getElementById('imgPreviewGrid').innerHTML = '';
+  document.getElementById('removeFilesBtn').style.display = 'none';
+}
+
+// ── Toggle comments ──
+function toggleComments(pk) {
+  const el = document.getElementById('comments-' + pk);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    const btn = document.getElementById('comment-toggle-' + pk);
+    if (btn) { const b = btn.querySelector('.comment-new-badge'); if (b) b.remove(); }
+  }
+}
+
+// ── Toggle reply form ──
+function toggleReply(formId, username) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+  const isOpen = form.classList.contains('open') || form.style.display === 'flex';
+  if (isOpen) {
+    form.classList.remove('open');
+    form.style.display = 'none';
+  } else {
+    form.classList.add('open');
+    form.style.display = 'flex';
+    const input = form.querySelector('input[name=content]');
+    if (input) { input.focus(); if (!input.value) input.value = `@${username} `; }
+  }
+}
+
+
+// ─────────────────────────────────────────────
+// POST MODAL
+// ─────────────────────────────────────────────
+let modalPostPk = null;
+
+function openPostModal(pk) {
+  const card = document.getElementById('post-' + pk);
+  if (!card) return;
+  modalPostPk = pk;
+
+  // Populate header
+  const author = card.querySelector('.post-author')?.textContent || '';
+  const meta   = card.querySelector('.post-sub')?.innerHTML || '';
+  document.getElementById('modalAvatar').textContent = author[0]?.toUpperCase() || '?';
+  document.getElementById('modalAuthor').textContent = author;
+  document.getElementById('modalMeta').innerHTML = meta;
+
+  // Populate content
+  document.getElementById('modalContent').textContent =
+    card.querySelector('.post-content')?.textContent || '';
+
+  // Populate images (clone grid)
+  const imgEl = document.getElementById('modalImages');
+  imgEl.innerHTML = '';
+  const srcGrid = card.querySelector('.post-image-grid');
+  if (srcGrid) {
+    const clone = srcGrid.cloneNode(true);
+    clone.style.cursor = 'default';
+    clone.querySelectorAll('img').forEach(i => i.style.cursor = 'default');
+    imgEl.appendChild(clone);
+  }
+
+  // Populate tags
+  const tagsEl = document.getElementById('modalTags');
+  tagsEl.innerHTML = card.querySelector('.post-tags')?.outerHTML || '';
+
+  // Populate comments (clone existing)
+  const modalComments = document.getElementById('modalComments');
+  modalComments.innerHTML = '';
+  const section = document.getElementById('comments-' + pk);
+  if (section) {
+    section.querySelectorAll('.comment-item').forEach(ci => {
+      modalComments.appendChild(ci.cloneNode(true));
+    });
+    const placeholder = section.querySelector('p');
+    if (placeholder && !section.querySelector('.comment-item')) {
+      modalComments.innerHTML = placeholder.outerHTML;
+    }
+  }
+  if (!modalComments.innerHTML.trim()) {
+    modalComments.innerHTML = '<p style="color:var(--text-light);font-size:0.85rem;text-align:center;">No comments yet. Be the first!</p>';
+  }
+
+  // Wire comment form
+  document.getElementById('modalCsrf').value = CSRF();
+  document.getElementById('modalCommentInput').value = '';
+
+  document.getElementById('postModalBackdrop').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closePostModal() {
+  document.getElementById('postModalBackdrop').style.display = 'none';
+  document.body.style.overflow = '';
+  modalPostPk = null;
+}
+
+function closeModalOnBackdrop(e) {
+  if (e.target === document.getElementById('postModalBackdrop')) closePostModal();
+}
+
+// Esc key closes modal
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePostModal(); });
+
+// Modal comment form submit
+;(document.getElementById('modalCommentForm') || {addEventListener:()=>{}}).addEventListener('submit', async function (e) {
+  e.preventDefault();
+  if (!modalPostPk) return;
+  const input = document.getElementById('modalCommentInput');
+  if (!input.value.trim()) return;
+  const fd = new FormData();
+  fd.append('content', input.value.trim());
+  fd.append('csrfmiddlewaretoken', CSRF());
+  try {
+    const res = await fetch(`/wall/${modalPostPk}/comment/`, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd,
+    });
+    const data = await res.json();
+    if (data.ok) {
+      const modalComments = document.getElementById('modalComments');
+      const p = modalComments.querySelector('p');
+      if (p) p.remove();
+      modalComments.insertAdjacentHTML('beforeend', buildCommentHTML(data.comment));
+      input.value = '';
+      // Also update card inline
+      const section = document.getElementById('comments-' + modalPostPk);
+      if (section) {
+        const sp = section.querySelector('p'); if (sp) sp.remove();
+        const form = section.querySelector('.ajax-comment-form');
+        if (form) form.insertAdjacentHTML('beforebegin', buildCommentHTML(data.comment));
+        else section.insertAdjacentHTML('beforeend', buildCommentHTML(data.comment));
+      }
+      const toggleBtn = document.getElementById('comment-toggle-' + modalPostPk);
+      if (toggleBtn) {
+        const count = (section ? section.querySelectorAll('.comment-item').length : 1);
+        toggleBtn.innerHTML = `<i class="bi bi-chat"></i> ${count} ${count === 1 ? 'comment' : 'comments'}`;
+      }
+    }
+  } catch (err) { console.error(err); }
+});
+
+// ─────────────────────────────────────────────
+// BUILD POST CARD HTML from JSON data
+// ─────────────────────────────────────────────
+function buildPostCard(p) {
+  const initial = p.author[0].toUpperCase();
+  const uniBadge = p.university ? `<span class="uni-badge">${p.university}</span>` : '';
+  const deleteBtn = p.can_delete ? `
+    <form method="post" action="${p.delete_url}" style="margin:0;">
+      <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF()}">
+      <button type="submit" class="action-btn danger" onclick="return confirm('Delete this post?')" title="Delete post">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </form>` : '';
+  const tagsHtml = p.tags.length ? `<div class="post-tags">${p.tags.map(t => `<a href="?tag=${t}" class="tag-chip">#${t}</a>`).join('')}</div>` : '';
+  const urls = p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []);
+  const isSingle = urls.length === 1;
+  const imagesHtml = urls.length ? `
+    <div class="post-image-grid ${isSingle ? 'single' : ''}" onclick="openPostModal('${p.pk}')">
+      ${urls.slice(0, 4).map((u, i) => i === 3 && urls.length > 4
+        ? `<div class="img-more-overlay"><img src="${u}" alt="more"><div class="overlay-count">+${urls.length - 3}</div></div>`
+        : `<img src="${u}" alt="Post image" loading="lazy">`).join('')}
+    </div>` : '';
+
+  return `
+  <div class="post-card" id="post-${p.pk}" style="animation:fadeInUp 0.4s ease both;">
+    <div class="post-header">
+      <div class="post-avatar">${initial}</div>
+      <div class="post-meta">
+        <div class="post-author">${p.author}</div>
+        <div class="post-sub">${uniBadge}<span>just now</span></div>
+      </div>
+      ${deleteBtn}
+    </div>
+    <div class="post-content-area" onclick="openPostModal('${p.pk}')">
+      <div class="post-content">${p.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      ${imagesHtml}
+    </div>
+    ${tagsHtml}
+    <div class="post-actions">
+      <button class="action-btn like-btn" data-post="${p.pk}" data-liked="0">
+        <i class="bi bi-heart"></i><span class="like-count">0</span>
+      </button>
+      <button class="action-btn comment-toggle" id="comment-toggle-${p.pk}" onclick="toggleComments('${p.pk}')">
+        <i class="bi bi-chat"></i> 0 comments
+      </button>
+      <button class="action-btn" onclick="openPostModal('${p.pk}')" style="border-color:var(--blue);color:var(--blue);">
+        <i class="bi bi-arrows-fullscreen"></i> Open
+      </button>
+    </div>
+    <div class="comments-section" id="comments-${p.pk}" style="display:none;">
+      <p style="color:var(--text-light);font-size:0.85rem;text-align:center;">No comments yet. Be the first!</p>
+      <form class="comment-form ajax-comment-form" data-post="${p.pk}">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF()}">
+        <input type="text" name="content" placeholder="Write a comment…" required>
+        <button type="submit" class="action-btn"><i class="bi bi-send"></i></button>
+      </form>
+    </div>
+  </div>`;
+}
+
+// ── AJAX: Create Post ──
+;(document.getElementById('createPostForm') || {addEventListener:()=>{}}).addEventListener('submit', async function (e) {
+
+  e.preventDefault();
+  const form = this;
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Posting…';
+
+  try {
+    const fd = new FormData(form);
+    const res = await fetch(form.action, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd,
+    });
+    const data = await res.json();
+    if (data.ok) {
+      let feed = document.getElementById('wall-feed');
+      if (!feed) {
+        feed = document.createElement('div');
+        feed.id = 'wall-feed';
+        document.querySelector('.filters-bar').insertAdjacentElement('afterend', feed);
+      }
+      const emptyState = document.getElementById('wall-empty');
+      if (emptyState) emptyState.remove();
+      feed.insertAdjacentHTML('afterbegin', buildPostCard(data.post));
+      bindLikeBtn(feed.querySelector(`#post-${data.post.pk} .like-btn`));
+      bindCommentForm(feed.querySelector(`#post-${data.post.pk} .ajax-comment-form`));
+      form.reset();
+      clearFiles();
+    } else {
+      alert(data.error || 'Could not create post.');
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-send-fill"></i> Post';
+  }
+});
+
+// ─────────────────────────────────────────────
+// BUILD COMMENT HTML from JSON data
+// ─────────────────────────────────────────────
+function buildCommentHTML(c, tempId) {
+  const initial = c.author[0].toUpperCase();
+  const replyFormId = `reply-form-ajax-${c.pk || tempId}`;
+  const isReplyClass = c.is_reply ? 'is-reply' : '';
+  const replyQuote = c.is_reply ? (() => {
+    // Extract @username from content
+    const match = c.content.match(/^@(\S+)/);
+    const replyTo = match ? match[1] : '';
+    return replyTo ? `<div class="reply-quote"><i class="bi bi-reply-fill"></i> Replying to <strong>@${replyTo}</strong></div>` : '';
+  })() : '';
+  const deleteBtn = c.can_delete ? `
+    <form method="post" action="${c.delete_url}" style="display:inline;margin-left:4px;">
+      <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF()}">
+      <button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.75rem;padding:0;" title="Delete comment">
+        <i class="bi bi-x"></i>
+      </button>
+    </form>` : '';
+  const idAttr = c.pk ? `id="comment-${c.pk}"` : `id="${tempId}"`;
+  return `
+  <div class="comment-item ${isReplyClass}" ${idAttr}>
+    <div class="comment-avatar">${initial}</div>
+    <div class="comment-bubble" style="flex:1;">
+      ${replyQuote}
+      <div class="comment-author">${c.author} <span class="comment-time">· just now</span>${deleteBtn}</div>
+      ${c.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+      <button class="reply-btn" onclick="toggleReply('${replyFormId}', '${c.author}')">
+        <i class="bi bi-reply"></i> Reply
+      </button>
+      <form class="reply-form ajax-comment-form" id="${replyFormId}" data-post="${c.post_pk}" style="display:none;">
+        <input type="hidden" name="csrfmiddlewaretoken" value="${CSRF()}">
+        <input type="text" name="content" placeholder="Replying to @${c.author}…" required>
+        <button type="submit" class="action-btn" style="flex-shrink:0;"><i class="bi bi-send"></i></button>
+      </form>
+    </div>
+  </div>`;
+}
+
+// ── AJAX: Add Comment (with Optimistic UI) ──
+function bindCommentForm(form) {
+  if (!form) return;
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const postPk = this.dataset.post;
+    const input = this.querySelector('input[name=content]');
+    const content = input.value.trim();
+    if (!content) return;
+
+    // ─ Optimistic: show comment immediately ─
+    const tempId = 'comment-temp-' + Date.now();
+    const optimistic = {
+      pk: null, post_pk: postPk, author: ME,
+      content, is_reply: content.startsWith('@'),
+      can_delete: false, delete_url: ''
+    };
+    const section = document.getElementById('comments-' + postPk);
+    const placeholder = section ? section.querySelector('p') : null;
+    if (placeholder) placeholder.remove();
+    this.insertAdjacentHTML('beforebegin', buildCommentHTML(optimistic, tempId));
+    input.value = '';
+    // Close reply form if it's a reply form
+    if (this.classList.contains('reply-form')) {
+      this.classList.remove('open');
+      this.style.display = 'none';
+    }
+    // Update toggle count immediately
+    const toggleBtn = document.getElementById('comment-toggle-' + postPk);
+    if (toggleBtn && section) {
+      const count = section.querySelectorAll('.comment-item').length;
+      toggleBtn.innerHTML = `<i class="bi bi-chat"></i> ${count} ${count === 1 ? 'comment' : 'comments'}`;
+    }
+
+    try {
+      const fd = new FormData(this);
+      fd.set('content', content);
+      const res = await fetch(`/wall/${postPk}/comment/`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd,
+      });
+      const data = await res.json();
+      if (data.ok) {
+        // Patch the optimistic element with real data (pk, delete button)
+        const tempEl = document.getElementById(tempId);
+        if (tempEl) {
+          data.comment.can_delete = true;
+          const realHtml = buildCommentHTML(data.comment, tempId);
+          tempEl.outerHTML = realHtml;
+          // Bind reply form in real element
+          const realEl = document.getElementById('comment-' + data.comment.pk);
+          if (realEl) {
+            const replyFrm = realEl.querySelector('.ajax-comment-form');
+            if (replyFrm) bindCommentForm(replyFrm);
+          }
+        }
+        // Sync with modal if open
+        if (String(modalPostPk) === String(postPk)) {
+          const mc = document.getElementById('modalComments');
+          if (mc) {
+            const mp = mc.querySelector('p'); if (mp) mp.remove();
+            mc.insertAdjacentHTML('beforeend', buildCommentHTML(data.comment));
+          }
+        }
+      } else {
+        // Revert on error
+        const tempEl = document.getElementById(tempId);
+        if (tempEl) tempEl.remove();
+        alert(data.error || 'Could not post comment.');
+      }
+    } catch (err) {
+      console.error(err);
+      const tempEl = document.getElementById(tempId);
+      if (tempEl) tempEl.remove();
+    }
+  });
+}
+
+
+// ── Like button AJAX ──
+function bindLikeBtn(btn) {
+  if (!btn) return;
+  btn.addEventListener('click', async function () {
+    const pk = this.dataset.post;
+    try {
+      const res = await fetch(`/wall/${pk}/like/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF() },
+      });
+      const data = await res.json();
+      const icon = this.querySelector('i');
+      const count = this.querySelector('.like-count');
+      if (data.liked) {
+        this.classList.add('liked');
+        icon.className = 'bi bi-heart-fill';
+      } else {
+        this.classList.remove('liked');
+        icon.className = 'bi bi-heart';
+      }
+      count.textContent = data.count;
+    } catch (err) { console.error(err); }
+  });
+}
+
+// Bind to all existing like buttons and comment forms on page load
+document.querySelectorAll('.like-btn').forEach(bindLikeBtn);
+document.querySelectorAll('.ajax-comment-form').forEach(bindCommentForm);
+
+// ─────────────────────────────────────────────
+// PUSHER — Live Wall Updates for ALL users
+// ─────────────────────────────────────────────
+(function () {
+  const PUSHER_KEY     = '{{ pusher_key }}';
+  const PUSHER_CLUSTER = '{{ pusher_cluster }}';
+  if (!PUSHER_KEY) return;
+
+  const pusher  = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER, forceTLS: true });
+  const channel = pusher.subscribe('wall');
+
+  // ── New post ──
+  channel.bind('new-post', function (p) {
+    if (p.author === ME) return;
+    if (document.getElementById('post-' + p.pk)) return;
+    p.can_delete = false;
+    const emptyState = document.getElementById('wall-empty');
+    if (emptyState) emptyState.remove();
+    let feed = document.getElementById('wall-feed');
+    if (!feed) {
+      feed = document.createElement('div');
+      feed.id = 'wall-feed';
+      document.querySelector('.filters-bar').insertAdjacentElement('afterend', feed);
+    }
+    feed.insertAdjacentHTML('afterbegin', buildPostCard(p));
+    const newCard = document.getElementById('post-' + p.pk);
+    bindLikeBtn(newCard.querySelector('.like-btn'));
+    bindCommentForm(newCard.querySelector('.ajax-comment-form'));
+    // Increment nav badge (handled in base.html)
+    bumpWallBadge();
+  });
+
+  // ── New comment ──
+  channel.bind('new-comment', function (c) {
+    if (c.author === ME) return;
+    if (document.getElementById('comment-' + c.pk)) return;
+
+    const section = document.getElementById('comments-' + c.post_pk);
+    if (!section) return;
+
+    c.can_delete = false;
+    const placeholder = section.querySelector('p');
+    if (placeholder) placeholder.remove();
+    const form = section.querySelector('.ajax-comment-form');
+    if (form) form.insertAdjacentHTML('beforebegin', buildCommentHTML(c));
+    else section.insertAdjacentHTML('beforeend', buildCommentHTML(c));
+
+    // Update toggle button count + add badge if section closed
+    const toggleBtn = document.getElementById('comment-toggle-' + c.post_pk);
+    if (toggleBtn) {
+      const count = section.querySelectorAll('.comment-item').length;
+      const isClosed = section.style.display === 'none';
+      let badgeHtml = '';
+      if (isClosed) {
+        let existing = toggleBtn.querySelector('.comment-new-badge');
+        const current = existing ? parseInt(existing.textContent) : 0;
+        const newCount = current + 1;
+        if (existing) existing.remove();
+        badgeHtml = `<span class="comment-new-badge">${newCount}</span>`;
+      }
+      toggleBtn.innerHTML = `<i class="bi bi-chat"></i> ${count} ${count === 1 ? 'comment' : 'comments'}${badgeHtml}`;
+    }
+
+    // Sync to modal if post is open
+    if (String(modalPostPk) === String(c.post_pk)) {
+      const mc = document.getElementById('modalComments');
+      if (mc) { const p = mc.querySelector('p'); if(p) p.remove(); mc.insertAdjacentHTML('beforeend', buildCommentHTML(c)); }
+    }
+
+    // Nav badge
+    bumpWallBadge();
+  });
+
+  // ── Like update ──
+  channel.bind('post-liked', function (data) {
+    const card = document.getElementById('post-' + data.pk);
+    if (!card) return;
+    const likeBtn = card.querySelector('.like-btn');
+    if (likeBtn && likeBtn.dataset.updating === '1') return;
+    const countEl = card.querySelector('.like-count');
+    if (countEl) countEl.textContent = data.count;
+  });
+
+})();
+
+// ── Nav badge helper (called by Pusher handlers) ──
+function bumpWallBadge() {
+  // Signal to base that wall has new activity (storage event picked up by base.html JS)
+  try {
+    const cur = parseInt(localStorage.getItem('wall_unseen') || '0');
+    localStorage.setItem('wall_unseen', cur + 1);
+    // If base badge el is on this same page, update it
+    const b = document.getElementById('wall-nav-badge');
+    if (b) { b.textContent = cur + 1; b.style.display = 'inline-flex'; }
+  } catch(e) {}
+}
+
+// Clear wall badge when on wall page
+try { localStorage.setItem('wall_unseen', '0'); } catch(e) {}
+
+// ─── Infinite Scroll ───────────────────────────────────────────────────────
+(function () {
+  let nextOffset   = {{ next_offset|default:10 }};
+  let hasMore      = {{ has_more|yesno:"true,false" }};
+  let loading      = false;
+  const loader     = document.getElementById('wall-loader');
+  const endMsg     = document.getElementById('wall-end-msg');
+  const sentinel   = document.getElementById('scroll-sentinel');
+  const tagFilter  = '{{ tag_filter|escapejs }}';
+  const uniFilter  = '{{ uni_filter|escapejs }}';
+
+  if (!hasMore) {
+    if (sentinel) sentinel.remove();
+  }
+
+  async function loadMore() {
+    if (loading || !hasMore) return;
+    loading = true;
+    if (loader) loader.classList.add('active');
+
+    try {
+      let url = `/wall/posts/?offset=${nextOffset}`;
+      if (tagFilter) url += `&tag=${encodeURIComponent(tagFilter)}`;
+      if (uniFilter) url += `&university=${encodeURIComponent(uniFilter)}`;
+
+      const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      const data = await res.json();
+
+      const feed = document.getElementById('wall-feed');
+      if (feed && data.posts.length) {
+        data.posts.forEach(p => {
+          const el = document.createElement('div');
+          el.innerHTML = buildPostCard(p);
+          const card = el.firstElementChild;
+          feed.appendChild(card);
+          // Bind interactive elements on new cards
+          bindCommentForm(card.querySelector('.ajax-comment-form'));
+          bindLikeBtn(card.querySelector('.like-btn'));
+          card.querySelectorAll('.reply-form.ajax-comment-form').forEach(bindCommentForm);
+        });
+      }
+
+      nextOffset = data.next_offset;
+      hasMore    = data.has_more;
+
+      if (!hasMore) {
+        if (loader)  loader.classList.remove('active');
+        if (endMsg)  endMsg.style.display = 'block';
+        if (sentinel) sentinel.remove();
+      }
+    } catch (err) {
+      console.error('Infinite scroll error:', err);
+    } finally {
+      loading = false;
+      if (loader) loader.classList.remove('active');
+    }
+  }
+
+  if (sentinel && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) loadMore();
+    }, { rootMargin: '200px' });
+    observer.observe(sentinel);
+  }
+})();
+
+{% endblock %}

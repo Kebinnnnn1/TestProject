@@ -1,0 +1,405 @@
+{% extends 'accounts/base.html' %}
+{% block title %}Messages — CUlink{% endblock %}
+
+{% block extra_head %}
+<style>
+  .chat-inbox-wrap {
+    max-width: 700px;
+    margin: 3rem auto;
+    padding: 0 1rem;
+  }
+  .inbox-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+  }
+  .inbox-header .icon-wrap {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: var(--grad-cool);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  /* Action buttons */
+  .inbox-actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .inbox-action-btn {
+    flex: 1;
+    min-width: 180px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 1rem 1.25rem;
+    border-radius: 16px;
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-family: inherit;
+  }
+  [data-theme="light"] .inbox-action-btn {
+    background: #f5f8fe;
+    border-color: #c5cfe0;
+  }
+  .inbox-action-btn:hover {
+    border-color: var(--blue);
+    box-shadow: 0 4px 20px rgba(67,97,238,0.14);
+    transform: translateY(-2px);
+  }
+  .inbox-action-btn .btn-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .inbox-action-btn .btn-icon.blue { background: rgba(78,124,63,0.14); color: var(--blue); }
+  .inbox-action-btn .btn-icon.purple { background: rgba(168,85,247,0.12); color: #a855f7; }
+  .inbox-action-btn .btn-icon.green { background: rgba(16,185,129,0.14); color: #10b981; }
+  .inbox-action-btn .btn-label { font-weight: 600; font-size: 0.88rem; }
+  .inbox-action-btn .btn-sub { font-size: 0.75rem; color: var(--text-light); }
+
+  .inbox-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin: 1.5rem 0 0.75rem;
+  }
+  .user-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0.85rem 1.1rem;
+    border-radius: 14px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    text-decoration: none;
+    color: var(--text-dark);
+    transition: all 0.2s;
+    margin-bottom: 0.5rem;
+  }
+  [data-theme="light"] .user-row {
+    border-color: #c5cfe0;
+    background: #f5f8fe;
+  }
+  .user-row:hover {
+    border-color: var(--blue);
+    box-shadow: 0 4px 16px rgba(67,97,238,0.12);
+    transform: translateY(-1px);
+    color: var(--text-dark);
+  }
+  .avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--grad-main);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .user-row .name { font-weight: 600; font-size: 0.95rem; }
+  .user-row .role-tag {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-left: auto;
+    background: var(--surface-3);
+    padding: 2px 10px;
+    border-radius: 20px;
+  }
+  .empty-state {
+    text-align: center;
+    color: var(--text-light);
+    padding: 3rem 2rem;
+    font-size: 0.9rem;
+  }
+  .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.4; }
+
+  /* ── Modals ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-box {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.25s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+  @keyframes slideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-box h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 0.35rem; }
+  .modal-box p  { font-size: 0.85rem; color: var(--text-light); margin: 0 0 1.25rem; }
+  .modal-close {
+    position: absolute; top: 1rem; right: 1rem;
+    background: none; border: none; font-size: 1.1rem;
+    color: var(--text-light); cursor: pointer;
+    border-radius: 8px; padding: 4px 8px;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--text-dark); }
+  .modal-input {
+    width: 100%;
+    background: var(--input-bg) !important;
+    border: 1.5px solid var(--input-border) !important;
+    color: var(--text-dark) !important;
+    border-radius: 12px !important;
+    padding: 0.7rem 1rem !important;
+    font-size: 0.92rem !important;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+  .modal-input:focus { border-color: var(--blue) !important; outline: none; }
+  .modal-btn {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: none;
+    background: var(--grad-main);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .modal-btn:hover { opacity: 0.88; transform: scale(1.01); }
+  .modal-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  /* Error/info toast inside modal */
+  .modal-alert {
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    font-size: 0.83rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    display: none;
+  }
+  .modal-alert.error { background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+  .modal-alert.show { display: block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-inbox-wrap">
+  <div class="inbox-header">
+    <div class="icon-wrap"><i class="bi bi-chat-dots-fill"></i></div>
+    <div>
+      <h1 style="font-size:1.6rem;font-weight:800;margin:0;">Messages</h1>
+      <p style="color:var(--text-light);font-size:0.88rem;margin:0;">Your private conversations</p>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="inbox-actions">
+    <button class="inbox-action-btn" id="btnChatUser">
+      <div class="btn-icon blue"><i class="bi bi-person-plus"></i></div>
+      <div>
+        <div class="btn-label">Chat with a user</div>
+        <div class="btn-sub">Start by entering a username</div>
+      </div>
+    </button>
+    <button class="inbox-action-btn" id="btnRandomChat">
+      <div class="btn-icon purple"><i class="bi bi-shuffle"></i></div>
+      <div>
+        <div class="btn-label">Random chat</div>
+        <div class="btn-sub">Match with someone from a university</div>
+      </div>
+    </button>
+    <button class="inbox-action-btn" id="btnRandomAnyone">
+      <div class="btn-icon green"><i class="bi bi-globe2"></i></div>
+      <div>
+        <div class="btn-label">Random chat with anyone</div>
+        <div class="btn-sub">Match with any random CUlink user</div>
+      </div>
+    </button>
+  </div>
+
+  <!-- Past Conversations -->
+  {% if people_with_convos %}
+  <div class="inbox-section-title">Conversations</div>
+  {% for item in people_with_convos %}
+  <a href="{% url 'chat_conversation' item.user.username %}" class="user-row">
+    <div class="avatar">{{ item.user.username|slice:":1"|upper }}</div>
+    <span class="name">{{ item.user.username }}</span>
+    {% if item.unread %}
+    <span style="background:var(--grad-main);color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto;margin-right:4px;">
+      {% if item.unread > 9 %}9+{% else %}{{ item.unread }}{% endif %}
+    </span>
+    {% else %}
+    <span class="role-tag">{{ item.user.university|default:item.user.role|capfirst }}</span>
+    {% endif %}
+    <i class="bi bi-chevron-right" style="color:var(--text-light);"></i>
+  </a>
+  {% endfor %}
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-chat-heart"></i>
+    No conversations yet.<br>Use the buttons above to start one!
+  </div>
+  {% endif %}
+</div>
+
+<!-- ── Modal: Chat with a user ── -->
+<div class="modal-overlay" id="modalChatUser">
+  <div class="modal-box">
+    <button class="modal-close" data-close="modalChatUser"><i class="bi bi-x-lg"></i></button>
+    <h3><i class="bi bi-person-plus me-2" style="color:var(--blue);"></i>Chat with a user</h3>
+    <p>Enter the exact username of the person you want to message.</p>
+    <div class="modal-alert error" id="alertChatUser"></div>
+    <input type="text" class="modal-input" id="inputChatUser" placeholder="e.g. kebinnnnn1" autocomplete="off" />
+    <button class="modal-btn" id="btnGoChatUser">Open Chat →</button>
+  </div>
+</div>
+
+<!-- ── Modal: Random Chat ── -->
+<div class="modal-overlay" id="modalRandom">
+  <div class="modal-box">
+    <button class="modal-close" data-close="modalRandom"><i class="bi bi-x-lg"></i></button>
+    <h3><i class="bi bi-shuffle me-2" style="color:#a855f7;"></i>Random Chat</h3>
+    <p>Pick a university and we'll match you with a random student from there!</p>
+    <div class="modal-alert error" id="alertRandom"></div>
+    <select class="modal-input" id="selectUni">
+      <option value="">— Select a university —</option>
+      <option value="CTU">CTU — Cebu Technological University</option>
+      <option value="CEC">CEC — Cebu Eastern College</option>
+      <option value="SWU">SWU — Southwestern University</option>
+      <option value="ACT">ACT — Asian College of Technology</option>
+      <option value="UV">UV — University of the Visayas</option>
+    </select>
+    <button class="modal-btn" id="btnGoRandom">Find Someone</button>
+  </div>
+</div>
+
+<!-- ── Modal: Random Chat with Anyone ── -->
+<div class="modal-overlay" id="modalRandomAnyone">
+  <div class="modal-box">
+    <button class="modal-close" data-close="modalRandomAnyone"><i class="bi bi-x-lg"></i></button>
+    <h3><i class="bi bi-globe2 me-2" style="color:#10b981;"></i>Random Chat with Anyone</h3>
+    <p>We'll match you with a random active CUlink user from any university!</p>
+    <div class="modal-alert error" id="alertRandomAnyone"></div>
+    <button class="modal-btn" id="btnGoRandomAnyone" style="background: linear-gradient(135deg,#10b981,#059669);">Find Anyone →</button>
+  </div>
+</div>
+
+<script>
+  // ── Generic modal helpers ──
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+  document.querySelectorAll('[data-close]').forEach(btn => {
+    btn.addEventListener('click', () => closeModal(btn.dataset.close));
+  });
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+  });
+
+  // ── Open modals ──
+  document.getElementById('btnChatUser').addEventListener('click', () => {
+    openModal('modalChatUser');
+    setTimeout(() => document.getElementById('inputChatUser').focus(), 200);
+  });
+  document.getElementById('btnRandomChat').addEventListener('click', () => openModal('modalRandom'));
+  document.getElementById('btnRandomAnyone').addEventListener('click', () => openModal('modalRandomAnyone'));
+
+  // ── Chat with user ──
+  document.getElementById('btnGoChatUser').addEventListener('click', () => {
+    const username = document.getElementById('inputChatUser').value.trim();
+    const alert = document.getElementById('alertChatUser');
+    alert.classList.remove('show');
+    if (!username) {
+      alert.textContent = 'Please enter a username.';
+      alert.classList.add('show');
+      return;
+    }
+    window.location.href = '/chat/' + encodeURIComponent(username) + '/';
+  });
+  document.getElementById('inputChatUser').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btnGoChatUser').click();
+  });
+
+  // ── Random chat ──
+  document.getElementById('btnGoRandom').addEventListener('click', async () => {
+    const uni = document.getElementById('selectUni').value;
+    const alert = document.getElementById('alertRandom');
+    const btn   = document.getElementById('btnGoRandom');
+    alert.classList.remove('show');
+
+    if (!uni) {
+      alert.textContent = 'Please select a university first.';
+      alert.classList.add('show');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Looking…';
+
+    try {
+      const res = await fetch('/chat/random/?university=' + encodeURIComponent(uni));
+      const data = await res.json();
+      if (data.ok) {
+        window.location.href = data.redirect;
+      } else {
+        const uniNames = {
+          CTU: 'CTU', CEC: 'CEC', SWU: 'SWU', ACT: 'ACT', UV: 'UV'
+        };
+        alert.textContent = `I can't find someone from ${uniNames[uni] || uni}, perhaps try another university?`;
+        alert.classList.add('show');
+      }
+    } catch (e) {
+      alert.textContent = 'Something went wrong. Please try again.';
+      alert.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Find Someone';
+    }
+  });
+
+  // ── Random chat with anyone ──
+  document.getElementById('btnGoRandomAnyone').addEventListener('click', async () => {
+    const alertEl = document.getElementById('alertRandomAnyone');
+    const btn     = document.getElementById('btnGoRandomAnyone');
+    alertEl.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Looking…';
+    try {
+      const res  = await fetch('/chat/random/');
+      const data = await res.json();
+      if (data.ok) {
+        window.location.href = data.redirect;
+      } else {
+        alertEl.textContent = 'No other users available right now. Try again later!';
+        alertEl.classList.add('show');
+      }
+    } catch (e) {
+      alertEl.textContent = 'Something went wrong. Please try again.';
+      alertEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Find Anyone →';
+    }
+  });
+</script>
+{% endblock %}
