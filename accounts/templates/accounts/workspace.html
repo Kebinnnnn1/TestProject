@@ -2,124 +2,114 @@
 {% block title %}Workspace — CUlink{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
 <style>
-/* ── Prevent Bootstrap from breaking the existing navbar ── */
-nav#mainNav, nav#mainNav * { all: revert; }
-
 /* ── Layout ── */
 body   { overflow: hidden !important; }
-main   { display: flex !important; flex-direction: column !important; overflow: hidden !important; padding: 0 !important; margin: 0 !important; }
+body > main { display: flex !important; flex-direction: column !important; overflow: hidden !important; padding: 0 !important; flex: 1 !important; min-height: 0 !important; }
 footer { display: none !important; }
-.ws-root { display: flex; flex: 1; overflow: hidden; min-height: 0; font-family: 'Inter','Segoe UI',sans-serif; }
+.ws-root { display: flex; flex: 1; overflow: hidden; min-height: 0; font-family: 'Inter','Segoe UI',sans-serif; height: 0; }
 
 /* ── Sidebar ── */
-.ws-sidebar {
-  width: 250px; min-width: 250px;
-  background: var(--surface-2); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; overflow: hidden; z-index: 10;
+.ws-sb {
+  width: 250px; min-width: 250px; background: var(--surface-2);
+  border-right: 1px solid var(--border); display: flex; flex-direction: column;
+  overflow: hidden; z-index: 10; transition: width .28s cubic-bezier(.4,0,.2,1), min-width .28s cubic-bezier(.4,0,.2,1), transform .28s cubic-bezier(.4,0,.2,1);
 }
-.ws-sidebar-hd {
+.ws-sb.ws-sb-collapsed { width: 0; min-width: 0; border-right: none; }
+.ws-sb-hd {
   padding: .7rem 1rem; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  display: flex; align-items: center; gap: .5rem; flex-shrink: 0;
 }
-.ws-sb-title { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-light); }
-.ws-sidebar-body { flex: 1; overflow-y: auto; padding: .35rem 0; }
-.ws-group-lbl {
-  padding: .5rem 1rem .12rem; font-size: .63rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .08em; color: var(--text-light);
+.ws-sb-lbl { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--text-light); flex: 1; }
+.ws-sb-body { flex: 1; overflow-y: auto; padding: .3rem 0; }
+.ws-grp-lbl {
+  padding: .5rem 1rem .1rem; font-size: .62rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .09em; color: var(--text-light);
 }
 .ws-doc-btn {
-  display: flex; align-items: center; gap: 8px; padding: .32rem 1rem;
+  display: flex; align-items: center; gap: 8px; padding: .33rem 1rem;
   width: 100%; border: none; background: none; color: var(--text-mid);
   font-size: .83rem; font-weight: 500; text-align: left; cursor: pointer; transition: background .12s;
 }
 .ws-doc-btn:hover  { background: var(--surface-3); color: var(--text-dark); }
 .ws-doc-btn.active { background: rgba(33,150,243,.1); color: var(--blue); font-weight: 700; border-right: 3px solid var(--blue); }
-.ws-doc-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.ws-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .ws-doc-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* New-doc button + picker */
+/* New-doc button */
 .ws-new-btn {
-  display: inline-flex; align-items: center; gap: 4px; padding: .26rem .6rem;
+  display: inline-flex; align-items: center; gap: 4px; padding: .26rem .55rem;
   background: var(--blue); color: #fff; border: none; border-radius: 7px;
-  font-size: .74rem; font-weight: 700; cursor: pointer; position: relative; transition: opacity .15s;
+  font-size: .73rem; font-weight: 700; cursor: pointer; position: relative; transition: opacity .15s; flex-shrink: 0;
 }
 .ws-new-btn:hover { opacity: .85; }
-.ws-type-picker {
+.ws-picker {
   position: absolute; top: calc(100% + 6px); right: 0; background: var(--card-bg);
-  border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.16);
-  padding: .32rem; z-index: 700; display: none; min-width: 188px;
+  border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,.18);
+  padding: .32rem; z-index: 700; display: none; min-width: 192px;
 }
-.ws-type-picker.open { display: block; }
-.ws-type-opt {
+.ws-picker.open { display: block; }
+.ws-pick-opt {
   display: flex; align-items: center; gap: 9px; padding: .42rem .6rem; border-radius: 8px;
   cursor: pointer; font-size: .83rem; font-weight: 500; color: var(--text-dark);
   border: none; background: none; width: 100%; text-align: left; transition: background .12s;
 }
-.ws-type-opt:hover { background: var(--surface-2); }
-.ws-type-opt-ic { width: 25px; height: 25px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; }
+.ws-pick-opt:hover { background: var(--surface-3); }
+.ws-pick-ic { width: 26px; height: 26px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: .82rem; flex-shrink: 0; }
 
 /* Mobile close */
 .ws-sb-close {
   display: none; background: none; border: 1px solid var(--border); border-radius: 7px;
   width: 26px; height: 26px; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--text-light); font-size: .8rem; transition: all .15s; flex-shrink: 0;
+  cursor: pointer; color: var(--text-light); font-size: .78rem; transition: all .15s; flex-shrink: 0;
 }
 .ws-sb-close:hover { border-color: #ef4444; color: #ef4444; }
-
-/* Backdrop */
 .ws-bd { display: none; position: fixed; inset: 0; z-index: 590; background: rgba(0,0,0,.42); backdrop-filter: blur(2px); }
 .ws-bd.on { display: block; }
 
 /* ── Main ── */
 .ws-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
 .ws-topbar {
-  display: flex; align-items: center; gap: .5rem;
-  padding: .5rem 1.2rem; border-bottom: 1px solid var(--border);
-  background: var(--card-bg); flex-shrink: 0;
+  display: flex; align-items: center; gap: .5rem; padding: .55rem 1.2rem;
+  border-bottom: 1px solid var(--border); background: var(--card-bg); flex-shrink: 0;
 }
-.ws-toggle-btn {
+.ws-tog {
   background: none; border: 1px solid var(--border); border-radius: 7px;
-  width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--text-light); font-size: .8rem; transition: all .2s; flex-shrink: 0;
+  width: 27px; height: 27px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-light); font-size: .82rem; transition: all .2s; flex-shrink: 0;
 }
-.ws-toggle-btn:hover { border-color: var(--blue); color: var(--blue); }
-.ws-tb-title { font-size: .86rem; font-weight: 700; color: var(--text-dark); }
-.ws-tb-sub   { font-size: .7rem; color: var(--text-light); }
+.ws-tog:hover { border-color: var(--blue); color: var(--blue); }
+.ws-tb-title { font-size: .87rem; font-weight: 700; color: var(--text-dark); line-height: 1.2; }
+.ws-tb-sub   { font-size: .7rem; color: var(--text-light); line-height: 1.2; }
 .ws-content  { flex: 1; overflow-y: auto; padding: 1.4rem; }
 
 /* ── Welcome ── */
-.ws-welcome { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 55vh; text-align: center; padding: 2rem; }
-.ws-welcome-ic { width: 68px; height: 68px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 1.1rem; background: linear-gradient(135deg,#e0f2fe,#dbeafe); color: var(--blue); }
-.ws-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px,1fr)); gap: .55rem; max-width: 530px; width: 100%; }
-.ws-tc {
-  background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 11px;
-  padding: .9rem .7rem; cursor: pointer; text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: .32rem; transition: all .2s;
-}
+.ws-welcome { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 56vh; text-align: center; padding: 2rem; }
+.ws-wel-ic  { width: 70px; height: 70px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.1rem; background: linear-gradient(135deg,#e0f2fe,#dbeafe); color: var(--blue); }
+.ws-type-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: .55rem; max-width: 540px; width: 100%; }
+.ws-tc { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: .9rem .7rem; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: .32rem; transition: all .2s; }
 .ws-tc:hover { transform: translateY(-3px); border-color: var(--blue); box-shadow: 0 6px 20px rgba(0,0,0,.1); }
-.ws-tc-ic   { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; }
-.ws-tc-name { font-size: .77rem; font-weight: 700; color: var(--text-dark); }
+.ws-tc-ic   { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+.ws-tc-name { font-size: .78rem; font-weight: 700; color: var(--text-dark); }
 
 /* ── Doc header ── */
 .ws-doc-hd { display: flex; align-items: center; gap: .8rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
-.ws-doc-ic  { width: 44px; height: 44px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+.ws-doc-ic  { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; }
 .ws-doc-ti  { flex: 1; font-size: 1.5rem; font-weight: 800; border: none; background: transparent; color: var(--text-dark); outline: none; padding: 0; letter-spacing: -.4px; min-width: 0; font-family: inherit; }
 .ws-doc-ti::placeholder { color: var(--text-light); }
-.ws-add-btn { display: inline-flex; align-items: center; gap: 4px; background: var(--blue); color: #fff; border: none; border-radius: 8px; padding: .3rem .8rem; font-size: .78rem; font-weight: 700; cursor: pointer; transition: opacity .15s; flex-shrink: 0; }
+.ws-add-btn { display: inline-flex; align-items: center; gap: 5px; background: var(--blue); color: #fff; border: none; border-radius: 8px; padding: .32rem .82rem; font-size: .8rem; font-weight: 700; cursor: pointer; transition: opacity .15s; flex-shrink: 0; }
 .ws-add-btn:hover { opacity: .85; }
-.ws-del-btn { background: none; border: 1.5px solid var(--border); border-radius: 8px; padding: .28rem .58rem; font-size: .78rem; color: var(--text-light); cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all .2s; flex-shrink: 0; }
-.ws-del-btn:hover { border-color: #ef4444; color: #ef4444; }
+.ws-del-doc { background: none; border: 1.5px solid var(--border); border-radius: 8px; padding: .3rem .58rem; font-size: .78rem; color: var(--text-light); cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all .2s; flex-shrink: 0; }
+.ws-del-doc:hover { border-color: #ef4444; color: #ef4444; }
 
 /* ── Progress bar ── */
-.ws-prog-wrap { margin-bottom: 1rem; }
+.ws-prog { margin-bottom: 1rem; }
 .ws-prog-track { height: 7px; background: var(--surface-3); border-radius: 4px; overflow: hidden; margin-bottom: .22rem; }
 .ws-prog-fill  { height: 100%; border-radius: 4px; transition: width .4s ease; }
 .ws-prog-lbl   { font-size: .72rem; color: var(--text-light); font-weight: 500; }
 
 /* ── Badges ── */
-.wb { display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 50px; font-size: .64rem; font-weight: 700; text-transform: uppercase; flex-shrink: 0; }
+.wb { display: inline-flex; align-items: center; gap: 3px; padding: 1px 7px; border-radius: 50px; font-size: .65rem; font-weight: 700; text-transform: uppercase; flex-shrink: 0; }
 .wb-high    { background: rgba(220,38,38,.12); color: #dc2626; }
 .wb-medium  { background: rgba(217,119,6,.12); color: #d97706; }
 .wb-low     { background: rgba(22,163,74,.12);  color: #16a34a; }
@@ -128,8 +118,8 @@ footer { display: none !important; }
 .wb-effort  { background: rgba(79,70,229,.1); color: #4f46e5; }
 .wb-prog    { background: rgba(37,99,235,.1); color: #2563eb; }
 
-/* ── Todo ── */
-.ws-todo-row { display: flex; align-items: center; gap: .52rem; padding: .48rem .35rem; border-radius: 8px; transition: background .12s; border-bottom: 1px solid var(--border); }
+/* ── Todo rows ── */
+.ws-todo-row { display: flex; align-items: center; gap: .5rem; padding: .48rem .35rem; border-radius: 8px; transition: background .12s; border-bottom: 1px solid var(--border); }
 .ws-todo-row:last-child { border-bottom: none; }
 .ws-todo-row:hover { background: var(--surface-2); }
 .ws-chk { background: none; border: none; cursor: pointer; font-size: 1.05rem; color: var(--text-light); padding: 0; flex-shrink: 0; transition: color .15s, transform .1s; }
@@ -144,91 +134,103 @@ footer { display: none !important; }
 .ws-act.del:hover { background: rgba(239,68,68,.1); color: #ef4444; }
 
 /* ── Kanban ── */
-.ws-kanban { display: grid; grid-template-columns: repeat(4,1fr); gap: .7rem; align-items: start; }
-.ws-kb-col { background: var(--surface-2); border-radius: 12px; padding: .72rem; display: flex; flex-direction: column; gap: .45rem; min-height: 110px; }
-.ws-kb-col-title { display: flex; align-items: center; gap: 6px; font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; padding-bottom: .4rem; border-bottom: 2px solid var(--border); flex-shrink: 0; }
-.ws-kb-dot { width: 7px; height: 7px; border-radius: 50%; }
+.ws-kanban { display: grid; grid-template-columns: repeat(4,1fr); gap: .75rem; align-items: start; }
+.ws-kb-col { background: var(--surface-2); border-radius: 12px; padding: .75rem; display: flex; flex-direction: column; gap: .42rem; min-height: 120px; }
+.ws-kb-col-title {
+  display: flex; align-items: center; gap: 6px; font-size: .67rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em; padding-bottom: .4rem; border-bottom: 2px solid var(--border);
+}
+.ws-kb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.ws-kb-count { font-size: .66rem; font-weight: 600; opacity: .6; margin-left: auto; }
 .ws-proj-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: .62rem; transition: box-shadow .2s, transform .15s; cursor: pointer; }
-.ws-proj-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.09); transform: translateY(-2px); }
-.ws-card-name { font-size: .85rem; font-weight: 600; color: var(--text-dark); margin-bottom: .32rem; }
+.ws-proj-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.1); transform: translateY(-2px); }
+.ws-card-name { font-size: .86rem; font-weight: 600; color: var(--text-dark); margin-bottom: .3rem; }
 .ws-card-meta { display: flex; flex-wrap: wrap; gap: .28rem; margin-bottom: .38rem; }
-.ws-card-prog-lbl { display: flex; justify-content: space-between; font-size: .66rem; color: var(--text-light); margin-bottom: 2px; }
-.ws-card-prog-track { height: 5px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
-.ws-card-prog-fill { height: 100%; background: linear-gradient(90deg,#2563eb,#3b82f6); border-radius: 3px; transition: width .3s; }
-.ws-kb-add { background: none; border: 1px dashed var(--border); border-radius: 8px; padding: .32rem; width: 100%; font-size: .76rem; color: var(--text-light); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: .2rem; }
+.ws-card-pt { display: flex; justify-content: space-between; font-size: .67rem; color: var(--text-light); margin-bottom: 2px; }
+.ws-card-track { height: 5px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+.ws-card-fill  { height: 100%; background: linear-gradient(90deg,#2563eb,#3b82f6); border-radius: 3px; transition: width .3s; }
+.ws-kb-add { background: none; border: 1px dashed var(--border); border-radius: 8px; padding: .32rem; width: 100%; font-size: .77rem; color: var(--text-light); cursor: pointer; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: .15rem; }
 .ws-kb-add:hover { border-color: var(--blue); color: var(--blue); background: rgba(33,150,243,.04); }
 
 /* ── Goals ── */
 .ws-goal-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: .65rem .82rem; margin-bottom: .45rem; display: flex; align-items: center; gap: .65rem; transition: box-shadow .2s; }
 .ws-goal-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,.07); }
-.ws-goal-chk { width: 21px; height: 21px; border-radius: 50%; border: 2px solid var(--border); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .72rem; flex-shrink: 0; transition: all .2s; }
+.ws-goal-chk { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .74rem; flex-shrink: 0; transition: all .2s; }
 .ws-goal-chk.done { background: #16a34a; border-color: #16a34a; color: #fff; }
-.ws-goal-name { flex: 1; font-size: .88rem; font-weight: 500; color: var(--text-dark); cursor: pointer; }
+.ws-goal-name { flex: 1; font-size: .89rem; font-weight: 500; color: var(--text-dark); cursor: pointer; min-width: 0; }
 .ws-goal-name.done-text { text-decoration: line-through; color: var(--text-light); }
 
 /* ── Notes ── */
-.ws-note-area { width: 100%; min-height: calc(100vh - 270px); border: none; background: transparent; font-size: .94rem; line-height: 1.8; color: var(--text-dark); outline: none; resize: none; font-family: inherit; padding: 0; }
+.ws-note-area { width: 100%; min-height: calc(100vh - 270px); border: none; background: transparent; font-size: .94rem; line-height: 1.85; color: var(--text-dark); outline: none; resize: none; font-family: inherit; padding: 0; }
 
 /* ── Modal ── */
 .ws-modal-bd { display: none; position: fixed; inset: 0; z-index: 800; background: rgba(0,0,0,.45); backdrop-filter: blur(3px); align-items: center; justify-content: center; padding: 1rem; }
 .ws-modal-bd.open { display: flex; }
-.ws-modal { background: var(--card-bg); border-radius: 16px; width: 100%; max-width: 485px; box-shadow: 0 24px 80px rgba(0,0,0,.22); border: 1px solid var(--border); animation: wsUp .22s ease; display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; }
+.ws-modal {
+  background: var(--card-bg); border-radius: 16px; width: 100%; max-width: 490px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.22); border: 1px solid var(--border);
+  animation: wsUp .22s ease; display: flex; flex-direction: column; max-height: 90vh; overflow: hidden;
+}
 @keyframes wsUp { from { opacity: 0; transform: translateY(20px) scale(.97); } to { opacity: 1; transform: none; } }
-.ws-modal-hd { display: flex; align-items: center; gap: .68rem; padding: .95rem 1.15rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.ws-modal-ic   { width: 33px; height: 33px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .92rem; flex-shrink: 0; }
-.ws-modal-titl { flex: 1; font-size: .95rem; font-weight: 700; color: var(--text-dark); }
-.ws-modal-cls  { background: none; border: 1px solid var(--border); border-radius: 7px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-light); font-size: .78rem; transition: all .15s; }
+.ws-modal-hd { display: flex; align-items: center; gap: .7rem; padding: 1rem 1.15rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.ws-modal-ic   { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0; }
+.ws-modal-titl { flex: 1; font-size: .96rem; font-weight: 700; color: var(--text-dark); }
+.ws-modal-cls  { background: none; border: 1px solid var(--border); border-radius: 7px; width: 27px; height: 27px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-light); font-size: .8rem; transition: all .15s; }
 .ws-modal-cls:hover { border-color: #ef4444; color: #ef4444; }
-.ws-modal-body { overflow-y: auto; padding: 1rem 1.15rem; display: flex; flex-direction: column; gap: .75rem; }
+.ws-modal-body { overflow-y: auto; padding: 1rem 1.15rem; display: flex; flex-direction: column; gap: .78rem; }
 .ws-modal-ft   { display: flex; gap: .45rem; padding: .8rem 1.15rem; border-top: 1px solid var(--border); flex-shrink: 0; }
 
-/* Form */
+/* Form controls */
 .fg  { display: flex; flex-direction: column; gap: .22rem; }
 .fl  { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-light); }
-.fi, .fs, .fta { border: 1.5px solid var(--border); border-radius: 9px; padding: .45rem .68rem; font-size: .86rem; color: var(--text-dark); background: var(--surface-2); outline: none; width: 100%; font-family: inherit; transition: border-color .15s; }
+.fi, .fs, .fta {
+  border: 1.5px solid var(--border); border-radius: 9px; padding: .46rem .7rem;
+  font-size: .86rem; color: var(--text-dark); background: var(--surface-2);
+  outline: none; width: 100%; font-family: inherit; transition: border-color .15s;
+}
 .fi:focus, .fs:focus, .fta:focus { border-color: var(--blue); }
-.fta { resize: vertical; min-height: 68px; }
+.fta { resize: vertical; min-height: 70px; }
 .f2  { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
 
-/* Effort */
+/* Effort selector */
 .eff-seg { display: flex; border: 1.5px solid var(--border); border-radius: 9px; overflow: hidden; }
-.eff-btn { flex: 1; border: none; background: none; padding: .4rem; font-size: .74rem; font-weight: 700; cursor: pointer; color: var(--text-light); transition: all .13s; }
+.eff-btn { flex: 1; border: none; background: none; padding: .42rem; font-size: .74rem; font-weight: 700; cursor: pointer; color: var(--text-light); transition: all .13s; }
 .eff-btn.on { background: var(--blue); color: #fff; }
 .eff-btn:hover:not(.on) { background: var(--surface-3); color: var(--text-dark); }
 
-/* Range */
+/* Progress range */
 .rng-wrap { display: flex; align-items: center; gap: .65rem; }
-.rng { flex: 1; accent-color: var(--blue); cursor: pointer; }
+.rng { flex: 1; accent-color: var(--blue); cursor: pointer; height: 6px; border-radius: 3px; }
 .rng-val { font-size: .83rem; font-weight: 700; color: var(--blue); min-width: 36px; text-align: right; }
 
 /* Buttons */
-.btn-p { flex: 1; background: var(--blue); color: #fff; border: none; border-radius: 9px; padding: .53rem 1rem; font-size: .87rem; font-weight: 700; cursor: pointer; transition: opacity .15s; }
+.btn-p { flex: 1; background: var(--blue); color: #fff; border: none; border-radius: 9px; padding: .54rem 1rem; font-size: .87rem; font-weight: 700; cursor: pointer; transition: opacity .15s; }
 .btn-p:hover { opacity: .87; }
 .btn-s { background: none; border: 1.5px solid var(--border); border-radius: 9px; padding: .52rem .82rem; font-size: .85rem; color: var(--text-mid); cursor: pointer; transition: all .15s; }
 .btn-s:hover { border-color: var(--text-mid); color: var(--text-dark); }
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
-  .ws-sidebar { position: fixed; left: 0; top: 0; height: 100%; z-index: 600; transform: translateX(-100%); transition: transform .28s cubic-bezier(.4,0,.2,1); box-shadow: 5px 0 28px rgba(0,0,0,.18); }
-  .ws-sidebar.open { transform: translateX(0); }
+  .ws-sb { position: fixed; left: 0; top: 0; height: 100%; z-index: 600; transform: translateX(-100%); box-shadow: 5px 0 28px rgba(0,0,0,.18); }
+  .ws-sb.open { transform: translateX(0); }
   .ws-sb-close { display: flex !important; }
   .ws-kanban { grid-template-columns: repeat(2,1fr); }
 }
 @media (max-width: 480px) {
   .ws-content { padding: .7rem; }
-  .ws-kanban { grid-template-columns: 1fr; }
-  .f2 { grid-template-columns: 1fr; }
-  .ws-doc-ti { font-size: 1.2rem; }
+  .ws-kanban  { grid-template-columns: 1fr; }
+  .f2         { grid-template-columns: 1fr; }
+  .ws-doc-ti  { font-size: 1.2rem; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
 {% csrf_token %}
-<div class="ws-bd" id="wsBd" onclick="closeMobileSidebar()"></div>
+<div class="ws-bd" id="wsBd" onclick="closeMob()"></div>
 
 <!-- Modal -->
-<div class="ws-modal-bd" id="wsModalBd">
+<div class="ws-modal-bd" id="wsMBd">
   <div class="ws-modal">
     <div class="ws-modal-hd">
       <div class="ws-modal-ic" id="mIc"></div>
@@ -243,32 +245,40 @@ footer { display: none !important; }
   </div>
 </div>
 
-<!-- Workspace -->
+<!-- Root -->
 <div class="ws-root">
   <!-- Sidebar -->
-  <aside class="ws-sidebar" id="wsSidebar">
-    <div class="ws-sidebar-hd">
-      <span class="ws-sb-title">My Workspace</span>
-      <button class="ws-sb-close" onclick="closeMobileSidebar()"><i class="bi bi-x-lg"></i></button>
+  <aside class="ws-sb" id="wsSb">
+    <div class="ws-sb-hd">
+      <span class="ws-sb-lbl">My Workspace</span>
+      <button class="ws-sb-close" onclick="closeMob()"><i class="bi bi-x-lg"></i></button>
       <div style="position:relative;">
         <button class="ws-new-btn" id="wsNewBtn" onclick="togglePicker()">
           <i class="bi bi-plus-lg"></i> New
         </button>
-        <div class="ws-type-picker" id="wsTypePicker">
-          <button class="ws-type-opt" onclick="createDoc('todo')"><span class="ws-type-opt-ic" style="background:#dcfce7;color:#16a34a;"><i class="bi bi-check2-square"></i></span>To-Do List</button>
-          <button class="ws-type-opt" onclick="createDoc('project')"><span class="ws-type-opt-ic" style="background:#dbeafe;color:#2563eb;"><i class="bi bi-kanban"></i></span>Project Tracker</button>
-          <button class="ws-type-opt" onclick="createDoc('goal')"><span class="ws-type-opt-ic" style="background:#f3e8ff;color:#7c3aed;"><i class="bi bi-bullseye"></i></span>Goal Tracker</button>
-          <button class="ws-type-opt" onclick="createDoc('note')"><span class="ws-type-opt-ic" style="background:#fce7f3;color:#db2777;"><i class="bi bi-journal-text"></i></span>Notes</button>
+        <div class="ws-picker" id="wsPicker">
+          <button class="ws-pick-opt" onclick="createDoc('todo')">
+            <span class="ws-pick-ic" style="background:#dcfce7;color:#16a34a;"><i class="bi bi-check2-square"></i></span>To-Do List
+          </button>
+          <button class="ws-pick-opt" onclick="createDoc('project')">
+            <span class="ws-pick-ic" style="background:#dbeafe;color:#2563eb;"><i class="bi bi-kanban"></i></span>Project Tracker
+          </button>
+          <button class="ws-pick-opt" onclick="createDoc('goal')">
+            <span class="ws-pick-ic" style="background:#f3e8ff;color:#7c3aed;"><i class="bi bi-bullseye"></i></span>Goal Tracker
+          </button>
+          <button class="ws-pick-opt" onclick="createDoc('note')">
+            <span class="ws-pick-ic" style="background:#fce7f3;color:#db2777;"><i class="bi bi-journal-text"></i></span>Notes
+          </button>
         </div>
       </div>
     </div>
-    <div class="ws-sidebar-body" id="wsSidebarBody"></div>
+    <div class="ws-sb-body" id="wsSbBody"></div>
   </aside>
 
   <!-- Main -->
   <div class="ws-main">
     <div class="ws-topbar">
-      <button class="ws-toggle-btn" onclick="toggleSidebar()"><i class="bi bi-layout-sidebar"></i></button>
+      <button class="ws-tog" onclick="toggleSb()"><i class="bi bi-layout-sidebar"></i></button>
       <div style="flex:1;min-width:0;">
         <div class="ws-tb-title" id="wsTbTitle">&nbsp;</div>
         <div class="ws-tb-sub"   id="wsTbSub"></div>
@@ -289,80 +299,83 @@ const TM = {
   goal:    { icon:'bi-bullseye',      label:'Goal Tracker',    color:'#7c3aed', bg:'#f3e8ff' },
   note:    { icon:'bi-journal-text',  label:'Notes',           color:'#db2777', bg:'#fce7f3' },
 };
+const KB = [
+  { status:'todo',        label:'To Do',       color:'#64748b', dot:'#94a3b8' },
+  { status:'in_progress', label:'In Progress',  color:'#2563eb', dot:'#3b82f6' },
+  { status:'done',        label:'Done',         color:'#16a34a', dot:'#22c55e' },
+  { status:'blocked',     label:'Blocked',      color:'#dc2626', dot:'#ef4444' },
+];
 
+/* ── Init ── */
 function init() {
   const s = parseInt(localStorage.getItem('ws_active')) || null;
   if (s && WS.docs.find(d => d.pk === s)) WS.activeId = s;
-  renderSidebar(); renderMain();
+  renderSb(); renderMain();
   document.addEventListener('click', e => {
-    if (!e.target.closest('#wsNewBtn') && !e.target.closest('#wsTypePicker'))
-      document.getElementById('wsTypePicker').classList.remove('open');
+    if (!e.target.closest('#wsNewBtn') && !e.target.closest('#wsPicker'))
+      document.getElementById('wsPicker').classList.remove('open');
   });
   window.addEventListener('resize', () => {
-    if (window.innerWidth > 900) {
-      document.getElementById('wsBd').classList.remove('on');
-      document.getElementById('wsSidebar').classList.remove('open');
-      document.getElementById('wsSidebar').style.transform = '';
-      WS.sidebarOpen = true;
-    }
+    if (window.innerWidth > 900) { closeMob(); WS.sidebarOpen = true; document.getElementById('wsSb').classList.remove('ws-sb-collapsed'); document.getElementById('wsSb').style.display = ''; }
   });
 }
 
-function renderSidebar() {
-  const el = document.getElementById('wsSidebarBody');
+/* ── Sidebar ── */
+function renderSb() {
   let html = '';
   ['todo','project','goal','note'].forEach(type => {
     const docs = WS.docs.filter(d => d.type === type);
     if (!docs.length) return;
-    html += `<div class="ws-group-lbl">${TM[type].label}</div>`;
+    html += `<div class="ws-grp-lbl">${TM[type].label}</div>`;
     docs.forEach(doc => {
-      html += `<button class="ws-doc-btn ${doc.pk===WS.activeId?'active':''}" onclick="selectDoc(${doc.pk})">
-        <span class="ws-doc-dot" style="background:${TM[doc.type].color};"></span>
+      html += `<button class="ws-doc-btn ${doc.pk === WS.activeId ? 'active' : ''}" onclick="selDoc(${doc.pk})">
+        <span class="ws-dot" style="background:${TM[doc.type].color};"></span>
         <span class="ws-doc-name">${esc(doc.title)}</span>
       </button>`;
     });
   });
-  el.innerHTML = html || '<div style="padding:.7rem 1rem;font-size:.8rem;color:var(--text-light);">No docs yet.<br>Click + New to start.</div>';
+  document.getElementById('wsSbBody').innerHTML = html ||
+    '<div style="padding:.7rem 1rem;font-size:.8rem;color:var(--text-light);">No docs yet.<br>Click + New to start.</div>';
 }
 
-function toggleSidebar() {
+function toggleSb() {
   WS.sidebarOpen = !WS.sidebarOpen;
-  const sb = document.getElementById('wsSidebar');
-  const bd = document.getElementById('wsBd');
+  const sb = document.getElementById('wsSb'), bd = document.getElementById('wsBd');
   if (window.innerWidth <= 900) { sb.classList.toggle('open', WS.sidebarOpen); bd.classList.toggle('on', WS.sidebarOpen); }
-  else { sb.style.display = WS.sidebarOpen ? '' : 'none'; }
+  else { sb.classList.toggle('ws-sb-collapsed', !WS.sidebarOpen); }
 }
-function closeMobileSidebar() {
+function closeMob() {
   WS.sidebarOpen = false;
-  document.getElementById('wsSidebar').classList.remove('open');
+  document.getElementById('wsSb').classList.remove('open');
   document.getElementById('wsBd').classList.remove('on');
 }
-function togglePicker() { document.getElementById('wsTypePicker').classList.toggle('open'); }
-function selectDoc(pk) {
+function togglePicker() { document.getElementById('wsPicker').classList.toggle('open'); }
+function selDoc(pk) {
   WS.activeId = pk; localStorage.setItem('ws_active', pk);
-  renderSidebar(); renderMain();
-  if (window.innerWidth <= 900) closeMobileSidebar();
+  renderSb(); renderMain();
+  if (window.innerWidth <= 900) closeMob();
 }
 
+/* ── Main render ── */
 function renderMain() {
   const doc = WS.docs.find(d => d.pk === WS.activeId);
   document.getElementById('wsTbTitle').innerHTML = doc ? esc(doc.title) : '&nbsp;';
-  document.getElementById('wsTbSub').textContent = doc ? TM[doc.type].label : '';
+  document.getElementById('wsTbSub').textContent  = doc ? TM[doc.type].label : '';
   if (!doc) { renderWelcome(); return; }
-  if      (doc.type==='todo')    renderTodo(doc);
-  else if (doc.type==='project') renderProject(doc);
-  else if (doc.type==='goal')    renderGoal(doc);
-  else if (doc.type==='note')    renderNote(doc);
+  if      (doc.type === 'todo')    renderTodo(doc);
+  else if (doc.type === 'project') renderProject(doc);
+  else if (doc.type === 'goal')    renderGoal(doc);
+  else if (doc.type === 'note')    renderNote(doc);
 }
 
 function renderWelcome() {
   document.getElementById('wsContent').innerHTML = `
     <div class="ws-welcome">
-      <div class="ws-welcome-ic"><i class="bi bi-journals"></i></div>
+      <div class="ws-wel-ic"><i class="bi bi-journals"></i></div>
       <h2 style="font-size:1.4rem;font-weight:800;color:var(--text-dark);margin-bottom:.3rem;">Your Personal Workspace</h2>
-      <p style="color:var(--text-light);max-width:330px;margin-bottom:1.6rem;">Organize tasks, projects, goals and notes — all in one place.</p>
+      <p style="color:var(--text-light);max-width:330px;margin-bottom:1.5rem;">Organize tasks, projects, goals and notes — all in one place.</p>
       <div class="ws-type-grid">
-        ${Object.entries(TM).map(([t,m])=>`
+        ${Object.entries(TM).map(([t,m]) => `
           <div class="ws-tc" onclick="createDoc('${t}')">
             <div class="ws-tc-ic" style="background:${m.bg};color:${m.color};"><i class="bi ${m.icon}"></i></div>
             <div class="ws-tc-name">${m.label}</div>
@@ -376,158 +389,174 @@ function docHdr(doc) {
   return `<div class="ws-doc-hd">
     <div class="ws-doc-ic" style="background:${m.bg};color:${m.color};"><i class="bi ${m.icon}"></i></div>
     <input class="ws-doc-ti" value="${esc(doc.title)}" placeholder="Untitled" onchange="saveDocTitle(${doc.pk},this.value)">
-    <button class="ws-add-btn" id="addBtn" onclick="openAddModal(${doc.pk})"><i class="bi bi-plus-lg"></i> Add</button>
-    <button class="ws-del-btn" onclick="deleteDoc(${doc.pk})"><i class="bi bi-trash3"></i></button>
+    <button class="ws-add-btn" id="wsAddBtn" onclick="openAdd(${doc.pk})"><i class="bi bi-plus-lg"></i> Add</button>
+    <button class="ws-del-doc" onclick="deleteDoc(${doc.pk})"><i class="bi bi-trash3"></i></button>
   </div>`;
 }
 
-/* ─ TODO ─ */
+/* ── TODO ── */
 function renderTodo(doc) {
-  const done=doc.items.filter(i=>i.is_done).length, total=doc.items.length, pct=total?Math.round(done/total*100):0;
-  const prog = total ? `<div class="ws-prog-wrap">
+  const done = doc.items.filter(i => i.is_done).length, total = doc.items.length;
+  const pct  = total ? Math.round(done / total * 100) : 0;
+  const prog = total ? `<div class="ws-prog">
     <div class="ws-prog-track"><div class="ws-prog-fill" style="width:${pct}%;background:linear-gradient(90deg,#16a34a,#22c55e);"></div></div>
-    <div class="ws-prog-lbl">${done} of ${total} done · ${pct}%</div></div>` : '';
-  document.getElementById('wsContent').innerHTML = `${docHdr(doc)}${prog}<div id="wsList">${doc.items.map(i=>todoRow(i,doc.pk)).join('')}</div>`;
+    <div class="ws-prog-lbl">${done} of ${total} done &middot; ${pct}%</div>
+  </div>` : '';
+  document.getElementById('wsContent').innerHTML =
+    `${docHdr(doc)}${prog}<div id="wsList">${doc.items.map(i => todoRow(i, doc.pk)).join('')}</div>`;
 }
 function todoRow(item, docPk) {
-  const today=new Date().toISOString().slice(0,10), ov=item.due_date&&item.due_date<today&&!item.is_done;
-  const due = item.due_date ? `<span class="wb ${ov?'wb-overdue':'wb-due'}"><i class="bi bi-${ov?'alarm-fill':'calendar3'}"></i>${item.due_date}</span>` : '';
-  const pc = {high:'wb-high',medium:'wb-medium',low:'wb-low'}[item.priority]||'wb-medium';
+  const today = new Date().toISOString().slice(0,10), ov = item.due_date && item.due_date < today && !item.is_done;
+  const due   = item.due_date ? `<span class="wb ${ov?'wb-overdue':'wb-due'}"><i class="bi bi-${ov?'alarm-fill':'calendar3'}"></i> ${item.due_date}</span>` : '';
+  const pc    = { high:'wb-high', medium:'wb-medium', low:'wb-low' }[item.priority] || 'wb-medium';
   return `<div class="ws-todo-row" id="ti-${item.pk}">
-    <button class="ws-chk ${item.is_done?'done':''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})"><i class="bi bi-${item.is_done?'check-circle-fill':'circle'}"></i></button>
-    <span class="ws-item-lbl ${item.is_done?'done-text':''}" onclick="openEditModal(${item.pk},${docPk})">${esc(item.content)}</span>
+    <button class="ws-chk ${item.is_done?'done':''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})">
+      <i class="bi bi-${item.is_done?'check-circle-fill':'circle'}"></i>
+    </button>
+    <span class="ws-item-lbl ${item.is_done?'done-text':''}" onclick="openEdit(${item.pk},${docPk})">${esc(item.content)}</span>
     <span class="wb ${pc}">${item.priority}</span>${due}
     <div class="ws-row-acts">
-      <button class="ws-act" onclick="openEditModal(${item.pk},${docPk})"><i class="bi bi-pencil"></i></button>
-      <button class="ws-act del" onclick="deleteItem(${item.pk},${docPk})"><i class="bi bi-trash3"></i></button>
+      <button class="ws-act" onclick="openEdit(${item.pk},${docPk})" title="Edit"><i class="bi bi-pencil"></i></button>
+      <button class="ws-act del" onclick="delItem(${item.pk},${docPk})" title="Delete"><i class="bi bi-trash3"></i></button>
     </div>
   </div>`;
 }
 
-/* ─ PROJECT ─ */
-const KB = [
-  {status:'todo',        label:'To Do',      color:'#64748b', dot:'#94a3b8'},
-  {status:'in_progress', label:'In Progress', color:'#2563eb', dot:'#3b82f6'},
-  {status:'done',        label:'Done',        color:'#16a34a', dot:'#22c55e'},
-  {status:'blocked',     label:'Blocked',     color:'#dc2626', dot:'#ef4444'},
-];
+/* ── PROJECT ── */
 function renderProject(doc) {
   const cols = KB.map(col => {
-    const its = doc.items.filter(i=>i.status===col.status);
+    const its = doc.items.filter(i => i.status === col.status);
     return `<div class="ws-kb-col">
-      <div class="ws-kb-col-title" style="color:${col.color};"><span class="ws-kb-dot" style="background:${col.dot};"></span>${col.label}<span class="badge bg-secondary ms-1" style="font-size:.58rem;">${its.length}</span></div>
-      ${its.map(i=>projCard(i,doc.pk)).join('')}
-      <button class="ws-kb-add" onclick="openAddModal(${doc.pk},'${col.status}')"><i class="bi bi-plus"></i> Add card</button>
+      <div class="ws-kb-col-title" style="color:${col.color};">
+        <span class="ws-kb-dot" style="background:${col.dot};"></span>${col.label}
+        <span class="ws-kb-count">${its.length}</span>
+      </div>
+      ${its.map(i => projCard(i, doc.pk)).join('')}
+      <button class="ws-kb-add" onclick="openAdd(${doc.pk},'${col.status}')">
+        <i class="bi bi-plus"></i> Add card
+      </button>
     </div>`;
   }).join('');
   document.getElementById('wsContent').innerHTML = `${docHdr(doc)}<div class="ws-kanban">${cols}</div>`;
-  document.getElementById('addBtn').style.display='none';
+  const ab = document.getElementById('wsAddBtn');
+  if (ab) ab.style.display = 'none';
 }
 function projCard(item, docPk) {
-  const today=new Date().toISOString().slice(0,10), ov=item.due_date&&item.due_date<today;
-  const pc={high:'wb-high',medium:'wb-medium',low:'wb-low'}[item.priority]||'wb-medium';
-  const due = item.due_date ? `<span class="wb ${ov?'wb-overdue':'wb-due'}"><i class="bi bi-${ov?'alarm-fill':'calendar3'}"></i>${item.due_date}</span>` : '';
-  const prog = item.progress||0;
-  return `<div class="ws-proj-card" onclick="openEditModal(${item.pk},${docPk})">
+  const today = new Date().toISOString().slice(0,10), ov = item.due_date && item.due_date < today;
+  const pc    = { high:'wb-high', medium:'wb-medium', low:'wb-low' }[item.priority] || 'wb-medium';
+  const due   = item.due_date ? `<span class="wb ${ov?'wb-overdue':'wb-due'}"><i class="bi bi-${ov?'alarm-fill':'calendar3'}"></i> ${item.due_date}</span>` : '';
+  const prog  = item.progress || 0;
+  return `<div class="ws-proj-card" onclick="openEdit(${item.pk},${docPk})">
     <div class="ws-card-name">${esc(item.content)}</div>
     <div class="ws-card-meta"><span class="wb ${pc}">${item.priority}</span>${due}<span class="wb wb-prog">${prog}%</span></div>
-    <div class="ws-card-prog-lbl"><span>Progress</span><span>${prog}%</span></div>
-    <div class="ws-card-prog-track"><div class="ws-card-prog-fill" style="width:${prog}%;"></div></div>
+    <div class="ws-card-pt"><span>Progress</span><span>${prog}%</span></div>
+    <div class="ws-card-track"><div class="ws-card-fill" style="width:${prog}%;"></div></div>
   </div>`;
 }
 
-/* ─ GOAL ─ */
+/* ── GOAL ── */
 function renderGoal(doc) {
-  const done=doc.items.filter(i=>i.is_done).length, total=doc.items.length, pct=total?Math.round(done/total*100):0;
-  const prog = total ? `<div class="ws-prog-wrap">
+  const done = doc.items.filter(i => i.is_done).length, total = doc.items.length;
+  const pct  = total ? Math.round(done / total * 100) : 0;
+  const prog = total ? `<div class="ws-prog">
     <div class="ws-prog-track"><div class="ws-prog-fill" style="width:${pct}%;background:linear-gradient(90deg,#7c3aed,#ec4899);"></div></div>
-    <div class="ws-prog-lbl">${pct}% of goals achieved</div></div>` : '';
-  document.getElementById('wsContent').innerHTML = `${docHdr(doc)}${prog}<div id="wsList">${doc.items.map(i=>goalCard(i,doc.pk)).join('')}</div>`;
+    <div class="ws-prog-lbl">${pct}% of goals achieved</div>
+  </div>` : '';
+  document.getElementById('wsContent').innerHTML =
+    `${docHdr(doc)}${prog}<div id="wsList">${doc.items.map(i => goalCard(i, doc.pk)).join('')}</div>`;
 }
 function goalCard(item, docPk) {
-  const today=new Date().toISOString().slice(0,10), ov=item.due_date&&item.due_date<today&&!item.is_done;
-  const pc={high:'wb-high',medium:'wb-medium',low:'wb-low'}[item.priority]||'wb-medium';
-  const due = item.due_date ? `<span class="wb ${ov?'wb-overdue':'wb-due'}"><i class="bi bi-${ov?'alarm-fill':'calendar3'}"></i>${item.due_date}</span>` : '';
+  const today = new Date().toISOString().slice(0,10), ov = item.due_date && item.due_date < today && !item.is_done;
+  const pc    = { high:'wb-high', medium:'wb-medium', low:'wb-low' }[item.priority] || 'wb-medium';
+  const due   = item.due_date ? `<span class="wb ${ov?'wb-overdue':'wb-due'}"><i class="bi bi-${ov?'alarm-fill':'calendar3'}"></i> ${item.due_date}</span>` : '';
+  const eff   = item.effort && item.effort !== 'm' ? `<span class="wb wb-effort">${item.effort.toUpperCase()}</span>` : '';
   return `<div class="ws-goal-card" id="gi-${item.pk}">
-    <button class="ws-goal-chk ${item.is_done?'done':''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})">${item.is_done?'<i class="bi bi-check"></i>':''}</button>
-    <span class="ws-goal-name ${item.is_done?'done-text':''}" onclick="openEditModal(${item.pk},${docPk})">${esc(item.content)}</span>
-    <span class="wb ${pc}">${item.priority}</span>${due}
-    <button class="ws-act del" onclick="deleteItem(${item.pk},${docPk})"><i class="bi bi-trash3"></i></button>
+    <button class="ws-goal-chk ${item.is_done?'done':''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})">
+      ${item.is_done ? '<i class="bi bi-check"></i>' : ''}
+    </button>
+    <span class="ws-goal-name ${item.is_done?'done-text':''}" onclick="openEdit(${item.pk},${docPk})">${esc(item.content)}</span>
+    <span class="wb ${pc}">${item.priority}</span>${eff}${due}
+    <button class="ws-act del" onclick="delItem(${item.pk},${docPk})" title="Delete"><i class="bi bi-trash3"></i></button>
   </div>`;
 }
 
-/* ─ NOTE ─ */
+/* ── NOTE ── */
 function renderNote(doc) {
   const content = doc.items.length ? doc.items[0].content : '';
   const pk = doc.items.length ? doc.items[0].pk : null;
   document.getElementById('wsContent').innerHTML = `${docHdr(doc)}
     <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;">
-      <textarea class="ws-note-area" id="wsNoteEl" placeholder="Start writing…" onkeyup="scheduleNote(${doc.pk},${pk})">${esc(content)}</textarea>
+      <textarea class="ws-note-area" id="wsNoteEl" placeholder="Start writing…" onkeyup="schedNote(${doc.pk},${pk})">${esc(content)}</textarea>
     </div>`;
-  document.getElementById('addBtn').style.display='none';
+  const ab = document.getElementById('wsAddBtn');
+  if (ab) ab.style.display = 'none';
   document.getElementById('wsNoteEl').focus();
 }
-function scheduleNote(docPk, pk) {
-  clearTimeout(WS.noteSaveTimer);
-  WS.noteSaveTimer = setTimeout(()=>saveNote(docPk,pk), 800);
-}
+function schedNote(docPk, pk) { clearTimeout(WS.noteSaveTimer); WS.noteSaveTimer = setTimeout(() => saveNote(docPk, pk), 800); }
 async function saveNote(docPk, pk) {
   const val = document.getElementById('wsNoteEl')?.value ?? '';
-  const doc = WS.docs.find(d=>d.pk===docPk);
+  const doc = WS.docs.find(d => d.pk === docPk);
   if (!doc) return;
-  if (pk) { doc.items[0].content=val; await api(`/workspace/item/${pk}/update/`,{content:val}); }
-  else { const d=await api(`/workspace/doc/${docPk}/item/`,{content:val,status:'todo',priority:'medium'}); if(d.ok){doc.items=[d.item];} }
+  if (pk) { doc.items[0].content = val; await api(`/workspace/item/${pk}/update/`, { content: val }); }
+  else { const d = await api(`/workspace/doc/${docPk}/item/`, { content: val, status:'todo', priority:'medium' }); if (d.ok) doc.items = [d.item]; }
 }
 
-/* ─ MODAL ─ */
-let MODAL={mode:'add',docPk:null,itemPk:null};
-let G_EFF='m';
+/* ── Modal ── */
+let MODAL = { mode:'add', docPk:null, itemPk:null };
+let G_EFF = 'm';
 
-function openAddModal(docPk, initStatus) {
-  MODAL={mode:'add',docPk,itemPk:null};
-  G_EFF='m';
-  const doc=WS.docs.find(d=>d.pk===docPk);
-  if(!doc) return;
-  const m=TM[doc.type];
-  setModalIcon(m); document.getElementById('mTitl').textContent=`Add to ${m.label}`; document.getElementById('mOk').textContent='Add';
-  document.getElementById('mBody').innerHTML=buildFields(doc.type,null);
-  bindEff('m'); bindRange();
-  if(initStatus){const s=document.getElementById('mStatus');if(s)s.value=initStatus;}
-  document.getElementById('wsModalBd').classList.add('open');
+function openAdd(docPk, initStatus) {
+  MODAL = { mode:'add', docPk, itemPk:null }; G_EFF = 'm';
+  const doc = WS.docs.find(d => d.pk === docPk);
+  if (!doc) return;
+  setMIc(TM[doc.type]);
+  document.getElementById('mTitl').textContent = `Add to ${TM[doc.type].label}`;
+  document.getElementById('mOk').textContent = 'Add';
+  document.getElementById('mBody').innerHTML = buildFields(doc.type, null);
+  bindEff('m'); bindRng();
+  if (initStatus) { const s = document.getElementById('mStatus'); if (s) s.value = initStatus; }
+  document.getElementById('wsMBd').classList.add('open');
   document.getElementById('mName')?.focus();
 }
-function openEditModal(itemPk, docPk) {
-  const doc=WS.docs.find(d=>d.pk===docPk), item=doc?.items.find(i=>i.pk===itemPk);
-  if(!item) return;
-  MODAL={mode:'edit',docPk,itemPk};
-  G_EFF=item.effort||'m';
-  const m=TM[doc.type];
-  setModalIcon(m); document.getElementById('mTitl').textContent='Edit Item'; document.getElementById('mOk').textContent='Save';
-  document.getElementById('mBody').innerHTML=buildFields(doc.type,item);
-  bindEff(G_EFF); bindRange();
-  document.getElementById('wsModalBd').classList.add('open');
+function openEdit(itemPk, docPk) {
+  const doc = WS.docs.find(d => d.pk === docPk), item = doc?.items.find(i => i.pk === itemPk);
+  if (!item) return;
+  MODAL = { mode:'edit', docPk, itemPk }; G_EFF = item.effort || 'm';
+  setMIc(TM[doc.type]);
+  document.getElementById('mTitl').textContent = 'Edit Item';
+  document.getElementById('mOk').textContent = 'Save';
+  document.getElementById('mBody').innerHTML = buildFields(doc.type, item);
+  bindEff(G_EFF); bindRng();
+  document.getElementById('wsMBd').classList.add('open');
 }
-function setModalIcon(m) {
-  const el=document.getElementById('mIc');
-  el.innerHTML=`<i class="bi ${m.icon}"></i>`;el.style.background=m.bg;el.style.color=m.color;
+function setMIc(m) {
+  const el = document.getElementById('mIc');
+  el.innerHTML = `<i class="bi ${m.icon}"></i>`; el.style.background = m.bg; el.style.color = m.color;
 }
-function closeModal() { document.getElementById('wsModalBd').classList.remove('open'); }
+function closeModal() { document.getElementById('wsMBd').classList.remove('open'); }
 
 function buildFields(type, item) {
-  const v=f=>item?(item[f]||''):'';
-  const priOpts=['high','medium','low'].map(p=>`<option value="${p}" ${(item?item.priority:'')==p||(!item&&p=='medium')?'selected':''}>${p[0].toUpperCase()+p.slice(1)}</option>`).join('');
-  const statOpts=[['todo','⬜ To Do'],['in_progress','🔷 In Progress'],['done','✅ Done'],['blocked','🚫 Blocked']].map(([val,lbl])=>`<option value="${val}" ${(item?item.status:'')==val||(!item&&val=='todo')?'selected':''}>${lbl}</option>`).join('');
+  const v  = f => item ? (item[f] || '') : '';
+  const priOpts = ['high','medium','low'].map(p =>
+    `<option value="${p}" ${(item?.priority===p||(!item&&p==='medium'))?'selected':''}>${p[0].toUpperCase()+p.slice(1)}</option>`).join('');
+  const statOpts = [
+    ['todo','To Do'], ['in_progress','In Progress'], ['done','Done'], ['blocked','Blocked']
+  ].map(([val, lbl]) =>
+    `<option value="${val}" ${(item?.status===val||(!item&&val==='todo'))?'selected':''}>${lbl}</option>`).join('');
 
-  if(type==='todo') return `
-    <div class="fg"><label class="fl">Task Name *</label><input id="mName" class="fi" value="${esc(v('content'))}" placeholder="What needs to be done?" required></div>
+  if (type === 'todo') return `
+    <div class="fg"><label class="fl">Task Name *</label>
+      <input id="mName" class="fi" value="${esc(v('content'))}" placeholder="What needs to be done?" required></div>
     <div class="f2">
       <div class="fg"><label class="fl">Priority</label><select id="mPriority" class="fs">${priOpts}</select></div>
       <div class="fg"><label class="fl">Due Date</label><input id="mDueDate" type="date" class="fi" value="${v('due_date')}"></div>
     </div>
-    <div class="fg"><label class="fl">Description</label><textarea id="mDesc" class="fta" placeholder="Add details…">${esc(v('description'))}</textarea></div>`;
+    <div class="fg"><label class="fl">Description</label>
+      <textarea id="mDesc" class="fta" placeholder="Add details…">${esc(v('description'))}</textarea></div>`;
 
-  if(type==='project') return `
-    <div class="fg"><label class="fl">Task Name *</label><input id="mName" class="fi" value="${esc(v('content'))}" placeholder="What are you working on?" required></div>
+  if (type === 'project') return `
+    <div class="fg"><label class="fl">Task Name *</label>
+      <input id="mName" class="fi" value="${esc(v('content'))}" placeholder="What are you working on?" required></div>
     <div class="f2">
       <div class="fg"><label class="fl">Priority</label><select id="mPriority" class="fs">${priOpts}</select></div>
       <div class="fg"><label class="fl">Status</label><select id="mStatus" class="fs">${statOpts}</select></div>
@@ -536,71 +565,106 @@ function buildFields(type, item) {
       <div class="fg"><label class="fl">Start Date</label><input id="mStartDate" type="date" class="fi" value="${v('start_date')}"></div>
       <div class="fg"><label class="fl">End Date</label><input id="mDueDate" type="date" class="fi" value="${v('due_date')}"></div>
     </div>
-    <div class="fg"><label class="fl">Progress — <span id="rLbl">${item?item.progress||0:0}%</span></label>
-      <div class="rng-wrap"><input id="mProgress" type="range" min="0" max="100" class="rng" value="${item?item.progress||0:0}">
-      <span class="rng-val" id="rBdg">${item?item.progress||0:0}%</span></div>
-    </div>
-    <div class="fg"><label class="fl">Description</label><textarea id="mDesc" class="fta" placeholder="Notes about this task…">${esc(v('description'))}</textarea></div>`;
+    <div class="fg"><label class="fl">Progress &mdash; <span id="rLbl">${item?item.progress||0:0}%</span></label>
+      <div class="rng-wrap">
+        <input id="mProgress" type="range" min="0" max="100" class="rng" value="${item?item.progress||0:0}"
+               oninput="updRng(this.value)">
+        <span class="rng-val" id="rBdg">${item?item.progress||0:0}%</span>
+      </div></div>
+    <div class="fg"><label class="fl">Description</label>
+      <textarea id="mDesc" class="fta" placeholder="Notes about this task…">${esc(v('description'))}</textarea></div>`;
 
-  if(type==='goal') return `
-    <div class="fg"><label class="fl">Goal *</label><input id="mName" class="fi" value="${esc(v('content'))}" placeholder="What do you want to achieve?" required></div>
+  if (type === 'goal') return `
+    <div class="fg"><label class="fl">Goal *</label>
+      <input id="mName" class="fi" value="${esc(v('content'))}" placeholder="What do you want to achieve?" required></div>
     <div class="f2">
       <div class="fg"><label class="fl">Priority</label><select id="mPriority" class="fs">${priOpts}</select></div>
       <div class="fg"><label class="fl">Due Date</label><input id="mDueDate" type="date" class="fi" value="${v('due_date')}"></div>
     </div>
     <div class="fg"><label class="fl">Effort Level</label>
-      <div class="eff-seg">${['xs','s','m','l','xl'].map(e=>`<button class="eff-btn" data-e="${e}" onclick="bindEff('${e}')">${e.toUpperCase()}</button>`).join('')}</div>
-    </div>
-    <div class="fg"><label class="fl">Description</label><textarea id="mDesc" class="fta" placeholder="Notes about this goal…">${esc(v('description'))}</textarea></div>`;
+      <div class="eff-seg">
+        ${['xs','s','m','l','xl'].map(e => `<button class="eff-btn" data-e="${e}" onclick="bindEff('${e}')">${e.toUpperCase()}</button>`).join('')}
+      </div></div>
+    <div class="fg"><label class="fl">Description</label>
+      <textarea id="mDesc" class="fta" placeholder="Notes about this goal…">${esc(v('description'))}</textarea></div>`;
 
-  return `<div class="fg"><label class="fl">Title *</label><input id="mName" class="fi" value="${esc(v('content'))}" placeholder="Name…" required></div>`;
+  return `<div class="fg"><label class="fl">Title *</label>
+    <input id="mName" class="fi" value="${esc(v('content'))}" placeholder="Name…" required></div>`;
 }
 
 function bindEff(val) {
-  G_EFF=val;
-  document.querySelectorAll('.eff-btn').forEach(b=>b.classList.toggle('on',b.dataset.e===val));
+  G_EFF = val;
+  document.querySelectorAll('.eff-btn').forEach(b => b.classList.toggle('on', b.dataset.e === val));
 }
-function bindRange() {
-  const r=document.getElementById('mProgress');
-  if(!r) return;
-  r.oninput=()=>{const v=r.value+'%';const l=document.getElementById('rLbl'),b=document.getElementById('rBdg');if(l)l.textContent=v;if(b)b.textContent=v;};
+function updRng(val) {
+  const v = val + '%';
+  const l = document.getElementById('rLbl'), b = document.getElementById('rBdg');
+  if (l) l.textContent = v; if (b) b.textContent = v;
+}
+function bindRng() {
+  const r = document.getElementById('mProgress');
+  if (r) r.oninput = () => updRng(r.value);
 }
 
 async function submitModal() {
-  const {mode,docPk,itemPk}=MODAL;
-  const nm=document.getElementById('mName');
-  if(nm&&!nm.value.trim()){nm.focus();nm.style.borderColor='#ef4444';return;}
-  const payload={
-    content:    nm?.value.trim()||'',
-    description:document.getElementById('mDesc')?.value||'',
-    priority:   document.getElementById('mPriority')?.value||'medium',
-    status:     document.getElementById('mStatus')?.value||'todo',
-    start_date: document.getElementById('mStartDate')?.value||null,
-    due_date:   document.getElementById('mDueDate')?.value||null,
-    progress:   parseInt(document.getElementById('mProgress')?.value||0),
-    effort:     G_EFF,
+  const { mode, docPk, itemPk } = MODAL;
+  const nm = document.getElementById('mName');
+  if (nm && !nm.value.trim()) { nm.focus(); nm.style.borderColor = '#ef4444'; return; }
+  const payload = {
+    content:     nm?.value.trim() || '',
+    description: document.getElementById('mDesc')?.value || '',
+    priority:    document.getElementById('mPriority')?.value || 'medium',
+    status:      document.getElementById('mStatus')?.value || 'todo',
+    start_date:  document.getElementById('mStartDate')?.value || null,
+    due_date:    document.getElementById('mDueDate')?.value || null,
+    progress:    parseInt(document.getElementById('mProgress')?.value || 0),
+    effort:      G_EFF,
   };
-  const btn=document.getElementById('mOk'); btn.textContent='Saving…'; btn.disabled=true;
-  const doc=WS.docs.find(d=>d.pk===docPk);
-  if(mode==='add'){const d=await api(`/workspace/doc/${docPk}/item/`,payload);if(d.ok)doc.items.push(d.item);}
-  else{const d=await api(`/workspace/item/${itemPk}/update/`,payload);if(d.ok){const it=doc.items.find(i=>i.pk===itemPk);if(it)Object.assign(it,d.item);}}
-  btn.textContent=mode==='add'?'Add':'Save'; btn.disabled=false;
-  closeModal(); renderSidebar(); renderMain();
+  const btn = document.getElementById('mOk'); btn.textContent = 'Saving…'; btn.disabled = true;
+  const doc = WS.docs.find(d => d.pk === docPk);
+  if (mode === 'add') { const d = await api(`/workspace/doc/${docPk}/item/`, payload); if (d.ok) doc.items.push(d.item); }
+  else { const d = await api(`/workspace/item/${itemPk}/update/`, payload); if (d.ok) { const it = doc.items.find(i => i.pk === itemPk); if (it) Object.assign(it, d.item); } }
+  btn.textContent = mode === 'add' ? 'Add' : 'Save'; btn.disabled = false;
+  closeModal(); renderSb(); renderMain();
 }
 
-/* ─ CRUD ─ */
+/* ── CRUD ── */
 async function createDoc(type) {
-  document.getElementById('wsTypePicker').classList.remove('open');
-  const m=TM[type];
-  const d=await api('/workspace/doc/create/',{type,title:`New ${m.label}`,color:m.color});
-  if(d.ok){WS.docs.unshift(d.doc);WS.activeId=d.doc.pk;localStorage.setItem('ws_active',d.doc.pk);renderSidebar();renderMain();setTimeout(()=>document.querySelector('.ws-doc-ti')?.focus(),80);}
+  document.getElementById('wsPicker').classList.remove('open');
+  const m = TM[type];
+  const d = await api('/workspace/doc/create/', { type, title: `New ${m.label}`, color: m.color });
+  if (d.ok) {
+    WS.docs.unshift(d.doc); WS.activeId = d.doc.pk; localStorage.setItem('ws_active', d.doc.pk);
+    renderSb(); renderMain(); setTimeout(() => document.querySelector('.ws-doc-ti')?.focus(), 80);
+  }
 }
-async function saveDocTitle(pk,val){const d=WS.docs.find(d=>d.pk===pk);if(d){d.title=val;renderSidebar();}await api(`/workspace/doc/${pk}/update/`,{title:val});}
-async function deleteDoc(pk){if(!confirm('Delete this doc?'))return;await api(`/workspace/doc/${pk}/delete/`,{});WS.docs=WS.docs.filter(d=>d.pk!==pk);if(WS.activeId===pk)WS.activeId=null;renderSidebar();renderMain();}
-async function toggleDone(pk,docPk,done){const doc=WS.docs.find(d=>d.pk===docPk),it=doc?.items.find(i=>i.pk===pk);if(!it)return;it.is_done=done;await api(`/workspace/item/${pk}/update/`,{is_done:done});renderMain();}
-async function deleteItem(pk,docPk){if(!confirm('Delete?'))return;await api(`/workspace/item/${pk}/delete/`,{});const d=WS.docs.find(d=>d.pk===docPk);if(d)d.items=d.items.filter(i=>i.pk!==pk);renderMain();}
-async function api(url,body){try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF()},body:JSON.stringify(body)});return await r.json();}catch(e){console.error(e);return{ok:false};}}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+async function saveDocTitle(pk, val) { const d = WS.docs.find(d => d.pk === pk); if (d) { d.title = val; renderSb(); } await api(`/workspace/doc/${pk}/update/`, { title: val }); }
+async function deleteDoc(pk) {
+  if (!confirm('Delete this doc and all its items?')) return;
+  await api(`/workspace/doc/${pk}/delete/`, {});
+  WS.docs = WS.docs.filter(d => d.pk !== pk);
+  if (WS.activeId === pk) WS.activeId = null;
+  renderSb(); renderMain();
+}
+async function toggleDone(pk, docPk, done) {
+  const doc = WS.docs.find(d => d.pk === docPk), it = doc?.items.find(i => i.pk === pk);
+  if (!it) return; it.is_done = done;
+  await api(`/workspace/item/${pk}/update/`, { is_done: done }); renderMain();
+}
+async function delItem(pk, docPk) {
+  if (!confirm('Delete this item?')) return;
+  await api(`/workspace/item/${pk}/delete/`, {});
+  const doc = WS.docs.find(d => d.pk === docPk);
+  if (doc) doc.items = doc.items.filter(i => i.pk !== pk);
+  renderMain();
+}
+async function api(url, body) {
+  try {
+    const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF()}, body: JSON.stringify(body) });
+    return await r.json();
+  } catch(e) { console.error('WS API', e); return { ok: false }; }
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 init();
 </script>

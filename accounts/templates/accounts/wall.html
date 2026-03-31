@@ -693,7 +693,7 @@
 
 <!-- Infinite scroll sentinel -->
 <div id="wall-loader"><div class="wall-spinner"></div> Loading more posts…</div>
-<div id="wall-end-msg">You've reached the end of the wall 🎉</div>
+<div id="wall-end-msg"><i class="bi bi-check2-all" style="margin-right:5px;"></i>You've reached the end of the wall</div>
 <div id="scroll-sentinel"></div>
 
 <!-- ── Post Modal ── -->
@@ -863,7 +863,7 @@ function _rebuildPreviews() {
     removeBtn.style.display = 'none';
     return;
   }
-  label.textContent = `📎 ${_selectedFiles.length} file${_selectedFiles.length > 1 ? 's' : ''} selected`;
+  label.innerHTML = `<i class="bi bi-paperclip" style="margin-right:4px;"></i>${_selectedFiles.length} file${_selectedFiles.length > 1 ? 's' : ''} selected`;
   removeBtn.style.display = 'inline-flex';
   _selectedFiles.forEach((f, idx) => {
     const thumb = document.createElement('div');
@@ -872,7 +872,7 @@ function _rebuildPreviews() {
     removeX.type = 'button';
     removeX.className = 'thumb-remove';
     removeX.title = 'Remove this image';
-    removeX.innerHTML = '✕';
+    removeX.innerHTML = '<i class="bi bi-x-lg"></i>';
     removeX.addEventListener('click', function(e) {
       e.stopPropagation();
       _selectedFiles.splice(idx, 1);
