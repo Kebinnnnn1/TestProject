@@ -966,10 +966,19 @@ def add_comment(request, pk):
 @verified_required
 @require_POST
 def delete_comment(request, pk):
-    """Delete own comment."""
+    """Delete own comment — supports both AJAX (JSON) and normal POST."""
+    if request.method != 'POST':
+        from django.http import HttpResponseNotAllowed
+        return HttpResponseNotAllowed(['POST'])
     comment = get_object_or_404(PostComment, pk=pk)
     if comment.author == request.user or request.user.is_staff:
         comment.delete()
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            from django.http import JsonResponse
+            return JsonResponse({'ok': True})
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        from django.http import JsonResponse
+        return JsonResponse({'ok': False, 'error': 'Not allowed'}, status=403)
     return redirect('wall')
 
 

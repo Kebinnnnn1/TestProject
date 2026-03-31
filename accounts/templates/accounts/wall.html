@@ -646,12 +646,13 @@
               <a href="/u/{{ comment.author.username }}/" style="color:inherit;text-decoration:none;font-weight:700;">{{ comment.author.username }}</a>
               <span class="comment-time">· {{ comment.timestamp|timesince }} ago</span>
               {% if comment.author == me or me.is_staff %}
-              <form method="post" action="{% url 'delete_comment' comment.pk %}" style="display:inline;margin-left:4px;">
-                {% csrf_token %}
-                <button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.75rem;padding:0;" title="Delete comment">
-                  <i class="bi bi-x"></i>
-                </button>
-              </form>
+              <button
+                type="button"
+                onclick="deleteComment({{ comment.pk }}, this)"
+                style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.85rem;padding:2px 4px;line-height:1;margin-left:4px;"
+                title="Delete comment">
+                <i class="bi bi-x-lg"></i>
+              </button>
               {% endif %}
             </div>
             {{ comment.content }}
@@ -849,6 +850,26 @@
 <script>
 const ME = "{{ me.username }}";
 const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+// ── AJAX comment delete (no page navigation) ──
+window.deleteComment = async function(pk, btn) {
+  if (!confirm('Delete this comment?')) return;
+  try {
+    const res = await fetch('/wall/comment/' + pk + '/delete/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': CSRF(),
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
+    const d = await res.json();
+    if (d.ok) {
+      const item = btn.closest('.comment-item');
+      if (item) item.remove();
+    }
+  } catch(e) { console.error('Delete comment error:', e); }
+};
+
 
 // ── Multi-image preview thumbnails ──
 let _selectedFiles = []; // Track files manually for individual removal
