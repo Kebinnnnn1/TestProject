@@ -1,10 +1,10 @@
-{% extends 'accounts/base.html' %}
+﻿{% extends 'accounts/base.html' %}
 {% block title %}Admin Dashboard — AuthApp{% endblock %}
 
 {% block extra_head %}
 <style>
     .admin-wrap {
-        background: var(--surface-2);
+        background: var(--bg-card);
         min-height: calc(100vh - 70px);
         padding: 2.5rem 0 4rem;
     }
@@ -38,7 +38,7 @@
         bottom: -40px;
         width: 150px;
         height: 150px;
-        background: radial-gradient(circle, rgba(67, 97, 238, 0.2), transparent 70%);
+        background: radial-gradient(circle, rgba(255,63,164, 0.2), transparent 70%);
         border-radius: 50%;
         animation: blobPulse 8s 2s ease-in-out infinite;
     }
@@ -85,7 +85,7 @@
     }
 
     .users-card {
-        background: var(--surface);
+        background: var(--bg);
         border-radius: 20px;
         box-shadow: var(--shadow-sm);
         border: 1px solid var(--border);
@@ -98,7 +98,7 @@
         font-weight: 700;
         color: var(--text-dark);
         border-bottom: 1px solid var(--border);
-        background: var(--surface-2);
+        background: var(--bg-card);
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -184,7 +184,7 @@
         color: var(--text-light);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        background: var(--surface-2) !important;
+        background: var(--bg-card) !important;
         border-bottom: 1px solid var(--border) !important;
         border-top: none !important;
         white-space: nowrap;
@@ -196,7 +196,7 @@
         color: var(--text-dark);
         vertical-align: middle;
         border-bottom: 1px solid var(--border);
-        background: var(--surface);
+        background: var(--bg);
     }
 
     .admin-table tbody tr:last-child td {
@@ -204,7 +204,7 @@
     }
 
     .admin-table tbody tr:hover td {
-        background: var(--surface-2);
+        background: var(--bg-card);
         transition: background 0.15s;
     }
 
@@ -214,7 +214,7 @@
         padding: 0.3rem 2rem 0.3rem 0.6rem;
         font-size: 0.78rem;
         font-weight: 600;
-        background: var(--surface);
+        background: var(--bg);
         color: var(--text-dark);
         cursor: pointer;
         transition: all 0.2s;
@@ -227,8 +227,8 @@
 
     .role-select:focus {
         outline: none;
-        border-color: var(--blue);
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.12);
+        border-color: var(--pink);
+        box-shadow: 0 0 0 3px rgba(255,63,164, 0.12);
     }
 
     .role-member {
@@ -257,7 +257,7 @@
                     <p
                         style="font-size:0.78rem;opacity:0.5;margin-bottom:0.2rem;text-transform:uppercase;letter-spacing:0.05em;position:relative;z-index:1;">
                         Admin Panel</p>
-                    <h1><i class="bi bi-speedometer2 me-2" style="color:var(--orange);"></i>User Management</h1>
+                    <h1><i class="bi bi-speedometer2 me-2" style="color:var(--pink);"></i>User Management</h1>
                     <p>Manage roles, status, and access for all AuthApp users</p>
                 </div>
                 <div class="col-lg-6">
@@ -287,7 +287,7 @@
 
         <div class="users-card reveal">
             <div class="users-card-header">
-                <span><i class="bi bi-people-fill me-2" style="color:var(--blue);"></i>All Users</span>
+                <span><i class="bi bi-people-fill me-2" style="color:var(--pink);"></i>All Users</span>
                 <span style="font-size:0.78rem;color:var(--text-light);font-weight:500;">{{ users|length }} total</span>
             </div>
             <div class="table-responsive">
@@ -314,7 +314,7 @@
                                     <div>
                                         <div style="font-size:0.88rem;font-weight:600;">{{ u.username }}</div>
                                         {% if u == request.user %}
-                                        <div style="font-size:0.7rem;color:var(--blue);">you</div>
+                                        <div style="font-size:0.7rem;color:var(--pink);">you</div>
                                         {% endif %}
                                     </div>
                                 </div>

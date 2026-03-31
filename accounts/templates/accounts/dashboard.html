@@ -1,4 +1,4 @@
-{% extends 'accounts/base.html' %}
+﻿{% extends 'accounts/base.html' %}
 {% block title %}Dashboard — CUlink{% endblock %}
 
 {% block extra_head %}
@@ -269,8 +269,8 @@
             <div class="col-sm-6 col-lg-3">
                 <div class="stat-card reveal delay-1">
                     <div class="sc-icon"
-                        style="background:linear-gradient(135deg,rgba(67,97,238,0.15),rgba(94,122,245,0.07));">
-                        <i class="bi bi-person-fill" style="color:var(--blue);"></i>
+                        style="background:linear-gradient(135deg,rgba(255,63,164,0.15),rgba(94,122,245,0.07));">
+                        <i class="bi bi-person-fill" style="color:var(--pink);"></i>
                     </div>
                     <div class="sc-label">Account</div>
                     <div class="sc-value" style="font-size:1.1rem;">{{ user.username }}</div>
@@ -325,7 +325,7 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <div class="info-card reveal">
-                    <h5><i class="bi bi-person-circle me-2" style="color:var(--blue);"></i>Profile Details</h5>
+                    <h5><i class="bi bi-person-circle me-2" style="color:var(--pink);"></i>Profile Details</h5>
                     <div class="info-row">
                         <span class="ir-label">Username</span>
                         <span class="ir-value">{{ user.username }}</span>
@@ -352,7 +352,7 @@
             </div>
             <div class="col-md-6">
                 <div class="info-card reveal delay-1">
-                    <h5><i class="bi bi-grid me-2" style="color:var(--orange);"></i>Quick Actions</h5>
+                    <h5><i class="bi bi-grid me-2" style="color:var(--pink);"></i>Quick Actions</h5>
                     <div class="d-flex flex-column gap-2">
                         {% if user.is_staff or user.is_superuser %}
                         <a href="{% url 'admin_dashboard' %}" class="quick-link">

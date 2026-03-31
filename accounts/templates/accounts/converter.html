@@ -1,4 +1,4 @@
-{% extends 'accounts/base.html' %}
+﻿{% extends 'accounts/base.html' %}
 {% block title %}File Converter - CUlink{% endblock %}
 {% block meta_description %}Free online file converter. Convert images and PDFs instantly in your browser. No uploads,
 no limits.{% endblock %}
@@ -6,7 +6,7 @@ no limits.{% endblock %}
 {% block extra_head %}
 <style>
   .cv-page {
-    background: var(--surface);
+    background: var(--bg);
     min-height: 100vh;
   }
 
@@ -14,7 +14,7 @@ no limits.{% endblock %}
     position: relative;
     overflow: hidden;
     padding: 5rem 0 4rem;
-    background: var(--surface);
+    background: var(--bg);
   }
 
   .cv-hero .blob {
@@ -28,7 +28,7 @@ no limits.{% endblock %}
   .cv-hero .b1 {
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(78, 124, 63, .18), transparent 70%);
+    background: radial-gradient(circle, rgba(255,63,164, .18), transparent 70%);
     top: -150px;
     right: -80px;
   }
@@ -36,7 +36,7 @@ no limits.{% endblock %}
   .cv-hero .b2 {
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(139, 191, 124, .15), transparent 70%);
+    background: radial-gradient(circle, rgba(255,63,164, .15), transparent 70%);
     bottom: -100px;
     left: -80px;
     animation-delay: 3s;
@@ -45,7 +45,7 @@ no limits.{% endblock %}
   .cv-hero .b3 {
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(46, 92, 35, .12), transparent 70%);
+    background: radial-gradient(circle, rgba(255,63,164, .12), transparent 70%);
     top: 40%;
     left: 45%;
     animation-delay: 5s;
@@ -55,20 +55,20 @@ no limits.{% endblock %}
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: linear-gradient(135deg, rgba(78, 124, 63, .10), rgba(46, 92, 35, .08));
-    border: 1px solid rgba(78, 124, 63, .25);
+    background: linear-gradient(135deg, rgba(255,63,164, .10), rgba(255,63,164, .08));
+    border: 1px solid rgba(255,63,164, .25);
     border-radius: 50px;
     padding: .45rem 1.1rem;
     font-size: .82rem;
     font-weight: 600;
-    color: var(--blue);
+    color: var(--pink);
     margin-bottom: 1.4rem;
   }
 
   .cv-badge .dot {
     width: 7px;
     height: 7px;
-    background: var(--orange);
+    background: var(--pink);
     border-radius: 50%;
     animation: blobPulse 2s ease-in-out infinite;
   }
@@ -158,7 +158,7 @@ no limits.{% endblock %}
   }
 
   .cv-card {
-    background: var(--surface-2);
+    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 28px;
     padding: 2.5rem;
@@ -168,24 +168,24 @@ no limits.{% endblock %}
   }
 
   .drop-zone {
-    border: 2.5px dashed rgba(78, 124, 63, .35);
+    border: 2.5px dashed rgba(255,63,164, .35);
     border-radius: 20px;
     padding: 3rem 2rem;
     text-align: center;
     cursor: pointer;
     transition: all .25s;
-    background: var(--surface);
+    background: var(--bg);
     position: relative;
   }
 
   .drop-zone.drag-over {
-    border-color: var(--blue);
-    background: rgba(78, 124, 63, .06);
+    border-color: var(--pink);
+    background: rgba(255,63,164, .06);
     transform: scale(1.01);
   }
 
   .drop-zone.has-file {
-    border-color: var(--orange);
+    border-color: var(--pink);
     border-style: solid;
   }
 
@@ -193,7 +193,7 @@ no limits.{% endblock %}
     font-size: 2.5rem;
     margin-bottom: .8rem;
     display: block;
-    color: var(--blue);
+    color: var(--pink);
   }
 
   .drop-title {
@@ -223,7 +223,7 @@ no limits.{% endblock %}
     gap: 12px;
     padding: 1rem;
     border-radius: 12px;
-    background: var(--surface-3);
+    background: var(--bg-card-alt);
     margin-top: 1rem;
     border: 1px solid var(--border);
   }
@@ -241,8 +241,8 @@ no limits.{% endblock %}
     justify-content: center;
     font-size: 1.3rem;
     flex-shrink: 0;
-    color: var(--blue);
-    background: rgba(78, 124, 63, .10);
+    color: var(--pink);
+    background: rgba(255,63,164, .10);
   }
 
   .fp-name {
@@ -304,7 +304,7 @@ no limits.{% endblock %}
     padding: .65rem 2rem .65rem .9rem;
     border-radius: 12px;
     border: 1.5px solid var(--border);
-    background: var(--surface);
+    background: var(--bg);
     color: var(--text-dark);
     font-size: .9rem;
     font-weight: 600;
@@ -316,8 +316,8 @@ no limits.{% endblock %}
 
   .format-select:focus {
     outline: none;
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(78, 124, 63, .12);
+    border-color: var(--pink);
+    box-shadow: 0 0 0 3px rgba(255,63,164, .12);
   }
 
   /* Dynamic options panel */
@@ -326,8 +326,8 @@ no limits.{% endblock %}
     margin-top: 1rem;
     padding: 1.1rem 1.2rem;
     border-radius: 12px;
-    background: var(--surface);
-    border: 1.5px solid rgba(78, 124, 63, .2);
+    background: var(--bg);
+    border: 1.5px solid rgba(255,63,164, .2);
   }
 
   .opts-panel.show {
@@ -363,7 +363,7 @@ no limits.{% endblock %}
   }
 
   .opts-radios input[type=radio] {
-    accent-color: var(--blue);
+    accent-color: var(--pink);
     width: 15px;
     height: 15px;
   }
@@ -373,7 +373,7 @@ no limits.{% endblock %}
     padding: .6rem .9rem;
     border-radius: 10px;
     border: 1.5px solid var(--border);
-    background: var(--surface-2);
+    background: var(--bg-card);
     color: var(--text-dark);
     font-size: .88rem;
     box-sizing: border-box;
@@ -383,7 +383,7 @@ no limits.{% endblock %}
 
   .opts-input:focus {
     outline: none;
-    border-color: var(--blue);
+    border-color: var(--pink);
   }
 
   .opts-hint {
@@ -397,7 +397,7 @@ no limits.{% endblock %}
     margin-top: 1.5rem;
     padding: 1rem;
     border-radius: 14px;
-    background: var(--grad-main);
+    background: var(--pink);
     border: none;
     color: #fff;
     font-size: 1rem;
@@ -408,12 +408,12 @@ no limits.{% endblock %}
     justify-content: center;
     gap: 8px;
     transition: all .25s;
-    box-shadow: 0 8px 24px rgba(78, 124, 63, .30);
+    box-shadow: 0 8px 24px rgba(255,63,164, .30);
   }
 
   .btn-convert:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(78, 124, 63, .40);
+    box-shadow: 0 12px 32px rgba(255,63,164, .40);
   }
 
   .btn-convert:disabled {
@@ -441,7 +441,7 @@ no limits.{% endblock %}
   .progress-bar-fill {
     height: 100%;
     width: 0%;
-    background: var(--grad-main);
+    background: var(--pink);
     border-radius: 3px;
     transition: width .3s;
   }
@@ -495,7 +495,7 @@ no limits.{% endblock %}
   }
 
   .fmt-card {
-    background: var(--surface-2);
+    background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 1.25rem;
@@ -505,7 +505,7 @@ no limits.{% endblock %}
 
   .fmt-card:hover {
     transform: translateY(-4px);
-    border-color: rgba(78, 124, 63, .30);
+    border-color: rgba(255,63,164, .30);
     box-shadow: var(--shadow-md);
   }
 
@@ -532,11 +532,11 @@ no limits.{% endblock %}
 
   .steps-section {
     padding: 5rem 0;
-    background: var(--surface-2);
+    background: var(--bg-card);
   }
 
   .step-card {
-    background: var(--surface);
+    background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 24px;
     padding: 2rem;
@@ -595,7 +595,7 @@ no limits.{% endblock %}
     right: -5%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(78, 124, 63, .25), transparent 70%);
+    background: radial-gradient(circle, rgba(255,63,164, .25), transparent 70%);
     border-radius: 50%;
     animation: blobPulse 7s ease-in-out infinite;
   }
@@ -623,12 +623,12 @@ no limits.{% endblock %}
 
   [data-theme="dark"] .cv-card,
   [data-theme="dark"] .drop-zone {
-    background: var(--surface-2);
+    background: var(--bg-card);
   }
 
   [data-theme="dark"] .format-select,
   [data-theme="dark"] .opts-input {
-    background: var(--surface-3);
+    background: var(--bg-card-alt);
   }
 
   /* ── Responsive ─────────────────────────────────────────────── */
@@ -776,7 +776,7 @@ no limits.{% endblock %}
                   <option value="">Auto-detect</option>
                 </select>
               </div>
-              <div style="display:flex;align-items:center;margin-top:18px;color:var(--blue);font-size:1.2rem;"><i
+              <div style="display:flex;align-items:center;margin-top:18px;color:var(--pink);font-size:1.2rem;"><i
                   class="bi bi-arrow-right"></i></div>
               <div class="format-box">
                 <label>To</label>
@@ -936,8 +936,8 @@ no limits.{% endblock %}
       <div class="row g-4">
         <div class="col-md-4">
           <div class="step-card reveal delay-1">
-            <div class="step-num" style="background:linear-gradient(135deg,rgba(67,97,238,.15),rgba(67,97,238,.05));"><i
-                class="bi bi-cloud-upload-fill" style="color:var(--blue);font-size:1.6rem;"></i></div>
+            <div class="step-num" style="background:linear-gradient(135deg,rgba(255,63,164,.15),rgba(255,63,164,.05));"><i
+                class="bi bi-cloud-upload-fill" style="color:var(--pink);font-size:1.6rem;"></i></div>
             <h5>Upload</h5>
             <p>Drag and drop your file or click to browse. We support images, PDFs, and text files.</p>
           </div>
@@ -945,7 +945,7 @@ no limits.{% endblock %}
         <div class="col-md-4">
           <div class="step-card reveal delay-2">
             <div class="step-num" style="background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(255,107,53,.05));">
-              <i class="bi bi-arrow-repeat" style="color:var(--orange);font-size:1.6rem;"></i></div>
+              <i class="bi bi-arrow-repeat" style="color:var(--pink);font-size:1.6rem;"></i></div>
             <h5>Convert</h5>
             <p>Pick your target format and hit Convert. It all happens in your browser - instant and private.</p>
           </div>
@@ -975,8 +975,8 @@ no limits.{% endblock %}
             files to any server. Every conversion runs entirely in your browser using Web APIs. No accounts, no storage,
             no tracking.</p>
           <div class="sec-pills">
-            <span class="sec-pill"><i class="bi bi-shield-lock-fill" style="color:var(--blue);"></i> No uploads</span>
-            <span class="sec-pill"><i class="bi bi-lightning-fill" style="color:var(--orange);"></i> Instant
+            <span class="sec-pill"><i class="bi bi-shield-lock-fill" style="color:var(--pink);"></i> No uploads</span>
+            <span class="sec-pill"><i class="bi bi-lightning-fill" style="color:var(--pink);"></i> Instant
               conversion</span>
             <span class="sec-pill"><i class="bi bi-eye-slash-fill" style="color:#7209b7;"></i> No tracking</span>
             <span class="sec-pill"><i class="bi bi-infinity" style="color:#10b981;"></i> Unlimited use</span>

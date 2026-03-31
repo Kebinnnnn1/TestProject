@@ -1,4 +1,4 @@
-{% extends 'accounts/base.html' %}
+﻿{% extends 'accounts/base.html' %}
 {% block title %}Resend Verification — CUlink{% endblock %}
 
 {% block extra_head %}
@@ -9,14 +9,14 @@
     align-items: center;
     justify-content: center;
     padding: 3rem 1rem;
-    background: var(--surface-2);
+    background: var(--bg-card);
     position: relative;
     overflow: hidden;
   }
   .resend-blob-1 {
     position: absolute;
     width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(67,97,238,0.1), transparent 70%);
+    background: radial-gradient(circle, rgba(255,63,164,0.1), transparent 70%);
     top: -150px; right: -100px;
     border-radius: 50%;
     animation: blobPulse 8s ease-in-out infinite;
@@ -33,7 +33,7 @@
   }
   .resend-card {
     width: 100%; max-width: 430px;
-    background: var(--card-bg);
+    background: var(--bg-white);
     border-radius: 24px;
     box-shadow: 0 24px 64px rgba(0,0,0,0.09);
     padding: 3rem;
@@ -43,7 +43,7 @@
   }
   .resend-icon {
     width: 52px; height: 52px;
-    background: var(--grad-main);
+    background: var(--pink);
     border-radius: 14px;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.4rem; color: #fff;
@@ -89,7 +89,7 @@
 
     <div style="text-align:center;margin-top:1.5rem;">
       <a href="{% url 'login' %}" style="font-size:0.83rem;color:var(--text-light);text-decoration:none;">
-        Back to <span style="color:var(--blue);font-weight:600;">Sign In →</span>
+        Back to <span style="color:var(--pink);font-weight:600;">Sign In →</span>
       </a>
     </div>
   </div>

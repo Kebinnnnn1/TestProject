@@ -919,7 +919,7 @@
   {% if user.is_authenticated and not user.is_verified %}
   <!-- Verification Required Modal -->
   <div id="verifyModal" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:1rem;">
-    <div style="background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:2rem;max-width:420px;width:100%;box-shadow:var(--shadow-lg);text-align:center;animation:fadeInUp 0.3s ease;">
+    <div style="background:var(--bg-white);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:2rem;max-width:420px;width:100%;box-shadow:var(--shadow-lg);text-align:center;animation:fadeInUp 0.3s ease;">
       <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,63,164,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
         <i class="bi bi-shield-lock" style="font-size:1.8rem;color:var(--pink);"></i>
       </div>
