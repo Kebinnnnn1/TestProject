@@ -4,9 +4,20 @@
 {% block extra_head %}
 <style>
   /* ── Fix base layout for workspace (full-height, no scroll, hide footer) ── */
-  body   { overflow: hidden !important; }
-  main   { display: flex; flex-direction: column; overflow: hidden; padding: 0 !important; }
-  footer { display: none !important; }
+  body {
+    overflow: hidden !important;
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0 !important;
+  }
+
+  footer {
+    display: none !important;
+  }
 
   /* ── Workspace root ── */
   .ws-wrap {
@@ -27,7 +38,11 @@
     overflow: hidden;
     transition: width 0.3s, min-width 0.3s;
   }
-  .ws-sidebar.collapsed { width: 0; min-width: 0; }
+
+  .ws-sidebar.collapsed {
+    width: 0;
+    min-width: 0;
+  }
 
   .ws-sidebar-header {
     padding: 1rem 1rem 0.5rem;
@@ -37,6 +52,7 @@
     justify-content: space-between;
     flex-shrink: 0;
   }
+
   .ws-sidebar-title {
     font-size: 0.78rem;
     font-weight: 700;
@@ -44,6 +60,7 @@
     letter-spacing: 0.08em;
     color: var(--text-light);
   }
+
   .ws-new-btn {
     display: inline-flex;
     align-items: center;
@@ -59,7 +76,11 @@
     transition: opacity 0.2s, transform 0.15s;
     position: relative;
   }
-  .ws-new-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .ws-new-btn:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
 
   /* Type picker dropdown */
   .ws-type-picker {
@@ -69,14 +90,18 @@
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: 12px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
     padding: 0.5rem;
     z-index: 500;
     min-width: 190px;
     display: none;
     animation: fadeInUp 0.15s ease;
   }
-  .ws-type-picker.open { display: block; }
+
+  .ws-type-picker.open {
+    display: block;
+  }
+
   .ws-type-option {
     display: flex;
     align-items: center;
@@ -93,11 +118,18 @@
     width: 100%;
     text-align: left;
   }
-  .ws-type-option:hover { background: var(--surface-2); }
+
+  .ws-type-option:hover {
+    background: var(--surface-2);
+  }
+
   .ws-type-option .type-icon-sm {
-    width: 28px; height: 28px;
+    width: 28px;
+    height: 28px;
     border-radius: 7px;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.9rem;
     flex-shrink: 0;
   }
@@ -108,6 +140,7 @@
     overflow-y: auto;
     padding: 0.5rem 0;
   }
+
   .ws-group-label {
     padding: 0.6rem 1rem 0.2rem;
     font-size: 0.7rem;
@@ -119,6 +152,7 @@
     align-items: center;
     gap: 6px;
   }
+
   .ws-doc-item {
     display: flex;
     align-items: center;
@@ -136,25 +170,36 @@
     width: 100%;
     text-align: left;
   }
-  .ws-doc-item:hover { background: var(--surface-3); color: var(--text-dark); }
+
+  .ws-doc-item:hover {
+    background: var(--surface-3);
+    color: var(--text-dark);
+  }
+
   .ws-doc-item.active {
-    background: rgba(78,124,63,0.12);
+    background: rgba(78, 124, 63, 0.12);
     color: var(--blue);
     font-weight: 600;
   }
+
   .ws-doc-item.active::before {
     content: '';
     position: absolute;
-    left: 0; top: 0; bottom: 0;
+    left: 0;
+    top: 0;
+    bottom: 0;
     width: 3px;
     background: var(--blue);
     border-radius: 0 2px 2px 0;
   }
+
   .ws-doc-dot {
-    width: 8px; height: 8px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
   }
+
   .ws-doc-name {
     flex: 1;
     overflow: hidden;
@@ -170,6 +215,7 @@
     overflow: hidden;
     position: relative;
   }
+
   .ws-topbar {
     display: flex;
     align-items: center;
@@ -179,18 +225,26 @@
     background: var(--card-bg);
     flex-shrink: 0;
   }
+
   .ws-toggle-btn {
     background: none;
     border: 1px solid var(--border);
     border-radius: 8px;
-    width: 30px; height: 30px;
-    display: flex; align-items: center; justify-content: center;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     color: var(--text-light);
     font-size: 0.9rem;
     transition: all 0.2s;
   }
-  .ws-toggle-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+  .ws-toggle-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
 
   .ws-content-area {
     flex: 1;
@@ -206,13 +260,18 @@
     margin-bottom: 2rem;
     flex-wrap: wrap;
   }
+
   .ws-doc-emoji {
-    width: 52px; height: 52px;
+    width: 52px;
+    height: 52px;
     border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 1.6rem;
     flex-shrink: 0;
   }
+
   .ws-title-input {
     flex: 1;
     font-size: 1.75rem;
@@ -225,7 +284,11 @@
     min-width: 0;
     letter-spacing: -0.5px;
   }
-  .ws-title-input::placeholder { color: var(--text-light); }
+
+  .ws-title-input::placeholder {
+    color: var(--text-light);
+  }
+
   .ws-del-doc-btn {
     background: none;
     border: 1.5px solid var(--border);
@@ -234,14 +297,23 @@
     font-size: 0.8rem;
     color: var(--text-light);
     cursor: pointer;
-    display: flex; align-items: center; gap: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
     transition: all 0.2s;
     flex-shrink: 0;
   }
-  .ws-del-doc-btn:hover { border-color: #ef4444; color: #ef4444; }
+
+  .ws-del-doc-btn:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+  }
 
   /* ── Progress bar ── */
-  .ws-progress-wrap { margin-bottom: 1.5rem; }
+  .ws-progress-wrap {
+    margin-bottom: 1.5rem;
+  }
+
   .ws-progress-bar {
     height: 8px;
     background: var(--surface-3);
@@ -249,12 +321,14 @@
     overflow: hidden;
     margin-bottom: 0.4rem;
   }
+
   .ws-progress-fill {
     height: 100%;
     background: var(--grad-main);
     border-radius: 4px;
     transition: width 0.4s ease;
   }
+
   .ws-progress-label {
     font-size: 0.78rem;
     color: var(--text-light);
@@ -262,7 +336,10 @@
   }
 
   /* ── Todo list ── */
-  .ws-todo-list { margin-bottom: 0.75rem; }
+  .ws-todo-list {
+    margin-bottom: 0.75rem;
+  }
+
   .ws-todo-item {
     display: flex;
     align-items: center;
@@ -272,7 +349,11 @@
     transition: background 0.15s;
     group: true;
   }
-  .ws-todo-item:hover { background: var(--surface-2); }
+
+  .ws-todo-item:hover {
+    background: var(--surface-2);
+  }
+
   .ws-check-btn {
     background: none;
     border: none;
@@ -284,8 +365,15 @@
     flex-shrink: 0;
     transition: color 0.2s, transform 0.15s;
   }
-  .ws-check-btn:hover { transform: scale(1.15); }
-  .ws-check-btn.done { color: var(--blue); }
+
+  .ws-check-btn:hover {
+    transform: scale(1.15);
+  }
+
+  .ws-check-btn.done {
+    color: var(--blue);
+  }
+
   .ws-item-text {
     flex: 1;
     font-size: 0.93rem;
@@ -298,7 +386,12 @@
     padding: 0;
     line-height: 1.5;
   }
-  .ws-item-text.done-text { text-decoration: line-through; color: var(--text-light); }
+
+  .ws-item-text.done-text {
+    text-decoration: line-through;
+    color: var(--text-light);
+  }
+
   .ws-priority-pill {
     padding: 1px 8px;
     border-radius: 50px;
@@ -308,13 +401,20 @@
     text-transform: uppercase;
     cursor: pointer;
   }
+
   .ws-due-badge {
     font-size: 0.72rem;
     color: var(--text-light);
     flex-shrink: 0;
-    display: flex; align-items: center; gap: 3px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
   }
-  .ws-due-badge.overdue { color: #ef4444; }
+
+  .ws-due-badge.overdue {
+    color: #ef4444;
+  }
+
   .ws-item-del {
     background: none;
     border: none;
@@ -326,8 +426,15 @@
     transition: color 0.15s, background 0.15s;
     flex-shrink: 0;
   }
-  .ws-todo-item:hover .ws-item-del { color: var(--text-light); }
-  .ws-item-del:hover { color: #ef4444 !important; background: rgba(239,68,68,0.08); }
+
+  .ws-todo-item:hover .ws-item-del {
+    color: var(--text-light);
+  }
+
+  .ws-item-del:hover {
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.08);
+  }
 
   /* Add item form */
   .ws-add-row {
@@ -340,7 +447,11 @@
     margin-top: 0.5rem;
     transition: border-color 0.2s;
   }
-  .ws-add-row:focus-within { border-color: var(--blue); }
+
+  .ws-add-row:focus-within {
+    border-color: var(--blue);
+  }
+
   .ws-add-input {
     flex: 1;
     border: none;
@@ -350,7 +461,11 @@
     outline: none;
     padding: 0;
   }
-  .ws-add-input::placeholder { color: var(--text-light); }
+
+  .ws-add-input::placeholder {
+    color: var(--text-light);
+  }
+
   .ws-add-submit {
     background: var(--grad-main);
     color: #fff;
@@ -362,7 +477,10 @@
     cursor: pointer;
     transition: opacity 0.2s;
   }
-  .ws-add-submit:hover { opacity: 0.88; }
+
+  .ws-add-submit:hover {
+    opacity: 0.88;
+  }
 
   /* ── Project Kanban ── */
   .ws-kanban {
@@ -370,13 +488,20 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
   }
-  @media (max-width: 700px) { .ws-kanban { grid-template-columns: 1fr; } }
+
+  @media (max-width: 700px) {
+    .ws-kanban {
+      grid-template-columns: 1fr;
+    }
+  }
+
   .ws-kanban-col {
     background: var(--surface-2);
     border-radius: 14px;
     padding: 0.85rem;
     min-height: 200px;
   }
+
   .ws-kanban-col-title {
     display: flex;
     align-items: center;
@@ -389,6 +514,7 @@
     padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--border);
   }
+
   .ws-kanban-col-count {
     background: var(--surface-3);
     color: var(--text-light);
@@ -397,6 +523,7 @@
     font-size: 0.7rem;
     margin-left: auto;
   }
+
   .ws-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -407,7 +534,12 @@
     transition: box-shadow 0.2s, transform 0.15s;
     animation: fadeInUp 0.2s ease both;
   }
-  .ws-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-1px); }
+
+  .ws-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
   .ws-card-content {
     font-size: 0.88rem;
     color: var(--text-dark);
@@ -421,12 +553,14 @@
     font-family: inherit;
     padding: 0;
   }
+
   .ws-card-footer {
     display: flex;
     align-items: center;
     gap: 0.4rem;
     flex-wrap: wrap;
   }
+
   .ws-card-status-btn {
     font-size: 0.7rem;
     padding: 2px 8px;
@@ -443,6 +577,7 @@
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
   }
+
   .ws-sticky {
     border-radius: 14px;
     padding: 1rem;
@@ -450,11 +585,16 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     transition: transform 0.2s, box-shadow 0.2s;
     animation: fadeInUp 0.25s ease both;
   }
-  .ws-sticky:hover { transform: rotate(-0.5deg) scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.13); }
+
+  .ws-sticky:hover {
+    transform: rotate(-0.5deg) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
+  }
+
   .ws-sticky-text {
     flex: 1;
     border: none;
@@ -468,36 +608,55 @@
     line-height: 1.55;
     padding: 0;
   }
+
   .ws-sticky-del {
     position: absolute;
-    top: 6px; right: 6px;
-    background: rgba(0,0,0,0.08);
+    top: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.08);
     border: none;
     border-radius: 6px;
-    width: 22px; height: 22px;
-    display: flex; align-items: center; justify-content: center;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     font-size: 0.8rem;
     color: #555;
     transition: background 0.15s;
     opacity: 0;
   }
-  .ws-sticky:hover .ws-sticky-del { opacity: 1; }
-  .ws-sticky-del:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
+
+  .ws-sticky:hover .ws-sticky-del {
+    opacity: 1;
+  }
+
+  .ws-sticky-del:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+
   .ws-sticky-color-btns {
     display: flex;
     gap: 5px;
     margin-top: 0.5rem;
     flex-wrap: wrap;
   }
+
   .ws-color-dot {
-    width: 16px; height: 16px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    border: 2px solid rgba(0,0,0,0.1);
+    border: 2px solid rgba(0, 0, 0, 0.1);
     cursor: pointer;
     transition: transform 0.15s;
   }
-  .ws-color-dot:hover { transform: scale(1.3); }
+
+  .ws-color-dot:hover {
+    transform: scale(1.3);
+  }
+
   .ws-add-sticky-btn {
     border: 2px dashed var(--border);
     border-radius: 14px;
@@ -514,7 +673,11 @@
     transition: border-color 0.2s, color 0.2s;
     width: 100%;
   }
-  .ws-add-sticky-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+  .ws-add-sticky-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+  }
 
   /* ── Goal tracker ── */
   .ws-goal-item {
@@ -529,19 +692,32 @@
     transition: box-shadow 0.2s;
     animation: fadeInUp 0.2s ease both;
   }
-  .ws-goal-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+
+  .ws-goal-item:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+  }
+
   .ws-goal-check {
-    width: 24px; height: 24px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     border: 2px solid var(--border);
     cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.85rem;
     flex-shrink: 0;
     transition: all 0.2s;
     background: none;
   }
-  .ws-goal-check.done { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+  .ws-goal-check.done {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+
   .ws-goal-text {
     flex: 1;
     font-size: 0.93rem;
@@ -552,7 +728,11 @@
     padding: 0;
     font-family: inherit;
   }
-  .ws-goal-text.done-text { text-decoration: line-through; color: var(--text-light); }
+
+  .ws-goal-text.done-text {
+    text-decoration: line-through;
+    color: var(--text-light);
+  }
 
   /* ── Note ── */
   .ws-note-textarea {
@@ -568,12 +748,14 @@
     font-family: inherit;
     padding: 0;
   }
+
   .ws-note-toolbar {
     display: flex;
     gap: 0.4rem;
     margin-bottom: 1rem;
     flex-wrap: wrap;
   }
+
   .ws-tb-btn {
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -585,7 +767,12 @@
     color: var(--text-mid);
     transition: all 0.15s;
   }
-  .ws-tb-btn:hover { background: var(--surface-3); color: var(--blue); border-color: var(--blue); }
+
+  .ws-tb-btn:hover {
+    background: var(--surface-3);
+    color: var(--blue);
+    border-color: var(--blue);
+  }
 
   /* ── Welcome screen ── */
   .ws-welcome {
@@ -597,9 +784,24 @@
     text-align: center;
     padding: 2rem;
   }
-  .ws-welcome-icon { margin-bottom: 1rem; }
-  .ws-welcome h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-dark); }
-  .ws-welcome p { color: var(--text-light); margin-bottom: 2rem; max-width: 380px; }
+
+  .ws-welcome-icon {
+    margin-bottom: 1rem;
+  }
+
+  .ws-welcome h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+  }
+
+  .ws-welcome p {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+    max-width: 380px;
+  }
+
   .ws-type-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -607,6 +809,7 @@
     max-width: 600px;
     width: 100%;
   }
+
   .ws-type-card {
     background: var(--card-bg);
     border: 1.5px solid var(--border);
@@ -620,14 +823,34 @@
     align-items: center;
     gap: 0.5rem;
   }
+
   .ws-type-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
     border-color: var(--blue);
   }
-  .ws-type-card-icon { font-size: 1.5rem; width: 44px; height: 44px; background: var(--surface-2); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-  .ws-type-card-name { font-size: 0.82rem; font-weight: 700; color: var(--text-dark); }
-  .ws-type-card-desc { font-size: 0.72rem; color: var(--text-light); }
+
+  .ws-type-card-icon {
+    font-size: 1.5rem;
+    width: 44px;
+    height: 44px;
+    background: var(--surface-2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ws-type-card-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-dark);
+  }
+
+  .ws-type-card-desc {
+    font-size: 0.72rem;
+    color: var(--text-light);
+  }
 
   /* ── Sidebar close button (hidden on desktop) ── */
   .ws-sidebar-close {
@@ -635,7 +858,8 @@
     background: none;
     border: 1px solid var(--border);
     border-radius: 8px;
-    width: 30px; height: 30px;
+    width: 30px;
+    height: 30px;
     align-items: center;
     justify-content: center;
     cursor: pointer;
@@ -645,7 +869,11 @@
     flex-shrink: 0;
     margin-left: 0.5rem;
   }
-  .ws-sidebar-close:hover { border-color: #ef4444; color: #ef4444; }
+
+  .ws-sidebar-close:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+  }
 
   /* ── Backdrop overlay for mobile sidebar ── */
   .ws-backdrop {
@@ -653,42 +881,81 @@
     position: fixed;
     inset: 0;
     z-index: 590;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(2px);
     animation: fadeIn 0.2s ease;
   }
-  .ws-backdrop.visible { display: block; }
+
+  .ws-backdrop.visible {
+    display: block;
+  }
 
   /* ── Tablet (<= 900px): sidebar slides over content ── */
   @media (max-width: 900px) {
     .ws-sidebar {
       position: fixed;
-      left: 0; top: 0;
+      left: 0;
+      top: 0;
       height: 100%;
       z-index: 600;
       transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-      box-shadow: 6px 0 32px rgba(0,0,0,0.22);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 6px 0 32px rgba(0, 0, 0, 0.22);
     }
-    .ws-sidebar.open { transform: translateX(0); }
-    .ws-sidebar-close { display: flex !important; }
-    .ws-main { width: 100%; }
+
+    .ws-sidebar.open {
+      transform: translateX(0);
+    }
+
+    .ws-sidebar-close {
+      display: flex !important;
+    }
+
+    .ws-main {
+      width: 100%;
+    }
   }
 
   /* ── Phone (<= 480px) ── */
   @media (max-width: 480px) {
-    .ws-content-area { padding: 0.75rem; }
-    .ws-kanban { grid-template-columns: 1fr; }
-    .ws-brainstorm-grid { grid-template-columns: 1fr; }
-    .ws-type-grid { grid-template-columns: repeat(2, 1fr); }
-    .ws-doc-header { flex-wrap: wrap; gap: 0.5rem; }
-    .ws-title-input { font-size: 1.3rem; }
-    .ws-topbar { padding: 0.5rem 0.75rem; }
+    .ws-content-area {
+      padding: 0.75rem;
+    }
+
+    .ws-kanban {
+      grid-template-columns: 1fr;
+    }
+
+    .ws-brainstorm-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .ws-type-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ws-doc-header {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .ws-title-input {
+      font-size: 1.3rem;
+    }
+
+    .ws-topbar {
+      padding: 0.5rem 0.75rem;
+    }
   }
 
   /* Dark mode adjustments */
-  [data-theme="dark"] .ws-sticky-text { color: #1a1a1a; }
-  [data-theme="dark"] .ws-sidebar { background: var(--surface-2); }
+  [data-theme="dark"] .ws-sticky-text {
+    color: #1a1a1a;
+  }
+
+  [data-theme="dark"] .ws-sidebar {
+    background: var(--surface-2);
+  }
 
   /* ── Item Detail Panel ── */
   .ws-detail-backdrop {
@@ -696,11 +963,14 @@
     position: fixed;
     inset: 0;
     z-index: 900;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(3px);
     animation: fadeIn 0.2s ease;
   }
-  .ws-detail-backdrop.visible { display: block; }
+
+  .ws-detail-backdrop.visible {
+    display: block;
+  }
 
   .ws-detail-panel {
     position: fixed;
@@ -711,14 +981,17 @@
     height: 100%;
     background: var(--card-bg);
     border-left: 1px solid var(--border);
-    box-shadow: -12px 0 48px rgba(0,0,0,0.15);
+    box-shadow: -12px 0 48px rgba(0, 0, 0, 0.15);
     z-index: 950;
     display: flex;
     flex-direction: column;
-    transition: right 0.32s cubic-bezier(0.4,0,0.2,1);
+    transition: right 0.32s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
   }
-  .ws-detail-panel.open { right: 0; }
+
+  .ws-detail-panel.open {
+    right: 0;
+  }
 
   .ws-detail-head {
     display: flex;
@@ -728,13 +1001,18 @@
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
+
   .ws-detail-type-badge {
-    width: 36px; height: 36px;
+    width: 36px;
+    height: 36px;
     border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 1rem;
     flex-shrink: 0;
   }
+
   .ws-detail-title {
     flex: 1;
     font-size: 1.1rem;
@@ -745,19 +1023,27 @@
     outline: none;
     min-width: 0;
   }
+
   .ws-detail-close {
     background: none;
     border: 1px solid var(--border);
     border-radius: 8px;
-    width: 30px; height: 30px;
-    display: flex; align-items: center; justify-content: center;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     color: var(--text-light);
     font-size: 0.9rem;
     flex-shrink: 0;
     transition: all 0.2s;
   }
-  .ws-detail-close:hover { border-color: #ef4444; color: #ef4444; }
+
+  .ws-detail-close:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+  }
 
   .ws-detail-body {
     flex: 1;
@@ -774,15 +1060,18 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.6rem 0.85rem;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.3);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: 10px;
     color: #ef4444;
     font-size: 0.83rem;
     font-weight: 600;
     animation: fadeInUp 0.2s ease;
   }
-  .ws-overdue-banner.show { display: flex; }
+
+  .ws-overdue-banner.show {
+    display: flex;
+  }
 
   /* Description */
   .ws-detail-desc-label {
@@ -793,6 +1082,7 @@
     color: var(--text-light);
     margin-bottom: 0.4rem;
   }
+
   .ws-detail-desc {
     width: 100%;
     min-height: 100px;
@@ -808,8 +1098,14 @@
     font-family: inherit;
     transition: border-color 0.2s;
   }
-  .ws-detail-desc:focus { border-color: var(--blue); }
-  .ws-detail-desc::placeholder { color: var(--text-light); }
+
+  .ws-detail-desc:focus {
+    border-color: var(--blue);
+  }
+
+  .ws-detail-desc::placeholder {
+    color: var(--text-light);
+  }
 
   /* Properties grid */
   .ws-props-grid {
@@ -817,17 +1113,30 @@
     grid-template-columns: 1fr 1fr;
     gap: 0.85rem;
   }
-  @media (max-width: 480px) { .ws-props-grid { grid-template-columns: 1fr; } }
 
-  .ws-prop-field { display: flex; flex-direction: column; gap: 0.3rem; }
+  @media (max-width: 480px) {
+    .ws-props-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .ws-prop-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
   .ws-prop-label {
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--text-light);
-    display: flex; align-items: center; gap: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
+
   .ws-prop-select {
     border: 1.5px solid var(--border);
     border-radius: 8px;
@@ -841,7 +1150,10 @@
     font-family: inherit;
     width: 100%;
   }
-  .ws-prop-select:focus { border-color: var(--blue); }
+
+  .ws-prop-select:focus {
+    border-color: var(--blue);
+  }
 
   /* Effort segmented control */
   .ws-effort-seg {
@@ -850,6 +1162,7 @@
     overflow: hidden;
     border: 1.5px solid var(--border);
   }
+
   .ws-effort-btn {
     flex: 1;
     border: none;
@@ -861,11 +1174,16 @@
     transition: all 0.15s;
     color: var(--text-light);
   }
+
   .ws-effort-btn.active {
     background: var(--blue);
     color: #fff;
   }
-  .ws-effort-btn:hover:not(.active) { background: var(--surface-3); color: var(--text-dark); }
+
+  .ws-effort-btn:hover:not(.active) {
+    background: var(--surface-3);
+    color: var(--text-dark);
+  }
 
   /* Date field */
   .ws-prop-date {
@@ -880,7 +1198,10 @@
     font-family: inherit;
     transition: border-color 0.2s;
   }
-  .ws-prop-date:focus { border-color: var(--blue); }
+
+  .ws-prop-date:focus {
+    border-color: var(--blue);
+  }
 
   /* Detail panel footer */
   .ws-detail-footer {
@@ -891,6 +1212,7 @@
     align-items: center;
     flex-shrink: 0;
   }
+
   .ws-detail-save {
     flex: 1;
     background: var(--grad-main);
@@ -903,7 +1225,12 @@
     cursor: pointer;
     transition: opacity 0.2s, transform 0.15s;
   }
-  .ws-detail-save:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .ws-detail-save:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+  }
+
   .ws-detail-del {
     background: none;
     border: 1.5px solid var(--border);
@@ -913,9 +1240,16 @@
     color: var(--text-light);
     cursor: pointer;
     transition: all 0.2s;
-    display: flex; align-items: center; gap: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
-  .ws-detail-del:hover { border-color: #ef4444; color: #ef4444; }
+
+  .ws-detail-del:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+
   .ws-detail-created {
     font-size: 0.72rem;
     color: var(--text-light);
@@ -934,9 +1268,15 @@
     transition: color 0.15s, background 0.15s;
     flex-shrink: 0;
   }
+
   .ws-todo-item:hover .ws-expand-btn,
-  .ws-goal-item:hover .ws-expand-btn { color: var(--text-light); }
-  .ws-expand-btn:hover { color: var(--blue) !important; }
+  .ws-goal-item:hover .ws-expand-btn {
+    color: var(--text-light);
+  }
+
+  .ws-expand-btn:hover {
+    color: var(--blue) !important;
+  }
 </style>
 {% endblock %}
 
@@ -1012,9 +1352,9 @@
       <div class="ws-prop-label"><i class="bi bi-speedometer2"></i> Effort Level</div>
       <div class="ws-effort-seg" id="detailEffortSeg">
         <button class="ws-effort-btn" data-effort="xs" onclick="selectEffort('xs')">XS</button>
-        <button class="ws-effort-btn" data-effort="s"  onclick="selectEffort('s')">S</button>
-        <button class="ws-effort-btn" data-effort="m"  onclick="selectEffort('m')">M</button>
-        <button class="ws-effort-btn" data-effort="l"  onclick="selectEffort('l')">L</button>
+        <button class="ws-effort-btn" data-effort="s" onclick="selectEffort('s')">S</button>
+        <button class="ws-effort-btn" data-effort="m" onclick="selectEffort('m')">M</button>
+        <button class="ws-effort-btn" data-effort="l" onclick="selectEffort('l')">L</button>
         <button class="ws-effort-btn" data-effort="xl" onclick="selectEffort('xl')">XL</button>
       </div>
     </div>
@@ -1040,7 +1380,8 @@
         </button>
         <div class="ws-type-picker" id="wsTypePicker">
           <button class="ws-type-option" onclick="createDoc('todo')">
-            <span class="type-icon-sm" style="background:#dcfce7;color:#16a34a;"><i class="bi bi-check2-square"></i></span>
+            <span class="type-icon-sm" style="background:#dcfce7;color:#16a34a;"><i
+                class="bi bi-check2-square"></i></span>
             To-Do List
           </button>
           <button class="ws-type-option" onclick="createDoc('project')">
@@ -1056,7 +1397,8 @@
             Goal Tracker
           </button>
           <button class="ws-type-option" onclick="createDoc('note')">
-            <span class="type-icon-sm" style="background:#fce7f3;color:#db2777;"><i class="bi bi-journal-text"></i></span>
+            <span class="type-icon-sm" style="background:#fce7f3;color:#db2777;"><i
+                class="bi bi-journal-text"></i></span>
             Notes
           </button>
         </div>
@@ -1080,131 +1422,131 @@
 
 {% block extra_scripts %}
 <script>
-// ─── State ───────────────────────────────────────────────────────────────────
-const WS = {
-  docs: {{ docs_json|safe }},
+  // ─── State ───────────────────────────────────────────────────────────────────
+  const WS = {
+    docs: {{ docs_json| safe }},
   activeId: null,
-  sidebarOpen: window.innerWidth > 900,
-  saving: {},
+    sidebarOpen: window.innerWidth > 900,
+      saving: { },
   noteSaveTimer: null,
 };
 
-const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
+  const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-const TYPE_META = {
-  todo:       { icon: '<i class="bi bi-check2-square"></i>',  label: 'To-Do List',      color: '#16a34a', bg: '#dcfce7' },
-  project:    { icon: '<i class="bi bi-kanban"></i>',          label: 'Project Tracker', color: '#2563eb', bg: '#dbeafe' },
-  brainstorm: { icon: '<i class="bi bi-lightbulb"></i>',       label: 'Brainstorm',      color: '#d97706', bg: '#fef9c3' },
-  goal:       { icon: '<i class="bi bi-bullseye"></i>',        label: 'Goal Tracker',    color: '#7c3aed', bg: '#f3e8ff' },
-  note:       { icon: '<i class="bi bi-journal-text"></i>',    label: 'Notes',           color: '#db2777', bg: '#fce7f3' },
-};
+  const TYPE_META = {
+    todo: { icon: '<i class="bi bi-check2-square"></i>', label: 'To-Do List', color: '#16a34a', bg: '#dcfce7' },
+    project: { icon: '<i class="bi bi-kanban"></i>', label: 'Project Tracker', color: '#2563eb', bg: '#dbeafe' },
+    brainstorm: { icon: '<i class="bi bi-lightbulb"></i>', label: 'Brainstorm', color: '#d97706', bg: '#fef9c3' },
+    goal: { icon: '<i class="bi bi-bullseye"></i>', label: 'Goal Tracker', color: '#7c3aed', bg: '#f3e8ff' },
+    note: { icon: '<i class="bi bi-journal-text"></i>', label: 'Notes', color: '#db2777', bg: '#fce7f3' },
+  };
 
-const STICKY_COLORS = ['#fef9c3','#fce7f3','#dbeafe','#dcfce7','#ffedd5','#f3e8ff','#e0f2fe','#fef2f2'];
+  const STICKY_COLORS = ['#fef9c3', '#fce7f3', '#dbeafe', '#dcfce7', '#ffedd5', '#f3e8ff', '#e0f2fe', '#fef2f2'];
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-function init() {
-  const stored = parseInt(localStorage.getItem('ws_active')) || null;
-  if (stored && WS.docs.find(d => d.pk === stored)) WS.activeId = stored;
-  renderSidebar();
-  renderMain();
-  document.addEventListener('click', e => {
-    if (!e.target.closest('#wsNewBtn') && !e.target.closest('#wsTypePicker')) {
-      document.getElementById('wsTypePicker').classList.remove('open');
-    }
-  });
-  // On resize to desktop: restore sidebar to normal flow
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 900) {
-      const s = document.getElementById('wsSidebar');
-      s.classList.remove('open');
-      s.classList.remove('collapsed');
-      document.getElementById('wsBackdrop').classList.remove('visible');
-      WS.sidebarOpen = true;
-    }
-  });
-}
+  // ─── Init ─────────────────────────────────────────────────────────────────────
+  function init() {
+    const stored = parseInt(localStorage.getItem('ws_active')) || null;
+    if (stored && WS.docs.find(d => d.pk === stored)) WS.activeId = stored;
+    renderSidebar();
+    renderMain();
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#wsNewBtn') && !e.target.closest('#wsTypePicker')) {
+        document.getElementById('wsTypePicker').classList.remove('open');
+      }
+    });
+    // On resize to desktop: restore sidebar to normal flow
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) {
+        const s = document.getElementById('wsSidebar');
+        s.classList.remove('open');
+        s.classList.remove('collapsed');
+        document.getElementById('wsBackdrop').classList.remove('visible');
+        WS.sidebarOpen = true;
+      }
+    });
+  }
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
-function renderSidebar() {
-  const body = document.getElementById('wsSidebarBody');
-  const groups = ['todo','project','brainstorm','goal','note'];
-  let html = '';
-  groups.forEach(type => {
-    const docs = WS.docs.filter(d => d.type === type);
-    if (!docs.length) return;
-    const m = TYPE_META[type];
-    html += `<div class="ws-group-label"><span style="color:${m.color};">${m.icon}</span> ${m.label}</div>`;
-    docs.forEach(doc => {
-      const active = doc.pk === WS.activeId ? 'active' : '';
-      html += `
+  // ─── Sidebar ──────────────────────────────────────────────────────────────────
+  function renderSidebar() {
+    const body = document.getElementById('wsSidebarBody');
+    const groups = ['todo', 'project', 'brainstorm', 'goal', 'note'];
+    let html = '';
+    groups.forEach(type => {
+      const docs = WS.docs.filter(d => d.type === type);
+      if (!docs.length) return;
+      const m = TYPE_META[type];
+      html += `<div class="ws-group-label"><span style="color:${m.color};">${m.icon}</span> ${m.label}</div>`;
+      docs.forEach(doc => {
+        const active = doc.pk === WS.activeId ? 'active' : '';
+        html += `
         <button class="ws-doc-item ${active}" onclick="selectDoc(${doc.pk})">
           <span class="ws-doc-dot" style="background:${doc.color};"></span>
           <span class="ws-doc-name">${esc(doc.title)}</span>
         </button>`;
+      });
     });
-  });
-  if (!html) html = `<div style="padding:1rem;font-size:0.82rem;color:var(--text-light);text-align:center;">No docs yet.<br>Click + New to start.</div>`;
-  body.innerHTML = html;
-}
-
-function toggleSidebar() {
-  WS.sidebarOpen = !WS.sidebarOpen;
-  const sidebar   = document.getElementById('wsSidebar');
-  const backdrop  = document.getElementById('wsBackdrop');
-  const isMobile  = window.innerWidth <= 900;
-  if (isMobile) {
-    sidebar.classList.toggle('open', WS.sidebarOpen);
-    backdrop.classList.toggle('visible', WS.sidebarOpen);
-  } else {
-    sidebar.classList.toggle('collapsed', !WS.sidebarOpen);
+    if (!html) html = `<div style="padding:1rem;font-size:0.82rem;color:var(--text-light);text-align:center;">No docs yet.<br>Click + New to start.</div>`;
+    body.innerHTML = html;
   }
-}
 
-function closeSidebarMobile() {
-  WS.sidebarOpen = false;
-  document.getElementById('wsSidebar').classList.remove('open');
-  document.getElementById('wsBackdrop').classList.remove('visible');
-}
-
-function toggleTypePicker() {
-  document.getElementById('wsTypePicker').classList.toggle('open');
-}
-
-// ─── Select / navigate ────────────────────────────────────────────────────────
-function selectDoc(pk) {
-  WS.activeId = pk;
-  localStorage.setItem('ws_active', pk);
-  renderSidebar();
-  renderMain();
-}
-
-function getActiveDoc() {
-  return WS.docs.find(d => d.pk === WS.activeId) || null;
-}
-
-// ─── Main render (dispatcher) ─────────────────────────────────────────────────
-function renderMain() {
-  const doc = getActiveDoc();
-  const topbarTitle = document.getElementById('wsTopbarTitle');
-  if (!doc) {
-    topbarTitle.textContent = '';
-    renderWelcome();
-    return;
+  function toggleSidebar() {
+    WS.sidebarOpen = !WS.sidebarOpen;
+    const sidebar = document.getElementById('wsSidebar');
+    const backdrop = document.getElementById('wsBackdrop');
+    const isMobile = window.innerWidth <= 900;
+    if (isMobile) {
+      sidebar.classList.toggle('open', WS.sidebarOpen);
+      backdrop.classList.toggle('visible', WS.sidebarOpen);
+    } else {
+      sidebar.classList.toggle('collapsed', !WS.sidebarOpen);
+    }
   }
-  const m = TYPE_META[doc.type];
-  topbarTitle.textContent = m.label;
-  switch (doc.type) {
-    case 'todo':       renderTodo(doc);       break;
-    case 'project':    renderProject(doc);    break;
-    case 'brainstorm': renderBrainstorm(doc); break;
-    case 'goal':       renderGoal(doc);       break;
-    case 'note':       renderNote(doc);       break;
-  }
-}
 
-// ─── Welcome screen ───────────────────────────────────────────────────────────
-function renderWelcome() {
-  document.getElementById('wsContentArea').innerHTML = `
+  function closeSidebarMobile() {
+    WS.sidebarOpen = false;
+    document.getElementById('wsSidebar').classList.remove('open');
+    document.getElementById('wsBackdrop').classList.remove('visible');
+  }
+
+  function toggleTypePicker() {
+    document.getElementById('wsTypePicker').classList.toggle('open');
+  }
+
+  // ─── Select / navigate ────────────────────────────────────────────────────────
+  function selectDoc(pk) {
+    WS.activeId = pk;
+    localStorage.setItem('ws_active', pk);
+    renderSidebar();
+    renderMain();
+  }
+
+  function getActiveDoc() {
+    return WS.docs.find(d => d.pk === WS.activeId) || null;
+  }
+
+  // ─── Main render (dispatcher) ─────────────────────────────────────────────────
+  function renderMain() {
+    const doc = getActiveDoc();
+    const topbarTitle = document.getElementById('wsTopbarTitle');
+    if (!doc) {
+      topbarTitle.textContent = '';
+      renderWelcome();
+      return;
+    }
+    const m = TYPE_META[doc.type];
+    topbarTitle.textContent = m.label;
+    switch (doc.type) {
+      case 'todo': renderTodo(doc); break;
+      case 'project': renderProject(doc); break;
+      case 'brainstorm': renderBrainstorm(doc); break;
+      case 'goal': renderGoal(doc); break;
+      case 'note': renderNote(doc); break;
+    }
+  }
+
+  // ─── Welcome screen ───────────────────────────────────────────────────────────
+  function renderWelcome() {
+    document.getElementById('wsContentArea').innerHTML = `
     <div class="ws-welcome">
       <div class="ws-welcome-icon" style="width:72px;height:72px;background:linear-gradient(135deg,#dcfce7,#dbeafe);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:2rem;color:#4E7C3F;">
         <i class="bi bi-journals"></i>
@@ -1220,12 +1562,12 @@ function renderWelcome() {
         `).join('')}
       </div>
     </div>`;
-}
+  }
 
-// ─── Shared doc header HTML ───────────────────────────────────────────────────
-function docHeaderHTML(doc) {
-  const m = TYPE_META[doc.type];
-  return `
+  // ─── Shared doc header HTML ───────────────────────────────────────────────────
+  function docHeaderHTML(doc) {
+    const m = TYPE_META[doc.type];
+    return `
     <div class="ws-doc-header">
       <div class="ws-doc-emoji" style="background:${m.bg};color:${m.color};">${m.icon}</div>
       <input class="ws-title-input" id="docTitleInput" value="${esc(doc.title)}"
@@ -1235,20 +1577,20 @@ function docHeaderHTML(doc) {
         <i class="bi bi-trash3"></i> Delete
       </button>
     </div>`;
-}
+  }
 
-// ─── TODO ─────────────────────────────────────────────────────────────────────
-function renderTodo(doc) {
-  const done  = doc.items.filter(i => i.is_done).length;
-  const total = doc.items.length;
-  const pct   = total ? Math.round((done / total) * 100) : 0;
-  const progressHTML = total
-    ? `<div class="ws-progress-wrap">
+  // ─── TODO ─────────────────────────────────────────────────────────────────────
+  function renderTodo(doc) {
+    const done = doc.items.filter(i => i.is_done).length;
+    const total = doc.items.length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    const progressHTML = total
+      ? `<div class="ws-progress-wrap">
          <div class="ws-progress-bar"><div class="ws-progress-fill" id="progressFill" style="width:${pct}%"></div></div>
          <div class="ws-progress-label" id="progressLabel">${done} of ${total} completed · ${pct}%</div>
        </div>` : '';
 
-  document.getElementById('wsContentArea').innerHTML = `
+    document.getElementById('wsContentArea').innerHTML = `
     ${docHeaderHTML(doc)}
     ${progressHTML}
     <div class="ws-todo-list" id="wsItemList">
@@ -1259,24 +1601,24 @@ function renderTodo(doc) {
       <input class="ws-add-input" id="todoInput" placeholder="Add a task…">
       <button type="submit" class="ws-add-submit">Add</button>
     </form>`;
-}
+  }
 
-function todoItemHTML(item, docPk) {
-  const pColors = { low:'#16a34a', medium:'#d97706', high:'#dc2626' };
-  const pc = pColors[item.priority] || '#d97706';
-  const today = new Date().toISOString().slice(0,10);
-  const overdue = item.due_date && item.due_date < today && !item.is_done;
-  const dueHTML = item.due_date
-    ? `<span class="ws-due-badge ${overdue?'overdue':''}">${overdue?'<i class="bi bi-alarm-fill"></i>':'<i class="bi bi-calendar3"></i>'}${item.due_date}</span>` : '';
-  const effortMap = { xs:'XS', s:'S', m:'M', l:'L', xl:'XL' };
-  const effortHTML = item.effort && item.effort !== 'm'
-    ? `<span style="font-size:0.68rem;font-weight:700;padding:1px 6px;border-radius:50px;background:var(--surface-3);color:var(--text-light);flex-shrink:0;">${effortMap[item.effort]||item.effort}</span>` : '';
-  return `
+  function todoItemHTML(item, docPk) {
+    const pColors = { low: '#16a34a', medium: '#d97706', high: '#dc2626' };
+    const pc = pColors[item.priority] || '#d97706';
+    const today = new Date().toISOString().slice(0, 10);
+    const overdue = item.due_date && item.due_date < today && !item.is_done;
+    const dueHTML = item.due_date
+      ? `<span class="ws-due-badge ${overdue ? 'overdue' : ''}">${overdue ? '<i class="bi bi-alarm-fill"></i>' : '<i class="bi bi-calendar3"></i>'}${item.due_date}</span>` : '';
+    const effortMap = { xs: 'XS', s: 'S', m: 'M', l: 'L', xl: 'XL' };
+    const effortHTML = item.effort && item.effort !== 'm'
+      ? `<span style="font-size:0.68rem;font-weight:700;padding:1px 6px;border-radius:50px;background:var(--surface-3);color:var(--text-light);flex-shrink:0;">${effortMap[item.effort] || item.effort}</span>` : '';
+    return `
     <div class="ws-todo-item" id="ti-${item.pk}">
-      <button class="ws-check-btn ${item.is_done?'done':''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})" title="Toggle complete">
-        <i class="bi bi-${item.is_done?'check-circle-fill':'circle'}"></i>
+      <button class="ws-check-btn ${item.is_done ? 'done' : ''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})" title="Toggle complete">
+        <i class="bi bi-${item.is_done ? 'check-circle-fill' : 'circle'}"></i>
       </button>
-      <input class="ws-item-text ${item.is_done?'done-text':''}" value="${esc(item.content)}"
+      <input class="ws-item-text ${item.is_done ? 'done-text' : ''}" value="${esc(item.content)}"
              onchange="saveItemContent(${item.pk},${docPk},this.value)">
       <span class="ws-priority-pill" style="background:${pc}20;color:${pc};"
             onclick="cyclePriority(${item.pk},${docPk},'${item.priority}')"
@@ -1286,32 +1628,32 @@ function todoItemHTML(item, docPk) {
       <button class="ws-expand-btn" onclick="openDetail(${item.pk},${docPk})" title="Open detail"><i class="bi bi-arrow-up-right-square"></i></button>
       <button class="ws-item-del" onclick="deleteItem(${item.pk},${docPk})" title="Delete"><i class="bi bi-x"></i></button>
     </div>`;
-}
+  }
 
-function updateTodoProgress(doc) {
-  const fill  = document.getElementById('progressFill');
-  const label = document.getElementById('progressLabel');
-  if (!fill) return;
-  const done  = doc.items.filter(i => i.is_done).length;
-  const total = doc.items.length;
-  const pct   = total ? Math.round((done / total) * 100) : 0;
-  fill.style.width = pct + '%';
-  if (label) label.textContent = `${done} of ${total} completed · ${pct}%`;
-}
+  function updateTodoProgress(doc) {
+    const fill = document.getElementById('progressFill');
+    const label = document.getElementById('progressLabel');
+    if (!fill) return;
+    const done = doc.items.filter(i => i.is_done).length;
+    const total = doc.items.length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    fill.style.width = pct + '%';
+    if (label) label.textContent = `${done} of ${total} completed · ${pct}%`;
+  }
 
-// ─── PROJECT (Kanban) ─────────────────────────────────────────────────────────
-function renderProject(doc) {
-  const cols = [
-    { status: 'todo',        label: 'To Do',       color: '#64748b', dot: '#64748b' },
-    { status: 'in_progress', label: 'In Progress',  color: '#2563eb', dot: '#3b82f6' },
-    { status: 'done',        label: 'Done',         color: '#16a34a', dot: '#22c55e' },
-    { status: 'blocked',     label: 'Blocked',      color: '#dc2626', dot: '#ef4444' },
-  ];
+  // ─── PROJECT (Kanban) ─────────────────────────────────────────────────────────
+  function renderProject(doc) {
+    const cols = [
+      { status: 'todo', label: 'To Do', color: '#64748b', dot: '#64748b' },
+      { status: 'in_progress', label: 'In Progress', color: '#2563eb', dot: '#3b82f6' },
+      { status: 'done', label: 'Done', color: '#16a34a', dot: '#22c55e' },
+      { status: 'blocked', label: 'Blocked', color: '#dc2626', dot: '#ef4444' },
+    ];
 
-  const colHtml = cols.map(col => {
-    const items = doc.items.filter(i => i.status === col.status);
-    const cards = items.map(item => projectCardHTML(item, doc.pk)).join('');
-    return `
+    const colHtml = cols.map(col => {
+      const items = doc.items.filter(i => i.status === col.status);
+      const cards = items.map(item => projectCardHTML(item, doc.pk)).join('');
+      return `
       <div class="ws-kanban-col">
         <div class="ws-kanban-col-title" style="color:${col.color};">
           <span style="width:8px;height:8px;border-radius:50%;background:${col.dot};display:inline-block;"></span>
@@ -1327,31 +1669,31 @@ function renderProject(doc) {
           <button type="submit" class="ws-add-submit">+</button>
         </form>
       </div>`;
-  }).join('');
+    }).join('');
 
-  document.getElementById('wsContentArea').innerHTML = `
+    document.getElementById('wsContentArea').innerHTML = `
     ${docHeaderHTML(doc)}
     <div class="ws-kanban">${colHtml}</div>`;
-}
+  }
 
-function projectCardHTML(item, docPk) {
-  const pColors = { low:'#16a34a', medium:'#d97706', high:'#dc2626' };
-  const pc = pColors[item.priority] || '#d97706';
-  const nextStatus = { todo:'in_progress', in_progress:'done', done:'blocked', blocked:'todo' };
-  const nextLabel  = { todo:'<i class="bi bi-play-fill"></i> Start', in_progress:'<i class="bi bi-check-lg"></i> Done', done:'<i class="bi bi-slash-circle"></i> Block', blocked:'<i class="bi bi-arrow-counterclockwise"></i> Reset' };
-  const today   = new Date().toISOString().slice(0, 10);
-  const overdue = item.due_date && item.due_date < today && !item.is_done;
-  const dueTag  = item.due_date
-    ? `<span style="font-size:0.7rem;color:${overdue?'#ef4444':'var(--text-light)'};display:flex;align-items:center;gap:3px;"><i class="bi bi-${overdue?'alarm-fill':'calendar3'}"></i>${item.due_date}</span>` : '';
-  const effortMap = { xs:'XS', s:'S', m:'M', l:'L', xl:'XL' };
-  return `
+  function projectCardHTML(item, docPk) {
+    const pColors = { low: '#16a34a', medium: '#d97706', high: '#dc2626' };
+    const pc = pColors[item.priority] || '#d97706';
+    const nextStatus = { todo: 'in_progress', in_progress: 'done', done: 'blocked', blocked: 'todo' };
+    const nextLabel = { todo: '<i class="bi bi-play-fill"></i> Start', in_progress: '<i class="bi bi-check-lg"></i> Done', done: '<i class="bi bi-slash-circle"></i> Block', blocked: '<i class="bi bi-arrow-counterclockwise"></i> Reset' };
+    const today = new Date().toISOString().slice(0, 10);
+    const overdue = item.due_date && item.due_date < today && !item.is_done;
+    const dueTag = item.due_date
+      ? `<span style="font-size:0.7rem;color:${overdue ? '#ef4444' : 'var(--text-light)'};display:flex;align-items:center;gap:3px;"><i class="bi bi-${overdue ? 'alarm-fill' : 'calendar3'}"></i>${item.due_date}</span>` : '';
+    const effortMap = { xs: 'XS', s: 'S', m: 'M', l: 'L', xl: 'XL' };
+    return `
     <div class="ws-card" id="kc-${item.pk}">
       <div class="ws-card-content" contenteditable="true"
            onblur="saveItemContent(${item.pk},${docPk},this.textContent.trim())">${esc(item.content)}</div>
       <div class="ws-card-footer">
         <button class="ws-card-status-btn" style="background:${pc}20;color:${pc};"
                 onclick="cyclePriority(${item.pk},${docPk},'${item.priority}')">${item.priority}</button>
-        ${item.effort ? `<span style="font-size:0.68rem;font-weight:700;padding:1px 7px;border-radius:50px;background:var(--surface-3);color:var(--text-light);">${effortMap[item.effort]||item.effort}</span>` : ''}
+        ${item.effort ? `<span style="font-size:0.68rem;font-weight:700;padding:1px 7px;border-radius:50px;background:var(--surface-3);color:var(--text-light);">${effortMap[item.effort] || item.effort}</span>` : ''}
         <button class="ws-card-status-btn" style="background:var(--surface-3);color:var(--text-mid);"
                 onclick="moveCard(${item.pk},${docPk},'${nextStatus[item.status]}')">${nextLabel[item.status]}</button>
         ${dueTag}
@@ -1360,21 +1702,21 @@ function projectCardHTML(item, docPk) {
                 onclick="deleteItem(${item.pk},${docPk})"><i class="bi bi-x"></i></button>
       </div>
     </div>`;
-}
+  }
 
-function moveCard(pk, docPk, newStatus) {
-  const doc  = WS.docs.find(d => d.pk === docPk);
-  const item = doc.items.find(i => i.pk === pk);
-  if (!item) return;
-  item.status = newStatus;
-  api(`/workspace/item/${pk}/update/`, { status: newStatus });
-  renderProject(doc);
-}
+  function moveCard(pk, docPk, newStatus) {
+    const doc = WS.docs.find(d => d.pk === docPk);
+    const item = doc.items.find(i => i.pk === pk);
+    if (!item) return;
+    item.status = newStatus;
+    api(`/workspace/item/${pk}/update/`, { status: newStatus });
+    renderProject(doc);
+  }
 
-// ─── BRAINSTORM ───────────────────────────────────────────────────────────────
-function renderBrainstorm(doc) {
-  const stickies = doc.items.map(item => stickyHTML(item, doc.pk)).join('');
-  document.getElementById('wsContentArea').innerHTML = `
+  // ─── BRAINSTORM ───────────────────────────────────────────────────────────────
+  function renderBrainstorm(doc) {
+    const stickies = doc.items.map(item => stickyHTML(item, doc.pk)).join('');
+    document.getElementById('wsContentArea').innerHTML = `
     ${docHeaderHTML(doc)}
     <div class="ws-brainstorm-grid" id="wsBGrid">
       ${stickies}
@@ -1383,59 +1725,59 @@ function renderBrainstorm(doc) {
         Add idea
       </button>
     </div>`;
-}
+  }
 
-function stickyHTML(item, docPk) {
-  const colorDots = STICKY_COLORS.map(c =>
-    `<span class="ws-color-dot" style="background:${c};" onclick="changeStickyColor(${item.pk},${docPk},'${c}')"></span>`
-  ).join('');
-  return `
+  function stickyHTML(item, docPk) {
+    const colorDots = STICKY_COLORS.map(c =>
+      `<span class="ws-color-dot" style="background:${c};" onclick="changeStickyColor(${item.pk},${docPk},'${c}')"></span>`
+    ).join('');
+    return `
     <div class="ws-sticky" id="st-${item.pk}" style="background:${item.color};">
       <button class="ws-sticky-del" onclick="deleteItem(${item.pk},${docPk})"><i class="bi bi-x"></i></button>
       <textarea class="ws-sticky-text" rows="5"
                 onblur="saveItemContent(${item.pk},${docPk},this.value)">${esc(item.content)}</textarea>
       <div class="ws-sticky-color-btns">${colorDots}</div>
     </div>`;
-}
-
-function changeStickyColor(pk, docPk, color) {
-  const doc  = WS.docs.find(d => d.pk === docPk);
-  const item = doc.items.find(i => i.pk === pk);
-  if (!item) return;
-  item.color = color;
-  const el = document.getElementById(`st-${pk}`);
-  if (el) el.style.background = color;
-  api(`/workspace/item/${pk}/update/`, { color });
-}
-
-async function addSticky(docPk) {
-  const colors = STICKY_COLORS;
-  const color  = colors[Math.floor(Math.random() * colors.length)];
-  const data   = await api(`/workspace/doc/${docPk}/item/`, { content: '', color, status: 'todo', priority: 'medium' });
-  if (data.ok) {
-    const doc = WS.docs.find(d => d.pk === docPk);
-    doc.items.push(data.item);
-    renderBrainstorm(doc);
-    // Focus the new sticky
-    setTimeout(() => {
-      const el = document.querySelector(`#st-${data.item.pk} .ws-sticky-text`);
-      if (el) el.focus();
-    }, 50);
   }
-}
 
-// ─── GOAL ─────────────────────────────────────────────────────────────────────
-function renderGoal(doc) {
-  const done  = doc.items.filter(i => i.is_done).length;
-  const total = doc.items.length;
-  const pct   = total ? Math.round(done / total * 100) : 0;
-  const progressHTML = total
-    ? `<div class="ws-progress-wrap">
+  function changeStickyColor(pk, docPk, color) {
+    const doc = WS.docs.find(d => d.pk === docPk);
+    const item = doc.items.find(i => i.pk === pk);
+    if (!item) return;
+    item.color = color;
+    const el = document.getElementById(`st-${pk}`);
+    if (el) el.style.background = color;
+    api(`/workspace/item/${pk}/update/`, { color });
+  }
+
+  async function addSticky(docPk) {
+    const colors = STICKY_COLORS;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const data = await api(`/workspace/doc/${docPk}/item/`, { content: '', color, status: 'todo', priority: 'medium' });
+    if (data.ok) {
+      const doc = WS.docs.find(d => d.pk === docPk);
+      doc.items.push(data.item);
+      renderBrainstorm(doc);
+      // Focus the new sticky
+      setTimeout(() => {
+        const el = document.querySelector(`#st-${data.item.pk} .ws-sticky-text`);
+        if (el) el.focus();
+      }, 50);
+    }
+  }
+
+  // ─── GOAL ─────────────────────────────────────────────────────────────────────
+  function renderGoal(doc) {
+    const done = doc.items.filter(i => i.is_done).length;
+    const total = doc.items.length;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    const progressHTML = total
+      ? `<div class="ws-progress-wrap">
          <div class="ws-progress-bar"><div class="ws-progress-fill" id="progressFill" style="width:${pct}%;background:linear-gradient(90deg,#7c3aed,#ec4899);"></div></div>
          <div class="ws-progress-label" id="progressLabel">${pct}% of goals achieved</div>
        </div>` : '';
 
-  document.getElementById('wsContentArea').innerHTML = `
+    document.getElementById('wsContentArea').innerHTML = `
     ${docHeaderHTML(doc)}
     ${progressHTML}
     <div id="wsItemList">
@@ -1446,19 +1788,19 @@ function renderGoal(doc) {
       <input class="ws-add-input" id="goalInput" placeholder="Add a goal…">
       <button type="submit" class="ws-add-submit">Add</button>
     </form>`;
-}
+  }
 
-function goalItemHTML(item, docPk) {
-  const today   = new Date().toISOString().slice(0, 10);
-  const overdue = item.due_date && item.due_date < today && !item.is_done;
-  const dueHTML = item.due_date
-    ? `<span style="font-size:0.72rem;color:${overdue?'#ef4444':'var(--text-light)'};flex-shrink:0;display:flex;align-items:center;gap:3px;"><i class="bi bi-${overdue?'alarm-fill':'calendar3'}"></i>${item.due_date}</span>` : '';
-  return `
+  function goalItemHTML(item, docPk) {
+    const today = new Date().toISOString().slice(0, 10);
+    const overdue = item.due_date && item.due_date < today && !item.is_done;
+    const dueHTML = item.due_date
+      ? `<span style="font-size:0.72rem;color:${overdue ? '#ef4444' : 'var(--text-light)'};flex-shrink:0;display:flex;align-items:center;gap:3px;"><i class="bi bi-${overdue ? 'alarm-fill' : 'calendar3'}"></i>${item.due_date}</span>` : '';
+    return `
     <div class="ws-goal-item" id="gi-${item.pk}">
-      <button class="ws-goal-check ${item.is_done?'done':''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})">
+      <button class="ws-goal-check ${item.is_done ? 'done' : ''}" onclick="toggleDone(${item.pk},${docPk},${!item.is_done})">
         ${item.is_done ? '<i class="bi bi-check"></i>' : ''}
       </button>
-      <input class="ws-goal-text ${item.is_done?'done-text':''}" value="${esc(item.content)}"
+      <input class="ws-goal-text ${item.is_done ? 'done-text' : ''}" value="${esc(item.content)}"
              onchange="saveItemContent(${item.pk},${docPk},this.value)">
       ${dueHTML}
       <button class="ws-expand-btn" onclick="openDetail(${item.pk},${docPk})" title="Open detail"><i class="bi bi-arrow-up-right-square"></i></button>
@@ -1466,14 +1808,14 @@ function goalItemHTML(item, docPk) {
         <i class="bi bi-x"></i>
       </button>
     </div>`;
-}
+  }
 
-// ─── NOTE ─────────────────────────────────────────────────────────────────────
-function renderNote(doc) {
-  const content = doc.items.length ? doc.items[0].content : '';
-  const itemPk  = doc.items.length ? doc.items[0].pk : null;
+  // ─── NOTE ─────────────────────────────────────────────────────────────────────
+  function renderNote(doc) {
+    const content = doc.items.length ? doc.items[0].content : '';
+    const itemPk = doc.items.length ? doc.items[0].pk : null;
 
-  document.getElementById('wsContentArea').innerHTML = `
+    document.getElementById('wsContentArea').innerHTML = `
     ${docHeaderHTML(doc)}
     <div class="ws-note-toolbar">
       <button class="ws-tb-btn" onclick="insertText('**','**')" title="Bold"><b>B</b></button>
@@ -1487,289 +1829,289 @@ function renderNote(doc) {
     <textarea class="ws-note-textarea" id="noteArea"
               oninput="autoSaveNote(${doc.pk},${itemPk},this.value)"
               placeholder="Start typing your notes here…">${esc(content)}</textarea>`;
-}
-
-function insertText(before, after) {
-  const ta = document.getElementById('noteArea');
-  if (!ta) return;
-  const s = ta.selectionStart, e = ta.selectionEnd;
-  const selected = ta.value.slice(s, e);
-  ta.value = ta.value.slice(0, s) + before + selected + after + ta.value.slice(e);
-  ta.selectionStart = s + before.length;
-  ta.selectionEnd   = s + before.length + selected.length;
-  ta.focus();
-  ta.dispatchEvent(new Event('input'));
-}
-
-function insertTextLine(prefix) {
-  const ta = document.getElementById('noteArea');
-  if (!ta) return;
-  const s = ta.selectionStart;
-  const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
-  ta.value = ta.value.slice(0, lineStart) + prefix + ta.value.slice(lineStart);
-  ta.selectionStart = ta.selectionEnd = lineStart + prefix.length;
-  ta.focus();
-  ta.dispatchEvent(new Event('input'));
-}
-
-async function autoSaveNote(docPk, itemPk, content) {
-  if (WS.noteSaveTimer) clearTimeout(WS.noteSaveTimer);
-  const statusEl = document.getElementById('noteSaveStatus');
-  if (statusEl) statusEl.textContent = 'Saving…';
-  WS.noteSaveTimer = setTimeout(async () => {
-    const doc = WS.docs.find(d => d.pk === docPk);
-    if (!doc) return;
-    if (itemPk) {
-      await api(`/workspace/item/${itemPk}/update/`, { content });
-      const item = doc.items.find(i => i.pk === itemPk);
-      if (item) item.content = content;
-    } else {
-      // First note item — create it
-      const data = await api(`/workspace/doc/${docPk}/item/`, { content, status:'todo', priority:'medium', color:'#fce7f3' });
-      if (data.ok) { doc.items.push(data.item); }
-    }
-    if (statusEl) { statusEl.textContent = 'Saved ✓'; setTimeout(() => { statusEl.textContent = ''; }, 2000); }
-  }, 800);
-}
-
-// ─── CRUD operations ──────────────────────────────────────────────────────────
-async function createDoc(type) {
-  document.getElementById('wsTypePicker').classList.remove('open');
-  const m    = TYPE_META[type];
-  const data = await api('/workspace/doc/create/', { type, title: `My ${m.label}`, color: m.color });
-  if (data.ok) {
-    WS.docs.unshift(data.doc);
-    selectDoc(data.doc.pk);
   }
-}
 
-async function saveDocTitle(pk, title) {
-  const doc = WS.docs.find(d => d.pk === pk);
-  if (doc) doc.title = title;
-  await api(`/workspace/doc/${pk}/update/`, { title });
-  renderSidebar();
-  // Re-highlight active
-  document.querySelectorAll('.ws-doc-item').forEach(el => {
-    if (el.onclick && el.getAttribute('onclick')?.includes(`(${pk})`)) el.classList.add('active');
-  });
-}
+  function insertText(before, after) {
+    const ta = document.getElementById('noteArea');
+    if (!ta) return;
+    const s = ta.selectionStart, e = ta.selectionEnd;
+    const selected = ta.value.slice(s, e);
+    ta.value = ta.value.slice(0, s) + before + selected + after + ta.value.slice(e);
+    ta.selectionStart = s + before.length;
+    ta.selectionEnd = s + before.length + selected.length;
+    ta.focus();
+    ta.dispatchEvent(new Event('input'));
+  }
 
-async function deleteDoc(pk) {
-  if (!confirm('Delete this doc and all its items?')) return;
-  const data = await api(`/workspace/doc/${pk}/delete/`, {});
-  if (data.ok) {
-    WS.docs = WS.docs.filter(d => d.pk !== pk);
-    if (WS.activeId === pk) {
-      WS.activeId = WS.docs.length ? WS.docs[0].pk : null;
-      localStorage.setItem('ws_active', WS.activeId || '');
+  function insertTextLine(prefix) {
+    const ta = document.getElementById('noteArea');
+    if (!ta) return;
+    const s = ta.selectionStart;
+    const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+    ta.value = ta.value.slice(0, lineStart) + prefix + ta.value.slice(lineStart);
+    ta.selectionStart = ta.selectionEnd = lineStart + prefix.length;
+    ta.focus();
+    ta.dispatchEvent(new Event('input'));
+  }
+
+  async function autoSaveNote(docPk, itemPk, content) {
+    if (WS.noteSaveTimer) clearTimeout(WS.noteSaveTimer);
+    const statusEl = document.getElementById('noteSaveStatus');
+    if (statusEl) statusEl.textContent = 'Saving…';
+    WS.noteSaveTimer = setTimeout(async () => {
+      const doc = WS.docs.find(d => d.pk === docPk);
+      if (!doc) return;
+      if (itemPk) {
+        await api(`/workspace/item/${itemPk}/update/`, { content });
+        const item = doc.items.find(i => i.pk === itemPk);
+        if (item) item.content = content;
+      } else {
+        // First note item — create it
+        const data = await api(`/workspace/doc/${docPk}/item/`, { content, status: 'todo', priority: 'medium', color: '#fce7f3' });
+        if (data.ok) { doc.items.push(data.item); }
+      }
+      if (statusEl) { statusEl.textContent = 'Saved ✓'; setTimeout(() => { statusEl.textContent = ''; }, 2000); }
+    }, 800);
+  }
+
+  // ─── CRUD operations ──────────────────────────────────────────────────────────
+  async function createDoc(type) {
+    document.getElementById('wsTypePicker').classList.remove('open');
+    const m = TYPE_META[type];
+    const data = await api('/workspace/doc/create/', { type, title: `My ${m.label}`, color: m.color });
+    if (data.ok) {
+      WS.docs.unshift(data.doc);
+      selectDoc(data.doc.pk);
     }
+  }
+
+  async function saveDocTitle(pk, title) {
+    const doc = WS.docs.find(d => d.pk === pk);
+    if (doc) doc.title = title;
+    await api(`/workspace/doc/${pk}/update/`, { title });
     renderSidebar();
-    renderMain();
+    // Re-highlight active
+    document.querySelectorAll('.ws-doc-item').forEach(el => {
+      if (el.onclick && el.getAttribute('onclick')?.includes(`(${pk})`)) el.classList.add('active');
+    });
   }
-}
 
-async function addItem(e, docPk, type, status='todo') {
-  e.preventDefault();
-  const inputEl = e.target.querySelector('input');
-  const content = inputEl ? inputEl.value.trim() : '';
-  if (!content) return;
-  inputEl.value = '';
-  const color = type === 'brainstorm' ? STICKY_COLORS[Math.floor(Math.random()*STICKY_COLORS.length)] : '#fef9c3';
-  const data  = await api(`/workspace/doc/${docPk}/item/`, { content, status, priority:'medium', color });
-  if (data.ok) {
-    const doc = WS.docs.find(d => d.pk === docPk);
-    doc.items.push(data.item);
-    // Optimistic insert
-    const listEl = document.getElementById('wsItemList') || document.getElementById('col-todo');
-    if (type === 'todo' && listEl) {
-      listEl.insertAdjacentHTML('beforeend', todoItemHTML(data.item, docPk));
-      updateTodoProgress(doc);
-    } else if (type === 'project') {
-      const col = document.getElementById(`col-${status}`);
-      if (col) col.insertAdjacentHTML('beforebegin', projectCardHTML(data.item, docPk));
-      else renderProject(doc);
-    } else if (type === 'goal' && listEl) {
-      listEl.insertAdjacentHTML('beforeend', goalItemHTML(data.item, docPk));
-      updateTodoProgress(doc);
-    } else {
+  async function deleteDoc(pk) {
+    if (!confirm('Delete this doc and all its items?')) return;
+    const data = await api(`/workspace/doc/${pk}/delete/`, {});
+    if (data.ok) {
+      WS.docs = WS.docs.filter(d => d.pk !== pk);
+      if (WS.activeId === pk) {
+        WS.activeId = WS.docs.length ? WS.docs[0].pk : null;
+        localStorage.setItem('ws_active', WS.activeId || '');
+      }
+      renderSidebar();
       renderMain();
     }
-    inputEl.focus();
   }
-}
 
-async function toggleDone(pk, docPk, isDone) {
-  const doc  = WS.docs.find(d => d.pk === docPk);
-  const item = doc.items.find(i => i.pk === pk);
-  if (!item) return;
-  item.is_done = isDone;
-  await api(`/workspace/item/${pk}/update/`, { is_done: isDone });
-  // Update UI in place
-  const el = document.getElementById(`ti-${pk}`) || document.getElementById(`gi-${pk}`);
-  if (el) {
-    el.querySelectorAll('.ws-check-btn, .ws-goal-check').forEach(btn => {
-      btn.classList.toggle('done', isDone);
-      const ic = btn.querySelector('i');
-      if (ic && el.id.startsWith('ti-')) ic.className = `bi bi-${isDone?'check-circle-fill':'circle'}`;
-      if (el.id.startsWith('gi-')) btn.innerHTML = isDone ? '<i class="bi bi-check"></i>' : '';
-      btn.setAttribute('onclick', `toggleDone(${pk},${docPk},${!isDone})`);
-    });
-    el.querySelectorAll('.ws-item-text, .ws-goal-text').forEach(t => t.classList.toggle('done-text', isDone));
+  async function addItem(e, docPk, type, status = 'todo') {
+    e.preventDefault();
+    const inputEl = e.target.querySelector('input');
+    const content = inputEl ? inputEl.value.trim() : '';
+    if (!content) return;
+    inputEl.value = '';
+    const color = type === 'brainstorm' ? STICKY_COLORS[Math.floor(Math.random() * STICKY_COLORS.length)] : '#fef9c3';
+    const data = await api(`/workspace/doc/${docPk}/item/`, { content, status, priority: 'medium', color });
+    if (data.ok) {
+      const doc = WS.docs.find(d => d.pk === docPk);
+      doc.items.push(data.item);
+      // Optimistic insert
+      const listEl = document.getElementById('wsItemList') || document.getElementById('col-todo');
+      if (type === 'todo' && listEl) {
+        listEl.insertAdjacentHTML('beforeend', todoItemHTML(data.item, docPk));
+        updateTodoProgress(doc);
+      } else if (type === 'project') {
+        const col = document.getElementById(`col-${status}`);
+        if (col) col.insertAdjacentHTML('beforebegin', projectCardHTML(data.item, docPk));
+        else renderProject(doc);
+      } else if (type === 'goal' && listEl) {
+        listEl.insertAdjacentHTML('beforeend', goalItemHTML(data.item, docPk));
+        updateTodoProgress(doc);
+      } else {
+        renderMain();
+      }
+      inputEl.focus();
+    }
   }
-  updateTodoProgress(doc);
-}
 
-async function saveItemContent(pk, docPk, content) {
-  const doc  = WS.docs.find(d => d.pk === docPk);
-  const item = doc ? doc.items.find(i => i.pk === pk) : null;
-  if (item) item.content = content;
-  await api(`/workspace/item/${pk}/update/`, { content });
-}
-
-const PRIORITIES = ['low','medium','high'];
-async function cyclePriority(pk, docPk, current) {
-  const next = PRIORITIES[(PRIORITIES.indexOf(current) + 1) % PRIORITIES.length];
-  const doc  = WS.docs.find(d => d.pk === docPk);
-  const item = doc.items.find(i => i.pk === pk);
-  if (item) item.priority = next;
-  await api(`/workspace/item/${pk}/update/`, { priority: next });
-  renderMain(); // re-render to update colors
-}
-
-async function deleteItem(pk, docPk) {
-  const data = await api(`/workspace/item/${pk}/delete/`, {});
-  if (data.ok) {
+  async function toggleDone(pk, docPk, isDone) {
     const doc = WS.docs.find(d => d.pk === docPk);
-    doc.items = doc.items.filter(i => i.pk !== pk);
-    const el = document.getElementById(`ti-${pk}`) ||
-               document.getElementById(`kc-${pk}`) ||
-               document.getElementById(`st-${pk}`) ||
-               document.getElementById(`gi-${pk}`);
-    if (el) { el.style.animation = 'none'; el.style.opacity = '0'; el.style.transform = 'scale(0.9)'; el.style.transition = '0.2s'; setTimeout(() => el.remove(), 200); }
+    const item = doc.items.find(i => i.pk === pk);
+    if (!item) return;
+    item.is_done = isDone;
+    await api(`/workspace/item/${pk}/update/`, { is_done: isDone });
+    // Update UI in place
+    const el = document.getElementById(`ti-${pk}`) || document.getElementById(`gi-${pk}`);
+    if (el) {
+      el.querySelectorAll('.ws-check-btn, .ws-goal-check').forEach(btn => {
+        btn.classList.toggle('done', isDone);
+        const ic = btn.querySelector('i');
+        if (ic && el.id.startsWith('ti-')) ic.className = `bi bi-${isDone ? 'check-circle-fill' : 'circle'}`;
+        if (el.id.startsWith('gi-')) btn.innerHTML = isDone ? '<i class="bi bi-check"></i>' : '';
+        btn.setAttribute('onclick', `toggleDone(${pk},${docPk},${!isDone})`);
+      });
+      el.querySelectorAll('.ws-item-text, .ws-goal-text').forEach(t => t.classList.toggle('done-text', isDone));
+    }
     updateTodoProgress(doc);
   }
-}
 
-// ─── API helper ───────────────────────────────────────────────────────────────
-async function api(url, body) {
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF() },
-      body: JSON.stringify(body),
-    });
-    return await res.json();
-  } catch (e) { console.error('WS API error:', e); return { ok: false }; }
-}
-
-// ─── Escape helper ────────────────────────────────────────────────────────────
-function esc(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ─── Detail Panel ─────────────────────────────────────────────────────────────
-let DETAIL = { itemPk: null, docPk: null };
-
-function openDetail(itemPk, docPk) {
-  DETAIL = { itemPk, docPk };
-  const doc  = WS.docs.find(d => d.pk === docPk);
-  const item = doc && doc.items.find(i => i.pk === itemPk);
-  if (!item) return;
-
-  const m = TYPE_META[doc.type];
-
-  // Populate header
-  document.getElementById('detailTitle').value = item.content || '';
-  const badge = document.getElementById('detailTypeBadge');
-  badge.innerHTML = m.icon;
-  badge.style.background = m.bg;
-  badge.style.color      = m.color;
-
-  // Description
-  document.getElementById('detailDesc').value = item.description || '';
-
-  // Select fields
-  document.getElementById('detailPriority').value = item.priority  || 'medium';
-  document.getElementById('detailTaskType').value = item.task_type || 'other';
-  document.getElementById('detailStatus').value   = item.status    || 'todo';
-  document.getElementById('detailDueDate').value  = item.due_date  || '';
-
-  // Effort segmented control
-  selectEffort(item.effort || 'm', false);
-
-  // Overdue banner
-  const today   = new Date().toISOString().slice(0, 10);
-  const banner  = document.getElementById('detailOverdue');
-  const bannerT = document.getElementById('detailOverdueText');
-  if (item.due_date && item.due_date < today && !item.is_done) {
-    const diff = Math.round((new Date(today) - new Date(item.due_date)) / 86400000);
-    bannerT.textContent = `Overdue by ${diff} day${diff !== 1 ? 's' : ''}!`;
-    banner.classList.add('show');
-  } else {
-    banner.classList.remove('show');
+  async function saveItemContent(pk, docPk, content) {
+    const doc = WS.docs.find(d => d.pk === docPk);
+    const item = doc ? doc.items.find(i => i.pk === pk) : null;
+    if (item) item.content = content;
+    await api(`/workspace/item/${pk}/update/`, { content });
   }
 
-  // Delete button
-  document.getElementById('detailDelBtn').onclick = () => {
-    closeDetail();
-    deleteItem(itemPk, docPk);
-  };
+  const PRIORITIES = ['low', 'medium', 'high'];
+  async function cyclePriority(pk, docPk, current) {
+    const next = PRIORITIES[(PRIORITIES.indexOf(current) + 1) % PRIORITIES.length];
+    const doc = WS.docs.find(d => d.pk === docPk);
+    const item = doc.items.find(i => i.pk === pk);
+    if (item) item.priority = next;
+    await api(`/workspace/item/${pk}/update/`, { priority: next });
+    renderMain(); // re-render to update colors
+  }
 
-  // Open panel
-  document.getElementById('wsDetailPanel').classList.add('open');
-  document.getElementById('wsDetailBackdrop').classList.add('visible');
-  document.getElementById('detailTitle').focus();
-}
+  async function deleteItem(pk, docPk) {
+    const data = await api(`/workspace/item/${pk}/delete/`, {});
+    if (data.ok) {
+      const doc = WS.docs.find(d => d.pk === docPk);
+      doc.items = doc.items.filter(i => i.pk !== pk);
+      const el = document.getElementById(`ti-${pk}`) ||
+        document.getElementById(`kc-${pk}`) ||
+        document.getElementById(`st-${pk}`) ||
+        document.getElementById(`gi-${pk}`);
+      if (el) { el.style.animation = 'none'; el.style.opacity = '0'; el.style.transform = 'scale(0.9)'; el.style.transition = '0.2s'; setTimeout(() => el.remove(), 200); }
+      updateTodoProgress(doc);
+    }
+  }
 
-function closeDetail() {
-  document.getElementById('wsDetailPanel').classList.remove('open');
-  document.getElementById('wsDetailBackdrop').classList.remove('visible');
-}
+  // ─── API helper ───────────────────────────────────────────────────────────────
+  async function api(url, body) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF() },
+        body: JSON.stringify(body),
+      });
+      return await res.json();
+    } catch (e) { console.error('WS API error:', e); return { ok: false }; }
+  }
 
-function selectEffort(val, save=true) {
-  document.querySelectorAll('.ws-effort-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.effort === val);
-  });
-  if (save) document.getElementById('detailEffortSeg').dataset.value = val;
-  else      document.getElementById('detailEffortSeg').dataset.value = val;
-}
+  // ─── Escape helper ────────────────────────────────────────────────────────────
+  function esc(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
 
-async function saveDetail() {
-  const { itemPk, docPk } = DETAIL;
-  const doc  = WS.docs.find(d => d.pk === docPk);
-  const item = doc && doc.items.find(i => i.pk === itemPk);
-  if (!item) return;
+  // ─── Detail Panel ─────────────────────────────────────────────────────────────
+  let DETAIL = { itemPk: null, docPk: null };
 
-  const effort  = document.getElementById('detailEffortSeg').dataset.value || 'm';
-  const payload = {
-    content:     document.getElementById('detailTitle').value.trim(),
-    description: document.getElementById('detailDesc').value,
-    priority:    document.getElementById('detailPriority').value,
-    task_type:   document.getElementById('detailTaskType').value,
-    status:      document.getElementById('detailStatus').value,
-    due_date:    document.getElementById('detailDueDate').value || null,
-    effort,
-  };
+  function openDetail(itemPk, docPk) {
+    DETAIL = { itemPk, docPk };
+    const doc = WS.docs.find(d => d.pk === docPk);
+    const item = doc && doc.items.find(i => i.pk === itemPk);
+    if (!item) return;
 
-  // Sync to local state
-  Object.assign(item, payload);
+    const m = TYPE_META[doc.type];
 
-  const btn = document.querySelector('.ws-detail-save');
-  btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving…';
-  btn.disabled = true;
+    // Populate header
+    document.getElementById('detailTitle').value = item.content || '';
+    const badge = document.getElementById('detailTypeBadge');
+    badge.innerHTML = m.icon;
+    badge.style.background = m.bg;
+    badge.style.color = m.color;
 
-  await api(`/workspace/item/${itemPk}/update/`, payload);
+    // Description
+    document.getElementById('detailDesc').value = item.description || '';
 
-  btn.innerHTML = '<i class="bi bi-check-lg"></i> Saved!';
-  setTimeout(() => {
-    btn.innerHTML = '<i class="bi bi-check-lg"></i> Save Changes';
-    btn.disabled = false;
-    closeDetail();
-    renderMain();
-  }, 700);
-}
+    // Select fields
+    document.getElementById('detailPriority').value = item.priority || 'medium';
+    document.getElementById('detailTaskType').value = item.task_type || 'other';
+    document.getElementById('detailStatus').value = item.status || 'todo';
+    document.getElementById('detailDueDate').value = item.due_date || '';
 
-// ─── Boot ────────────────────────────────────────────────────────────────────
-init();
+    // Effort segmented control
+    selectEffort(item.effort || 'm', false);
+
+    // Overdue banner
+    const today = new Date().toISOString().slice(0, 10);
+    const banner = document.getElementById('detailOverdue');
+    const bannerT = document.getElementById('detailOverdueText');
+    if (item.due_date && item.due_date < today && !item.is_done) {
+      const diff = Math.round((new Date(today) - new Date(item.due_date)) / 86400000);
+      bannerT.textContent = `Overdue by ${diff} day${diff !== 1 ? 's' : ''}!`;
+      banner.classList.add('show');
+    } else {
+      banner.classList.remove('show');
+    }
+
+    // Delete button
+    document.getElementById('detailDelBtn').onclick = () => {
+      closeDetail();
+      deleteItem(itemPk, docPk);
+    };
+
+    // Open panel
+    document.getElementById('wsDetailPanel').classList.add('open');
+    document.getElementById('wsDetailBackdrop').classList.add('visible');
+    document.getElementById('detailTitle').focus();
+  }
+
+  function closeDetail() {
+    document.getElementById('wsDetailPanel').classList.remove('open');
+    document.getElementById('wsDetailBackdrop').classList.remove('visible');
+  }
+
+  function selectEffort(val, save = true) {
+    document.querySelectorAll('.ws-effort-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.effort === val);
+    });
+    if (save) document.getElementById('detailEffortSeg').dataset.value = val;
+    else document.getElementById('detailEffortSeg').dataset.value = val;
+  }
+
+  async function saveDetail() {
+    const { itemPk, docPk } = DETAIL;
+    const doc = WS.docs.find(d => d.pk === docPk);
+    const item = doc && doc.items.find(i => i.pk === itemPk);
+    if (!item) return;
+
+    const effort = document.getElementById('detailEffortSeg').dataset.value || 'm';
+    const payload = {
+      content: document.getElementById('detailTitle').value.trim(),
+      description: document.getElementById('detailDesc').value,
+      priority: document.getElementById('detailPriority').value,
+      task_type: document.getElementById('detailTaskType').value,
+      status: document.getElementById('detailStatus').value,
+      due_date: document.getElementById('detailDueDate').value || null,
+      effort,
+    };
+
+    // Sync to local state
+    Object.assign(item, payload);
+
+    const btn = document.querySelector('.ws-detail-save');
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving…';
+    btn.disabled = true;
+
+    await api(`/workspace/item/${itemPk}/update/`, payload);
+
+    btn.innerHTML = '<i class="bi bi-check-lg"></i> Saved!';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="bi bi-check-lg"></i> Save Changes';
+      btn.disabled = false;
+      closeDetail();
+      renderMain();
+    }, 700);
+  }
+
+  // ─── Boot ────────────────────────────────────────────────────────────────────
+  init();
 </script>
 {% endblock %}

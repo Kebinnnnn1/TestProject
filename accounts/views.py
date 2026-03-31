@@ -940,7 +940,9 @@ def _serialize_item(item):
         'priority':    item.priority,
         'task_type':   item.task_type,
         'effort':      item.effort,
-        'due_date':    item.due_date.isoformat() if item.due_date else None,
+        'due_date':    item.due_date.isoformat()   if item.due_date   else None,
+        'start_date':  item.start_date.isoformat() if item.start_date else None,
+        'progress':    item.progress,
         'order':       item.order,
         'color':       item.color,
     }
@@ -1035,7 +1037,7 @@ def workspace_create_item(request, pk):
 @verified_required
 @require_POST
 def workspace_update_item(request, pk):
-    """Update an item (content, description, done-state, status, priority, task_type, effort, due_date, color)."""
+    """Update an item (all fields)."""
     item = get_object_or_404(WorkspaceItem, pk=pk, doc__owner=request.user)
     data = json.loads(request.body)
     if 'content'     in data: item.content     = data['content']
@@ -1045,7 +1047,9 @@ def workspace_update_item(request, pk):
     if 'priority'    in data: item.priority    = data['priority']
     if 'task_type'   in data: item.task_type   = data['task_type']
     if 'effort'      in data: item.effort      = data['effort']
-    if 'due_date'    in data: item.due_date    = data['due_date'] or None
+    if 'due_date'    in data: item.due_date    = data['due_date']   or None
+    if 'start_date'  in data: item.start_date  = data['start_date'] or None
+    if 'progress'    in data: item.progress    = int(data['progress'])
     if 'color'       in data: item.color       = data['color']
     item.save()
     return JsonResponse({'ok': True, 'item': _serialize_item(item)})

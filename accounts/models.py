@@ -137,18 +137,16 @@ class PostImage(models.Model):
 
 class WorkspaceDoc(models.Model):
     """A Notion-like document / workspace page owned by one user."""
-    TYPE_TODO       = 'todo'
-    TYPE_PROJECT    = 'project'
-    TYPE_BRAINSTORM = 'brainstorm'
-    TYPE_GOAL       = 'goal'
-    TYPE_NOTE       = 'note'
+    TYPE_TODO    = 'todo'
+    TYPE_PROJECT = 'project'
+    TYPE_GOAL    = 'goal'
+    TYPE_NOTE    = 'note'
 
     TYPE_CHOICES = [
-        (TYPE_TODO,       'To-Do List'),
-        (TYPE_PROJECT,    'Project Tracker'),
-        (TYPE_BRAINSTORM, 'Brainstorm'),
-        (TYPE_GOAL,       'Goal Tracker'),
-        (TYPE_NOTE,       'Notes'),
+        (TYPE_TODO,    'To-Do List'),
+        (TYPE_PROJECT, 'Project Tracker'),
+        (TYPE_GOAL,    'Goal Tracker'),
+        (TYPE_NOTE,    'Notes'),
     ]
 
     owner      = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='workspace_docs')
@@ -228,8 +226,10 @@ class WorkspaceItem(models.Model):
     task_type   = models.CharField(max_length=20, choices=TASK_TYPE_CHOICES, default=TYPE_OTHER, blank=True)
     effort      = models.CharField(max_length=5,  choices=EFFORT_CHOICES,    default=EFFORT_M,   blank=True)
     due_date    = models.DateField(null=True, blank=True)
+    start_date  = models.DateField(null=True, blank=True)
+    progress    = models.IntegerField(default=0)   # 0-100 for project tracker
     order       = models.IntegerField(default=0)
-    color       = models.CharField(max_length=20, default='#fef9c3')  # brainstorm sticky-note color
+    color       = models.CharField(max_length=20, default='#fef9c3')
     created_at  = models.DateTimeField(auto_now_add=True)
 
     class Meta:
