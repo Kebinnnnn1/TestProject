@@ -1,4 +1,4 @@
-﻿{% extends 'accounts/base.html' %}
+{% extends 'accounts/base.html' %}
 {% block title %}Messages — CUlink{% endblock %}
 
 {% block extra_head %}
@@ -236,8 +236,13 @@
   <div class="inbox-section-title">Conversations</div>
   {% for item in people_with_convos %}
   <a href="{% url 'chat_conversation' item.user.username %}" class="user-row">
-    <div class="avatar">{{ item.user.username|slice:":1"|upper }}</div>
-    <span class="name">{{ item.user.username }}</span>
+    {% if item.user.avatar %}
+      <img src="{{ item.user.avatar.url }}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="">
+    {% else %}
+      <div class="avatar">{{ item.user.username|slice:":1"|upper }}</div>
+    {% endif %}
+    <span class="name">{% if item.user.display_name %}{{ item.user.display_name }}{% else %}{{ item.user.username }}{% endif %}</span>
+    {% if item.user.display_name %}<span style="font-size:0.72rem;color:var(--text-light);margin-left:4px;">@{{ item.user.username }}</span>{% endif %}
     {% if item.unread %}
     <span style="background:var(--pink);color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto;margin-right:4px;">
       {% if item.unread > 9 %}9+{% else %}{{ item.unread }}{% endif %}
@@ -246,6 +251,9 @@
     <span class="role-tag">{{ item.user.university|default:item.user.role|capfirst }}</span>
     {% endif %}
     <i class="bi bi-chevron-right" style="color:var(--text-light);"></i>
+  </a>
+  <a href="/u/{{ item.user.username }}/" title="View profile" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);color:var(--text-light);text-decoration:none;flex-shrink:0;transition:all .2s;margin-left:-44px;position:relative;z-index:2;background:var(--bg-white);" onmouseover="this.style.borderColor='var(--pink)';this.style.color='var(--pink)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-light)'">
+    <i class="bi bi-person-fill" style="font-size:.85rem;"></i>
   </a>
   {% endfor %}
   {% else %}

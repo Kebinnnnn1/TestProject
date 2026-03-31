@@ -175,11 +175,17 @@
     <a href="{% url 'chat_inbox' %}" class="back-btn" title="Back to inbox">
       <i class="bi bi-arrow-left"></i>
     </a>
-    <div class="avatar">{{ other.username|slice:":1"|upper }}</div>
-    <div class="info">
-      <h2>{{ other.username }}</h2>
-      <p><span class="connection-dot" id="connDot"></span><span id="connStatus">Connecting…</span></p>
-    </div>
+    <a href="/u/{{ other.username }}/" style="text-decoration:none;display:flex;align-items:center;gap:0.75rem;" title="View {{ other.username }}'s profile">
+      {% if other.avatar %}
+        <img src="{{ other.avatar.url }}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--border);" alt="">
+      {% else %}
+        <div class="avatar" style="transition:opacity .2s;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">{{ other.username|slice:":1"|upper }}</div>
+      {% endif %}
+      <div class="info">
+        <h2>{% if other.display_name %}{{ other.display_name }}{% else %}{{ other.username }}{% endif %}</h2>
+        <p><span class="connection-dot" id="connDot"></span><span id="connStatus">Connecting…</span></p>
+      </div>
+    </a>
   </div>
 
   <!-- Messages -->

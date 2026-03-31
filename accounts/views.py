@@ -238,6 +238,21 @@ class DashboardView(View):
 
 
 @method_decorator(login_required, name='dispatch')
+class PublicProfileView(View):
+    """Read-only public profile for any user, accessible from Wall / Chat."""
+    def get(self, request, username):
+        profile_user = get_object_or_404(CustomUser, username=username)
+        # Own profile → redirect to full /profile/
+        if profile_user == request.user:
+            return redirect('profile')
+        post_count = profile_user.posts.count()
+        return render(request, 'accounts/public_profile.html', {
+            'profile_user': profile_user,
+            'post_count': post_count,
+        })
+
+
+@method_decorator(login_required, name='dispatch')
 class ProfileView(View):
     def get(self, request):
         return render(request, 'accounts/profile.html', {'user': request.user})

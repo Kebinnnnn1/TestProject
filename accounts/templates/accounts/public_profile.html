@@ -1,0 +1,249 @@
+{% extends 'accounts/base.html' %}
+{% block title %}{{ profile_user.username }} — CUlink{% endblock %}
+
+{% block extra_head %}
+<style>
+.pub-page { min-height: calc(100vh - 70px); background: var(--bg); padding: 2.5rem 0 5rem; }
+
+/* Banner */
+.pub-banner {
+  background: var(--bg-dark);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.8rem;
+}
+.pub-banner::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(255,63,164,0.2), transparent 70%);
+  border-radius: 50%;
+}
+.pub-avatar-lg {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255,255,255,0.2);
+  display: block;
+  flex-shrink: 0;
+}
+.pub-initials-lg {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink), #c0007c);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid rgba(255,255,255,0.2);
+  flex-shrink: 0;
+  user-select: none;
+}
+.pub-banner-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+}
+.pub-banner-name {
+  font-size: 1.6rem; font-weight: 800; color: #fff;
+  letter-spacing: -0.5px; margin-bottom: 0.15rem;
+}
+.pub-banner-handle { font-size: 0.88rem; color: rgba(255,255,255,0.4); margin-bottom: 0.6rem; }
+.pub-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.pub-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px; font-size: 0.72rem; font-weight: 700;
+}
+.pub-badge-green  { background:rgba(16,185,129,0.18); color:#10b981; border:1px solid rgba(16,185,129,0.3); }
+.pub-badge-yellow { background:rgba(245,158,11,0.18); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); }
+.pub-badge-pink   { background:rgba(255,63,164,0.2); color:var(--pink); border:1px solid rgba(255,63,164,0.3); }
+.pub-badge-purple { background:rgba(167,139,250,0.18); color:#a78bfa; border:1px solid rgba(167,139,250,0.3); }
+.pub-badge-indigo { background:rgba(99,102,241,0.15); color:#818cf8; border:1px solid rgba(99,102,241,0.25); }
+
+/* Action buttons */
+.pub-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-left: auto; }
+.pub-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Space Grotesk', sans-serif;
+  text-decoration: none;
+}
+.pub-btn-primary {
+  background: var(--pink); color: #fff; border: none;
+}
+.pub-btn-primary:hover { opacity: 0.88; color: #fff; }
+.pub-btn-outline {
+  background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(255,255,255,0.18);
+  color: #fff;
+}
+.pub-btn-outline:hover { background: rgba(255,255,255,0.18); color: #fff; }
+
+/* Card */
+.pub-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.8rem;
+  margin-bottom: 1.2rem;
+  box-shadow: var(--shadow-sm);
+}
+.pub-card-title {
+  font-size: 0.8rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text-light); margin-bottom: 1.2rem;
+  display: flex; align-items: center; gap: 7px;
+}
+.pub-card-title i { color: var(--pink); }
+
+/* Info rows */
+.pub-info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.65rem 0; border-bottom: 1px solid var(--border);
+}
+.pub-info-row:last-child { border-bottom: none; }
+.pub-ir-label { font-size: 0.82rem; color: var(--text-light); font-weight: 500; }
+.pub-ir-value { font-size: 0.88rem; font-weight: 700; color: var(--text-dark); }
+
+/* Stats */
+.pub-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.7rem;
+  margin-bottom: 1.2rem;
+}
+.pub-stat {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.pub-stat-val { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); }
+.pub-stat-lbl { font-size: 0.7rem; color: var(--text-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.2rem; }
+
+@media (max-width: 600px) {
+  .pub-banner { padding: 1.5rem; }
+  .pub-banner-row { gap: 1rem; }
+  .pub-actions { margin-left: 0; width: 100%; }
+  .pub-btn { flex: 1; justify-content: center; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pub-page">
+  <div class="container" style="max-width:760px;">
+
+    <!-- Banner -->
+    <div class="pub-banner reveal">
+      <div class="pub-banner-row">
+        <!-- Avatar -->
+        {% if profile_user.avatar %}
+          <img src="{{ profile_user.avatar.url }}" alt="Avatar" class="pub-avatar-lg">
+        {% else %}
+          <div class="pub-initials-lg">{{ profile_user.username|slice:":1"|upper }}</div>
+        {% endif %}
+
+        <!-- Info -->
+        <div style="flex:1;min-width:0;">
+          <div class="pub-banner-name">
+            {% if profile_user.display_name %}{{ profile_user.display_name }}{% else %}{{ profile_user.username }}{% endif %}
+          </div>
+          {% if profile_user.display_name %}
+            <div class="pub-banner-handle">@{{ profile_user.username }}</div>
+          {% else %}
+            <div style="height:.8rem;"></div>
+          {% endif %}
+          <div class="pub-badges">
+            {% if profile_user.is_verified %}
+              <span class="pub-badge pub-badge-green"><i class="bi bi-patch-check-fill"></i> Verified</span>
+            {% else %}
+              <span class="pub-badge pub-badge-yellow"><i class="bi bi-exclamation-circle-fill"></i> Unverified</span>
+            {% endif %}
+            {% if profile_user.role == 'admin' %}
+              <span class="pub-badge pub-badge-purple"><i class="bi bi-shield-fill-check"></i> Admin</span>
+            {% elif profile_user.role == 'moderator' %}
+              <span class="pub-badge pub-badge-yellow"><i class="bi bi-shield-fill"></i> Moderator</span>
+            {% else %}
+              <span class="pub-badge pub-badge-pink"><i class="bi bi-person-fill"></i> Member</span>
+            {% endif %}
+            {% if profile_user.university %}
+              <span class="pub-badge pub-badge-indigo">
+                <i class="bi bi-mortarboard-fill"></i> {{ profile_user.university }}
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="pub-actions">
+          <a href="{% url 'chat_conversation' profile_user.username %}" class="pub-btn pub-btn-primary">
+            <i class="bi bi-chat-dots-fill"></i> Message
+          </a>
+          <a href="{% url 'wall' %}" class="pub-btn pub-btn-outline">
+            <i class="bi bi-journals"></i> Wall
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="pub-stats reveal delay-1">
+      <div class="pub-stat">
+        <div class="pub-stat-val">{{ post_count }}</div>
+        <div class="pub-stat-lbl">Posts</div>
+      </div>
+      <div class="pub-stat">
+        <div class="pub-stat-val">{{ profile_user.date_joined|date:"Y" }}</div>
+        <div class="pub-stat-lbl">Joined</div>
+      </div>
+      <div class="pub-stat">
+        <div class="pub-stat-val">{{ profile_user.university|default:"—" }}</div>
+        <div class="pub-stat-lbl">University</div>
+      </div>
+    </div>
+
+    <!-- Details card -->
+    <div class="pub-card reveal delay-2">
+      <div class="pub-card-title"><i class="bi bi-person-vcard-fill"></i> About</div>
+      <div class="pub-info-row">
+        <span class="pub-ir-label">Username</span>
+        <span class="pub-ir-value">{{ profile_user.username }}</span>
+      </div>
+      {% if profile_user.display_name %}
+      <div class="pub-info-row">
+        <span class="pub-ir-label">Display Name</span>
+        <span class="pub-ir-value">{{ profile_user.display_name }}</span>
+      </div>
+      {% endif %}
+      <div class="pub-info-row">
+        <span class="pub-ir-label">University</span>
+        <span class="pub-ir-value">
+          {% if profile_user.university %}{{ profile_user.get_university_display }}
+          {% else %}<span style="color:var(--text-light);font-weight:500;">Not set</span>{% endif %}
+        </span>
+      </div>
+      <div class="pub-info-row">
+        <span class="pub-ir-label">Role</span>
+        <span class="pub-ir-value">{{ profile_user.role|capfirst }}</span>
+      </div>
+      <div class="pub-info-row">
+        <span class="pub-ir-label">Member Since</span>
+        <span class="pub-ir-value">{{ profile_user.date_joined|date:"N j, Y" }}</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

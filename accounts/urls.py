@@ -25,6 +25,7 @@ urlpatterns = [
     # Profile
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('profile/update/', views.update_profile, name='update_profile'),
+    path('u/<str:username>/', views.PublicProfileView.as_view(), name='public_profile'),
     path('dashboard/university/', views.update_university, name='update_university'),
     path('dashboard/change-password/', views.change_password, name='change_password'),
     path('dashboard/change-email/', views.change_email, name='change_email'),
