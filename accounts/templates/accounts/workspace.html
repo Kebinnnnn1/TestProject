@@ -3,10 +3,15 @@
 
 {% block extra_head %}
 <style>
-  /* ── Layout ── */
+  /* ── Fix base layout for workspace (full-height, no scroll, hide footer) ── */
+  body   { overflow: hidden !important; }
+  main   { display: flex; flex-direction: column; overflow: hidden; padding: 0 !important; }
+  footer { display: none !important; }
+
+  /* ── Workspace root ── */
   .ws-wrap {
     display: flex;
-    height: calc(100vh - 68px);
+    flex: 1;
     overflow: hidden;
     background: var(--surface);
   }
