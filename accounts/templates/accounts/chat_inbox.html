@@ -236,26 +236,12 @@
   <div class="inbox-section-title">Conversations</div>
   {% for item in people_with_convos %}
   <a href="{% url 'chat_conversation' item.user.username %}" class="user-row">
-    <!-- Avatar — click goes to public profile, not conversation -->
-    <a href="/u/{{ item.user.username }}/"
-       onclick="event.stopPropagation();"
-       title="View {{ item.user.username }}'s profile"
-       style="flex-shrink:0;text-decoration:none;">
-      {% if item.user.avatar %}
-        <img src="{{ item.user.avatar.url }}"
-             style="width:38px;height:38px;border-radius:50%;object-fit:cover;display:block;border:2px solid transparent;transition:border-color .2s;"
-             onmouseover="this.style.borderColor='var(--pink)'"
-             onmouseout="this.style.borderColor='transparent'"
-             alt="">
-      {% else %}
-        <div class="avatar"
-             style="transition:opacity .2s;"
-             onmouseover="this.style.opacity='.7'"
-             onmouseout="this.style.opacity='1'">{{ item.user.username|slice:":1"|upper }}</div>
-      {% endif %}
-    </a>
+    {% if item.user.avatar %}
+      <img src="{{ item.user.avatar.url }}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="">
+    {% else %}
+      <div class="avatar">{{ item.user.username|slice:":1"|upper }}</div>
+    {% endif %}
     <span class="name">{% if item.user.display_name %}{{ item.user.display_name }}{% else %}{{ item.user.username }}{% endif %}</span>
-    {% if item.user.display_name %}<span style="font-size:0.72rem;color:var(--text-light);margin-left:4px;">@{{ item.user.username }}</span>{% endif %}
     {% if item.unread %}
     <span style="background:var(--pink);color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto;margin-right:4px;">
       {% if item.unread > 9 %}9+{% else %}{{ item.unread }}{% endif %}
