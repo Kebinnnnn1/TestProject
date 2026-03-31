@@ -118,7 +118,7 @@
     .brand-icon {
       width: 30px;
       height: 30px;
-      background: var(--text-dark);
+      background: var(--pink);
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -400,7 +400,7 @@
     }
 
     .btn-dark {
-      background: var(--text-dark);
+      background: #0f0f0f;
       color: #fff;
       border: none;
       border-radius: var(--radius-pill);
@@ -419,6 +419,16 @@
       background: #222;
       color: #fff;
       transform: translateY(-2px);
+    }
+
+    [data-theme="dark"] .btn-dark {
+      background: #f0f0f5;
+      color: #0f0f0f;
+    }
+
+    [data-theme="dark"] .btn-dark:hover {
+      background: #fff;
+      color: #0f0f0f;
     }
 
     /* ─── Cards ─── */

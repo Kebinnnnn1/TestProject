@@ -6,7 +6,7 @@
 <style>
   /* ─── Hero ─── */
   .hero {
-    background: var(--bg-dark);
+    background: var(--bg);
     padding: 6rem 0 5rem;
     position: relative;
     overflow: hidden;
@@ -16,17 +16,23 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.06);
+    border: 1px solid var(--border);
     border-radius: var(--radius-pill);
     padding: 0.4rem 1rem;
     font-size: 0.78rem;
     font-weight: 700;
-    color: rgba(255,255,255,0.7);
+    color: var(--text-light);
     letter-spacing: 0.05em;
     text-transform: uppercase;
     margin-bottom: 1.5rem;
     animation: fadeInLeft 0.6s ease both;
+  }
+
+  [data-theme="dark"] .hero-eyebrow {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.6);
   }
 
   .hero-eyebrow .live-dot {
@@ -42,7 +48,7 @@
     font-weight: 700;
     line-height: 1.08;
     letter-spacing: -2px;
-    color: #fff;
+    color: var(--text-dark);
     margin-bottom: 1.5rem;
     animation: fadeInLeft 0.7s 0.05s ease both;
   }
@@ -54,7 +60,7 @@
 
   .hero-subtitle {
     font-size: 1.1rem;
-    color: rgba(255,255,255,0.55);
+    color: var(--text-mid);
     line-height: 1.7;
     max-width: 500px;
     margin-bottom: 2.5rem;
@@ -92,8 +98,8 @@
 
   .btn-hero-outline {
     background: transparent;
-    color: rgba(255,255,255,0.75);
-    border: 1.5px solid rgba(255,255,255,0.2);
+    color: var(--text-mid);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius-pill);
     font-weight: 600;
     padding: 0.85rem 2.2rem;
@@ -106,9 +112,18 @@
   }
 
   .btn-hero-outline:hover {
+    border-color: var(--text-dark);
+    color: var(--text-dark);
+    transform: translateY(-1px);
+  }
+
+  [data-theme="dark"] .btn-hero-outline {
+    color: rgba(255,255,255,0.6);
+    border-color: rgba(255,255,255,0.2);
+  }
+  [data-theme="dark"] .btn-hero-outline:hover {
     border-color: rgba(255,255,255,0.5);
     color: #fff;
-    transform: translateY(-1px);
   }
 
   .hero-stats {
@@ -121,23 +136,24 @@
   .hero-stat-num {
     font-size: 1.6rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-dark);
     line-height: 1;
   }
 
   .hero-stat-label {
     font-size: 0.8rem;
-    color: rgba(255,255,255,0.45);
+    color: var(--text-light);
     margin-top: 0.2rem;
   }
 
-  /* Dashboard mockup */
+  /* Dashboard mockup — always dark regardless of theme */
   .hero-mockup {
-    background: rgba(255,255,255,0.05);
+    background: #1a1a1f;
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: var(--radius-lg);
     overflow: hidden;
     animation: fadeInRight 0.8s 0.2s ease both;
+    box-shadow: var(--shadow-lg);
   }
 
   .mockup-bar {
@@ -198,7 +214,7 @@
   /* ─── Strip ─── */
   .feature-strip {
     padding: 1.25rem 0;
-    background: #fff;
+    background: var(--bg-white);
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
     overflow: hidden;
@@ -248,8 +264,10 @@
     box-shadow: var(--shadow-md);
   }
 
-  .feat-card.pink-accent { background: rgba(255,63,164,0.1); }
-  .feat-card.purple-accent { background: #DDDDF5; }
+  .feat-card.pink-accent { background: rgba(255,63,164,0.08); }
+  .feat-card.purple-accent { background: rgba(100,100,200,0.1); }
+
+  [data-theme="dark"] .feat-card.purple-accent { background: rgba(100,100,220,0.15); }
 
   .feat-icon {
     width: 48px; height: 48px;
