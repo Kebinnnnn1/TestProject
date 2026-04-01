@@ -38,16 +38,16 @@ PUSHER_KEY     = config('PUSHER_KEY',     default='')
 PUSHER_SECRET  = config('PUSHER_SECRET',  default='')
 PUSHER_CLUSTER = config('PUSHER_CLUSTER', default='mt1')
 
-# Azure Blob Storage — image uploads for Knowledge Wall & avatars
-AZURE_ACCOUNT_NAME    = config('AZURE_ACCOUNT_NAME', default='')
-AZURE_ACCOUNT_KEY     = config('AZURE_ACCOUNT_KEY',  default='')
-AZURE_CONTAINER       = config('AZURE_CONTAINER',    default='culink-media')
-AZURE_OVERWRITE_FILES = True  # overwrite same-name files (re-uploaded avatars)
-
-if AZURE_ACCOUNT_NAME:
-    DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
-    AZURE_CUSTOM_DOMAIN  = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
-    MEDIA_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/'
+# Cloudinary — image uploads for Knowledge Wall
+_cloudinary_name = config('CLOUDINARY_CLOUD_NAME', default='')
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': _cloudinary_name,
+    'API_KEY':    config('CLOUDINARY_API_KEY',    default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+}
+# Only use Cloudinary storage if credentials are present
+if _cloudinary_name:
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -55,12 +55,13 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',          # must be before staticfiles
     'django.contrib.staticfiles',
-    'storages',
+    'cloudinary',
     'accounts',
 ]
 
-MEDIA_URL = MEDIA_URL if AZURE_ACCOUNT_NAME else '/media/'
+MEDIA_URL = '/media/'  # Required by django-cloudinary-storage
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

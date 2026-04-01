@@ -268,8 +268,16 @@ def update_profile(request):
 
     avatar_file = request.FILES.get('avatar')
     if avatar_file:
-        # django-storages uploads to Azure automatically
-        user.avatar = avatar_file
+        # Upload to Cloudinary
+        import cloudinary.uploader
+        result = cloudinary.uploader.upload(
+            avatar_file,
+            folder='avatars',
+            public_id=f'avatar_{user.pk}',
+            overwrite=True,
+            transformation=[{'width': 400, 'height': 400, 'crop': 'fill', 'gravity': 'face'}],
+        )
+        user.avatar = result.get('public_id', '')
 
     user.save(update_fields=['display_name', 'avatar'])
     messages.success(request, 'Profile updated successfully!')
@@ -773,9 +781,11 @@ def create_post(request):
         messages.error(request, 'Post content cannot be empty.')
         return redirect('wall')
 
+    cloudinary_ok = django_settings.CLOUDINARY_STORAGE.get('CLOUD_NAME')
+
     # Support both old single-file 'image' and new multi-file 'images'
-    files = request.FILES.getlist('images')
-    if not files:
+    files = request.FILES.getlist('images') if cloudinary_ok else []
+    if not files and cloudinary_ok:
         single = request.FILES.get('image')
         if single:
             files = [single]
