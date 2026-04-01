@@ -2,6 +2,7 @@
 {% block title %}Knowledge Wall — CUlink{% endblock %}
 
 {% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 <style>
   /* ── Layout ── */
   .wall-wrap {
@@ -1376,12 +1377,37 @@ function buildPostCard(p) {
 
   try {
     const fd = new FormData(form);
-    // Ensure ALL selected files go through — don't rely on DataTransfer sync
-    // Remove whatever the native input captured, then re-append from our tracked array
+
+    // ── Compress images before upload to stay under Vercel's 4.5MB limit ──
     if (_selectedFiles.length > 0) {
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Compressing…';
       fd.delete('images');
-      _selectedFiles.forEach(f => fd.append('images', f));
+
+      const compressOptions = {
+        maxSizeMB: 3,          // max 3MB per image (Vercel limit is 4.5MB total)
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: 'image/webp', // convert to WebP for smaller size
+        initialQuality: 0.85,
+      };
+
+      const compressedFiles = await Promise.all(
+        _selectedFiles.map(async f => {
+          try {
+            // Only compress actual images; skip tiny files already under 500KB
+            if (f.size < 500 * 1024) return f;
+            return await imageCompression(f, compressOptions);
+          } catch (e) {
+            console.warn('Compression failed for', f.name, '— using original', e);
+            return f;
+          }
+        })
+      );
+
+      compressedFiles.forEach(f => fd.append('images', f));
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Posting…';
     }
+
     const res = await fetch(form.action, {
       method: 'POST',
       headers: { 'X-Requested-With': 'XMLHttpRequest' },

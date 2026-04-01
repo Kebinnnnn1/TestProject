@@ -2,7 +2,6 @@ import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
-from cloudinary.models import CloudinaryField
 
 
 class CustomUser(AbstractUser):
@@ -29,7 +28,7 @@ class CustomUser(AbstractUser):
     role         = models.CharField(max_length=20, choices=ROLE_CHOICES, default=MEMBER)
     university   = models.CharField(max_length=10, blank=True, default='', choices=UNIVERSITY_CHOICES)
     display_name = models.CharField(max_length=60, blank=True, default='')
-    avatar       = CloudinaryField('avatar', blank=True, null=True)
+    avatar       = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     def __str__(self):
         return self.username
@@ -74,7 +73,7 @@ class Post(models.Model):
         'CustomUser', on_delete=models.CASCADE, related_name='posts'
     )
     content   = models.TextField(max_length=3000)
-    image     = CloudinaryField('image', blank=True, null=True)
+    image     = models.ImageField(upload_to='posts/', blank=True, null=True)
     tags      = models.CharField(max_length=200, blank=True, default='',
                                  help_text='Comma-separated tags, e.g. django,python')
     university = models.CharField(max_length=10, blank=True, default='')
@@ -94,13 +93,11 @@ class Post(models.Model):
 
     @property
     def image_url(self):
-        """Returns the Cloudinary URL safely, or empty string if no image."""
+        """Returns the Azure Blob URL safely, or empty string if no image."""
         try:
-            if self.image and str(self.image):
-                return self.image.url
+            return self.image.url if self.image else ''
         except Exception:
-            pass
-        return ''
+            return ''
 
 
 class PostComment(models.Model):
@@ -123,7 +120,7 @@ class PostComment(models.Model):
 class PostImage(models.Model):
     """Extra images attached to a Wall post (supports multi-image upload)."""
     post  = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='extra_images')
-    image = CloudinaryField('image')
+    image = models.ImageField(upload_to='posts/')
     order = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
