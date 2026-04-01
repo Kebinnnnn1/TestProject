@@ -538,6 +538,69 @@
   [data-theme="dark"] .post-card { box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
   [data-theme="dark"] .create-card textarea,
   [data-theme="dark"] .create-card input[type="text"] { background: var(--bg); }
+
+  /* ── Image Lightbox ── */
+  #lightboxBackdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.93);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    animation: fadeIn 0.18s ease;
+  }
+  #lightboxBackdrop.open { display: flex; }
+  #lightboxImg {
+    max-width: min(92vw, 1100px);
+    max-height: 82vh;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.6);
+    transition: opacity 0.15s;
+    user-select: none;
+  }
+  #lightboxCount {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.82rem;
+    margin-top: 10px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+  .lb-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: #fff;
+    font-size: 1.6rem;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+  }
+  .lb-btn:hover { background: rgba(255,255,255,0.25); }
+  #lbPrev { left: 16px; }
+  #lbNext { right: 16px; }
+  #lbClose {
+    position: fixed;
+    top: 14px; right: 18px;
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+    z-index: 10000;
+  }
+  #lbClose:hover { background: rgba(255,255,255,0.25); }
 </style>
 {% endblock %}
 
@@ -634,17 +697,17 @@
           {% elif not post.image_url and imgs|length == 2 %}duo
           {% elif post.image_url and imgs|length == 2 %}trio
           {% elif not post.image_url and imgs|length == 3 %}trio
-          {% else %}quad{% endif %}" onclick="openPostModal('{{ post.pk }}')">
+          {% else %}quad{% endif %}">
           {% if post.image_url %}
-          <img src="{{ post.image_url }}" alt="Post image" loading="lazy">
+          <img src="{{ post.image_url }}" alt="Post image" loading="lazy" onclick="openLightbox(this)" style="cursor:zoom-in;">
           {% endif %}
           {# Show up to 3 extra images (4th slot used for overlay if >4 total) #}
           {% for pi in imgs|slice:":3" %}
-          <img src="{{ pi.image.url }}" alt="Post image" loading="lazy">
+          <img src="{{ pi.image.url }}" alt="Post image" loading="lazy" onclick="openLightbox(this)" style="cursor:zoom-in;">
           {% endfor %}
           {# If there are more than what we show (primary + 3), show +N overlay on slot 4 #}
           {% if imgs|length > 3 %}
-          <div class="img-more-overlay">
+          <div class="img-more-overlay" onclick="openLightbox(this.querySelector('img'))">
             <img src="{{ imgs.3.image.url }}" alt="More images" loading="lazy">
             <div class="overlay-count">+{{ imgs|length|add:"-3" }}</div>
           </div>
@@ -780,6 +843,15 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- ── Image Lightbox ── -->
+<div id="lightboxBackdrop" onclick="lbClickOutside(event)">
+  <button id="lbClose" onclick="closeLightbox()" title="Close"><i class="bi bi-x-lg"></i></button>
+  <button class="lb-btn" id="lbPrev" onclick="lbNav(-1)" title="Previous"><i class="bi bi-chevron-left"></i></button>
+  <img id="lightboxImg" src="" alt="Full image">
+  <div id="lightboxCount"></div>
+  <button class="lb-btn" id="lbNext" onclick="lbNav(1)" title="Next"><i class="bi bi-chevron-right"></i></button>
 </div>
 {% endblock %}
 
@@ -925,6 +997,66 @@
 <script>
 const ME = "{{ me.username }}";
 const CSRF = () => document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+// ── Image Lightbox ──
+let _lbImgs = [];   // array of src strings for the current post grid
+let _lbIdx  = 0;   // current index
+
+window.openLightbox = function(imgEl) {
+  if (!imgEl) return;
+  // Collect all real images in the same grid (skip overlay placeholder imgs)
+  const grid = imgEl.closest('.post-image-grid');
+  if (grid) {
+    _lbImgs = [];
+    // Direct > img children
+    grid.querySelectorAll(':scope > img').forEach(i => _lbImgs.push(i.src));
+    // Overlay images (the 4th slot)
+    grid.querySelectorAll(':scope > .img-more-overlay > img').forEach(i => _lbImgs.push(i.src));
+    _lbIdx = _lbImgs.indexOf(imgEl.src);
+    if (_lbIdx < 0) _lbIdx = 0;
+  } else {
+    _lbImgs = [imgEl.src];
+    _lbIdx  = 0;
+  }
+  _lbRender();
+  document.getElementById('lightboxBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+function _lbRender() {
+  const img   = document.getElementById('lightboxImg');
+  const count = document.getElementById('lightboxCount');
+  const prev  = document.getElementById('lbPrev');
+  const next  = document.getElementById('lbNext');
+  img.style.opacity = '0';
+  img.src = _lbImgs[_lbIdx];
+  img.onload = () => { img.style.opacity = '1'; };
+  count.textContent = _lbImgs.length > 1 ? `${_lbIdx + 1} / ${_lbImgs.length}` : '';
+  prev.style.display = _lbImgs.length > 1 ? 'flex' : 'none';
+  next.style.display = _lbImgs.length > 1 ? 'flex' : 'none';
+}
+
+window.lbNav = function(dir) {
+  _lbIdx = (_lbIdx + dir + _lbImgs.length) % _lbImgs.length;
+  _lbRender();
+};
+
+window.closeLightbox = function() {
+  document.getElementById('lightboxBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+window.lbClickOutside = function(e) {
+  if (e.target.id === 'lightboxBackdrop') closeLightbox();
+};
+
+document.addEventListener('keydown', function(e) {
+  const lb = document.getElementById('lightboxBackdrop');
+  if (!lb || !lb.classList.contains('open')) return;
+  if (e.key === 'Escape')      closeLightbox();
+  if (e.key === 'ArrowLeft')   lbNav(-1);
+  if (e.key === 'ArrowRight')  lbNav(1);
+});
 
 // ── AJAX comment delete (no page navigation) ──
 window.deleteComment = async function(pk, btn) {
@@ -1184,12 +1316,16 @@ function buildPostCard(p) {
     </form>` : '';
   const tagsHtml = p.tags.length ? `<div class="post-tags">${p.tags.map(t => `<a href="?tag=${t}" class="tag-chip">#${t}</a>`).join('')}</div>` : '';
   const urls = p.image_urls && p.image_urls.length ? p.image_urls : (p.image_url ? [p.image_url] : []);
-  const isSingle = urls.length === 1;
-  const imagesHtml = urls.length ? `
-    <div class="post-image-grid ${isSingle ? 'single' : ''}" onclick="openPostModal('${p.pk}')">
-      ${urls.slice(0, 4).map((u, i) => i === 3 && urls.length > 4
-        ? `<div class="img-more-overlay"><img src="${u}" alt="more"><div class="overlay-count">+${urls.length - 3}</div></div>`
-        : `<img src="${u}" alt="Post image" loading="lazy">`).join('')}
+  const n = urls.length;
+  const gridClass = n === 0 ? '' : n === 1 ? 'single' : n === 2 ? 'duo' : n === 3 ? 'trio' : 'quad';
+  const imagesHtml = n ? `
+    <div class="post-image-grid ${gridClass}">
+      ${urls.slice(0, 4).map((u, i) => {
+        if (i === 3 && n > 4) {
+          return `<div class="img-more-overlay" onclick="openLightbox(this.querySelector('img'))"><img src="${u}" alt="more"><div class="overlay-count">+${n - 3}</div></div>`;
+        }
+        return `<img src="${u}" alt="Post image" loading="lazy" onclick="openLightbox(this)" style="cursor:zoom-in;">`;
+      }).join('')}
     </div>` : '';
 
   return `
@@ -1240,6 +1376,12 @@ function buildPostCard(p) {
 
   try {
     const fd = new FormData(form);
+    // Ensure ALL selected files go through — don't rely on DataTransfer sync
+    // Remove whatever the native input captured, then re-append from our tracked array
+    if (_selectedFiles.length > 0) {
+      fd.delete('images');
+      _selectedFiles.forEach(f => fd.append('images', f));
+    }
     const res = await fetch(form.action, {
       method: 'POST',
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
