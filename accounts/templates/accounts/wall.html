@@ -351,30 +351,76 @@
   /* ── Image Grid (multi-image posts) ── */
   .post-image-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    gap: 4px;
     margin-bottom: 0.85rem;
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
+    grid-template-columns: 1fr;
   }
-  .post-image-grid.single { grid-template-columns: 1fr; }
-  .post-image-grid img {
+  /* 1 image: full width, natural height up to 480px */
+  .post-image-grid.single img {
+    width: 100%;
+    max-height: 480px;
+    object-fit: contain;
+    background: var(--bg-card);
+    border-radius: 10px;
+  }
+  /* 2 images: side by side */
+  .post-image-grid.duo {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .post-image-grid.duo img {
+    width: 100%; height: 240px;
+    object-fit: cover;
+  }
+  /* 3 images: big left + 2 stacked right */
+  .post-image-grid.trio {
+    grid-template-columns: 3fr 2fr;
+    grid-template-rows: 160px 160px;
+  }
+  .post-image-grid.trio img:first-child {
+    grid-row: 1 / 3;
+    height: 324px;
+    object-fit: cover;
+    width: 100%;
+  }
+  .post-image-grid.trio img:not(:first-child),
+  .post-image-grid.trio .img-more-overlay {
+    height: 160px;
+    object-fit: cover;
+    width: 100%;
+  }
+  /* 4 images: 2x2 grid */
+  .post-image-grid.quad {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 200px);
+  }
+  .post-image-grid.quad img {
     width: 100%; height: 200px;
     object-fit: cover;
-    cursor: pointer;
-    transition: opacity 0.2s;
   }
-  .post-image-grid img:hover { opacity: 0.9; }
-  .post-image-grid.single img { height: 340px; max-height: 400px; }
+  /* shared img styles */
+  .post-image-grid img {
+    cursor: pointer;
+    transition: opacity 0.18s;
+    display: block;
+  }
+  .post-image-grid img:hover { opacity: 0.88; }
   .img-more-overlay {
     position: relative;
     cursor: pointer;
+    overflow: hidden;
+  }
+  .img-more-overlay img {
+    width: 100%; height: 100%;
+    object-fit: cover;
   }
   .img-more-overlay .overlay-count {
     position: absolute; inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.52);
     display: flex; align-items: center; justify-content: center;
-    color: #fff; font-size: 1.5rem; font-weight: 800;
+    color: #fff; font-size: 1.6rem; font-weight: 800;
+    letter-spacing: -0.5px;
   }
 
   /* ── Post Card clickable ── */
@@ -581,13 +627,22 @@
         <!-- Image Grid -->
         {% with imgs=post.extra_images.all %}
         {% if post.image_url or imgs %}
-        <div class="post-image-grid {% if not imgs and post.image_url %}single{% endif %}" onclick="openPostModal('{{ post.pk }}')">
+        <div class="post-image-grid
+          {% if post.image_url and not imgs %}single
+          {% elif not post.image_url and imgs|length == 1 %}single
+          {% elif post.image_url and imgs|length == 1 %}duo
+          {% elif not post.image_url and imgs|length == 2 %}duo
+          {% elif post.image_url and imgs|length == 2 %}trio
+          {% elif not post.image_url and imgs|length == 3 %}trio
+          {% else %}quad{% endif %}" onclick="openPostModal('{{ post.pk }}')">
           {% if post.image_url %}
           <img src="{{ post.image_url }}" alt="Post image" loading="lazy">
           {% endif %}
+          {# Show up to 3 extra images (4th slot used for overlay if >4 total) #}
           {% for pi in imgs|slice:":3" %}
           <img src="{{ pi.image.url }}" alt="Post image" loading="lazy">
           {% endfor %}
+          {# If there are more than what we show (primary + 3), show +N overlay on slot 4 #}
           {% if imgs|length > 3 %}
           <div class="img-more-overlay">
             <img src="{{ imgs.3.image.url }}" alt="More images" loading="lazy">
@@ -799,7 +854,27 @@
     el = document.getElementById('modalMeta');   if(el) el.innerHTML = (card.querySelector('.post-sub')||{}).innerHTML || '';
     el = document.getElementById('modalContent'); if(el) el.textContent = (card.querySelector('.post-content')||{}).textContent || '';
     var imgEl = document.getElementById('modalImages');
-    if (imgEl) { imgEl.innerHTML = ''; var sg = card.querySelector('.post-image-grid'); if(sg){var cl=sg.cloneNode(true);cl.style.cursor='default';imgEl.appendChild(cl);} }
+    if (imgEl) {
+      imgEl.innerHTML = '';
+      // Collect all image srcs from the post card (primary + extras, skip overlay hidden img)
+      var cardImgs = card.querySelectorAll('.post-image-grid > img, .post-image-grid .img-more-overlay > img');
+      if (cardImgs.length) {
+        // But we only want the real images, not the overlay's blurred background
+        // Collect srcs from direct > img (not inside overlay) + all overlay imgs
+        var srcs = [];
+        card.querySelectorAll('.post-image-grid > img').forEach(function(i){ srcs.push(i.src); });
+        card.querySelectorAll('.post-image-grid .img-more-overlay img').forEach(function(i){ srcs.push(i.src); });
+        var wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
+        srcs.forEach(function(src) {
+          var img = document.createElement('img');
+          img.src = src;
+          img.style.cssText = 'width:100%;max-height:520px;object-fit:contain;border-radius:10px;background:var(--bg-card);';
+          wrapper.appendChild(img);
+        });
+        imgEl.appendChild(wrapper);
+      }
+    }
     var tagsEl = document.getElementById('modalTags');
     if(tagsEl) tagsEl.innerHTML = (card.querySelector('.post-tags')||{}).outerHTML || '';
     var mc = document.getElementById('modalComments');
