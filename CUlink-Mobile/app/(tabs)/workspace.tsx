@@ -1,370 +1,338 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, ActivityIndicator, Alert, Modal,
   TextInput, FlatList,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { workspaceAPI } from '../../services/api';
 import { useAuthStore } from '../../store';
 import { Colors, Spacing, Radius } from '../../constants';
 
-// ── Types ──────────────────────────────────────────────────────────────────
-
 interface WorkspaceItem {
-  id: number;
-  content: string;
-  description: string;
-  is_done: boolean;
-  status: string;
-  priority: string;
-  task_type: string;
-  due_date: string | null;
-  progress: number;
-  color: string;
-  order: number;
+  id: number; content: string; description: string;
+  is_done: boolean; status: string; priority: string;
+  task_type: string; due_date: string | null;
+  progress: number; color: string; order: number;
 }
-
 interface WorkspaceDoc {
-  id: number;
-  type: string;
-  title: string;
-  color: string;
-  updated_at: string;
-  item_count: number;
-  items?: WorkspaceItem[];
+  id: number; type: string; title: string; color: string;
+  updated_at: string; item_count: number; items?: WorkspaceItem[];
 }
 
-const DOC_TYPES = [
-  { key: 'todo', label: '✅ To-Do List', color: '#4ade80' },
-  { key: 'project', label: '🗂️ Project Tracker', color: '#60a5fa' },
-  { key: 'goal', label: '🎯 Goal Tracker', color: '#f59e42' },
-  { key: 'note', label: '📝 Notes', color: '#a78bfa' },
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
+
+const DOC_TYPES: { key: string; label: string; icon: IoniconsName; color: string }[] = [
+  { key: 'todo',    label: 'To-Do List',      icon: 'checkbox-outline',        color: '#4ade80' },
+  { key: 'project', label: 'Project Tracker', icon: 'folder-open-outline',     color: '#60a5fa' },
+  { key: 'goal',    label: 'Goal Tracker',    icon: 'radio-button-on-outline', color: '#f59e42' },
+  { key: 'note',    label: 'Notes',           icon: 'document-text-outline',   color: '#a78bfa' },
 ];
 
 const PRIORITIES = ['low', 'medium', 'high'];
-const STATUSES = ['todo', 'in_progress', 'done', 'blocked'];
+const STATUSES   = ['todo', 'in_progress', 'done', 'blocked'];
 
-// ── Item Card ──────────────────────────────────────────────────────────────
+const STATUS_COLORS: Record<string,string> = {
+  todo: Colors.textMuted, in_progress: Colors.info, done: Colors.success, blocked: Colors.error,
+};
+const PRIORITY_COLORS: Record<string,string> = {
+  low: Colors.success, medium: Colors.warning, high: Colors.error,
+};
 
-function ItemCard({ item, docType, onUpdate, onDelete }: {
-  item: WorkspaceItem;
-  docType: string;
-  onUpdate: (id: number, data: Partial<WorkspaceItem>) => void;
-  onDelete: (id: number) => void;
-}) {
-  const statusColors: Record<string, string> = {
-    todo: Colors.textMuted,
-    in_progress: Colors.info,
-    done: Colors.success,
-    blocked: Colors.error,
-  };
-  const priorityColors: Record<string, string> = {
-    low: Colors.success,
-    medium: Colors.warning,
-    high: Colors.error,
-  };
-
+// ── Pill selector ──────────────────────────────────────────────────────────
+function PillRow({ options, value, onChange, colorMap }: { options: string[]; value: string; onChange: (v: string) => void; colorMap?: Record<string,string> }) {
   return (
-    <View style={[styles.itemCard, { borderLeftColor: item.color || Colors.primary, borderLeftWidth: 3 }]}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-        {docType === 'todo' && (
-          <TouchableOpacity
-            onPress={() => onUpdate(item.id, { is_done: !item.is_done })}
-            style={[styles.checkbox, item.is_done && styles.checkboxDone]}
+    <View style={s.pillRow}>
+      {options.map(o => {
+        const active = value === o;
+        const col = colorMap?.[o] || Colors.primary;
+        return (
+          <TouchableOpacity key={o}
+            style={[s.pill, active && { backgroundColor: col + '33', borderColor: col }]}
+            onPress={() => onChange(o)}
           >
-            {item.is_done && <Text style={styles.checkmark}>✓</Text>}
+            <Text style={[s.pillText, { color: active ? col : Colors.textMuted }]}>{o.replace('_', ' ')}</Text>
           </TouchableOpacity>
-        )}
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.itemContent, item.is_done && styles.itemDone]}>{item.content}</Text>
-          {item.description ? (
-            <Text style={styles.itemDesc}>{item.description}</Text>
-          ) : null}
-          <View style={styles.itemMeta}>
-            <View style={[styles.pill, { backgroundColor: statusColors[item.status] + '33' }]}>
-              <Text style={[styles.pillText, { color: statusColors[item.status] }]}>
-                {item.status.replace('_', ' ')}
-              </Text>
-            </View>
-            <View style={[styles.pill, { backgroundColor: priorityColors[item.priority] + '33' }]}>
-              <Text style={[styles.pillText, { color: priorityColors[item.priority] }]}>
-                {item.priority}
-              </Text>
-            </View>
-            {item.due_date && (
-              <Text style={styles.dueDate}>📅 {item.due_date}</Text>
-            )}
-          </View>
-          {docType === 'project' && (
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${item.progress}%` as any }]} />
-            </View>
-          )}
-        </View>
-
-        <TouchableOpacity onPress={() => onDelete(item.id)} style={styles.deleteItemBtn}>
-          <Text style={styles.deleteItemText}>✕</Text>
-        </TouchableOpacity>
-      </View>
+        );
+      })}
     </View>
   );
 }
 
-// ── Main Screen ────────────────────────────────────────────────────────────
+// ── Item card ──────────────────────────────────────────────────────────────
+function ItemCard({ item, docType, onUpdate, onDelete }: {
+  item: WorkspaceItem; docType: string;
+  onUpdate: (id: number, data: Partial<WorkspaceItem>) => void;
+  onDelete: (id: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [ec, setEc] = useState(item.content);
+  const [ed, setEd] = useState(item.description || '');
+  const [es, setEs] = useState(item.status);
+  const [ep, setEp] = useState(item.priority);
+  const [edu, setEdu] = useState(item.due_date || '');
+  const [eprog, setEprog] = useState(String(item.progress ?? 0));
+  const [saving, setSaving] = useState(false);
 
+  const openEdit = () => { setEc(item.content); setEd(item.description||''); setEs(item.status); setEp(item.priority); setEdu(item.due_date||''); setEprog(String(item.progress??0)); setOpen(true); };
+  const save = async () => {
+    if (!ec.trim()) return;
+    setSaving(true);
+    onUpdate(item.id, { content: ec.trim(), description: ed.trim(), status: es, priority: ep, due_date: edu||null, progress: Math.min(100, Math.max(0, parseInt(eprog)||0)) });
+    setOpen(false); setSaving(false);
+  };
+
+  const sc = STATUS_COLORS[item.status] || Colors.textMuted;
+  const pc = PRIORITY_COLORS[item.priority] || Colors.textMuted;
+
+  return (
+    <>
+      <TouchableOpacity style={[s.itemCard, { borderLeftColor: item.color || Colors.primary }]} onPress={openEdit} activeOpacity={0.78}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+          {docType === 'todo' && (
+            <TouchableOpacity onPress={() => onUpdate(item.id, { is_done: !item.is_done })}
+              style={[s.checkbox, item.is_done && { backgroundColor: Colors.success, borderColor: Colors.success }]}>
+              {item.is_done && <Ionicons name="checkmark" size={13} color="#fff" />}
+            </TouchableOpacity>
+          )}
+          <View style={{ flex: 1 }}>
+            <Text style={[s.itemContent, item.is_done && s.itemDone]}>{item.content}</Text>
+            {item.description ? <Text style={s.itemDesc} numberOfLines={2}>{item.description}</Text> : null}
+            <View style={s.itemMeta}>
+              <View style={[s.statusPill, { backgroundColor: sc + '22', borderColor: sc + '55' }]}>
+                <Text style={[s.statusText, { color: sc }]}>{item.status.replace('_', ' ')}</Text>
+              </View>
+              <View style={[s.statusPill, { backgroundColor: pc + '22', borderColor: pc + '55' }]}>
+                <Text style={[s.statusText, { color: pc }]}>{item.priority}</Text>
+              </View>
+              {item.due_date && (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                  <Ionicons name="calendar-outline" size={11} color={Colors.textMuted} />
+                  <Text style={s.dueTxt}>{item.due_date}</Text>
+                </View>
+              )}
+            </View>
+            {docType === 'project' && (
+              <View style={s.progressBar}>
+                <View style={[s.progressFill, { width: `${item.progress}%` as any }]} />
+              </View>
+            )}
+          </View>
+          <TouchableOpacity onPress={() => onDelete(item.id)} hitSlop={8} style={{ marginLeft: 8, marginTop: 2 }}>
+            <Ionicons name="close" size={15} color={Colors.textMuted} />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+
+      <Modal visible={open} animationType="slide" transparent>
+        <View style={s.modalOverlay}>
+          <ScrollView style={s.modalSheet} keyboardShouldPersistTaps="handled">
+            <View style={s.modalHead}>
+              <Text style={s.modalTitle}>Edit Item</Text>
+              <TouchableOpacity onPress={() => setOpen(false)}><Ionicons name="close" size={22} color={Colors.textMuted} /></TouchableOpacity>
+            </View>
+            <Text style={s.fieldLabel}>Content</Text>
+            <TextInput style={s.input} value={ec} onChangeText={setEc} placeholderTextColor={Colors.textMuted} />
+            <Text style={s.fieldLabel}>Description</Text>
+            <TextInput style={[s.input, { minHeight: 64 }]} value={ed} onChangeText={setEd} multiline placeholder="Optional..." placeholderTextColor={Colors.textMuted} />
+            <Text style={s.fieldLabel}>Status</Text>
+            <PillRow options={STATUSES} value={es} onChange={setEs} colorMap={STATUS_COLORS} />
+            <Text style={s.fieldLabel}>Priority</Text>
+            <PillRow options={PRIORITIES} value={ep} onChange={setEp} colorMap={PRIORITY_COLORS} />
+            <Text style={s.fieldLabel}>Due Date (YYYY-MM-DD)</Text>
+            <TextInput style={s.input} value={edu} onChangeText={setEdu} placeholder="e.g. 2025-12-31" placeholderTextColor={Colors.textMuted} />
+            {docType === 'project' && <>
+              <Text style={s.fieldLabel}>Progress (0–100)</Text>
+              <TextInput style={s.input} value={eprog} onChangeText={setEprog} keyboardType="numeric" placeholderTextColor={Colors.textMuted} />
+            </>}
+            {docType === 'todo' && (
+              <TouchableOpacity style={[s.pill, { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm }]}
+                onPress={() => onUpdate(item.id, { is_done: !item.is_done })}>
+                <Ionicons name={item.is_done ? 'arrow-undo-outline' : 'checkmark-circle-outline'} size={14} color={Colors.textSecondary} />
+                <Text style={s.pillText}>{item.is_done ? 'Mark as Not Done' : 'Mark as Done'}</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={s.primaryBtn} onPress={save} disabled={saving}>
+              {saving ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryBtnText}>Save Changes</Text>}
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.primaryBtn, { backgroundColor: Colors.error + 'dd', marginTop: 8, flexDirection: 'row', gap: 8 }]}
+              onPress={() => { setOpen(false); onDelete(item.id); }}>
+              <Ionicons name="trash-outline" size={15} color="#fff" />
+              <Text style={s.primaryBtnText}>Delete Item</Text>
+            </TouchableOpacity>
+            <View style={{ height: 40 }} />
+          </ScrollView>
+        </View>
+      </Modal>
+    </>
+  );
+}
+
+// ── Main ───────────────────────────────────────────────────────────────────
 export default function WorkspaceScreen() {
   const [docs, setDocs] = useState<WorkspaceDoc[]>([]);
-  const [selectedDoc, setSelectedDoc] = useState<WorkspaceDoc | null>(null);
+  const [selected, setSelected] = useState<WorkspaceDoc | null>(null);
   const [loading, setLoading] = useState(true);
   const [docLoading, setDocLoading] = useState(false);
 
-  const [createDocVisible, setCreateDocVisible] = useState(false);
-  const [newDocType, setNewDocType] = useState('todo');
-  const [newDocTitle, setNewDocTitle] = useState('');
-  const [newDocColor, setNewDocColor] = useState('#4E7C3F');
+  const [createDocOpen, setCreateDocOpen] = useState(false);
+  const [newType, setNewType] = useState('todo');
+  const [newTitle, setNewTitle] = useState('');
   const [creatingDoc, setCreatingDoc] = useState(false);
 
-  const [createItemVisible, setCreateItemVisible] = useState(false);
-  const [newItemContent, setNewItemContent] = useState('');
-  const [newItemDesc, setNewItemDesc] = useState('');
-  const [newItemPriority, setNewItemPriority] = useState('medium');
-  const [newItemStatus, setNewItemStatus] = useState('todo');
-  const [newItemDue, setNewItemDue] = useState('');
-  const [creatingItem, setCreatingItem] = useState(false);
+  const [addItemOpen, setAddItemOpen] = useState(false);
+  const [niContent, setNiContent] = useState('');
+  const [niDesc, setNiDesc] = useState('');
+  const [niPriority, setNiPriority] = useState('medium');
+  const [niStatus, setNiStatus] = useState('todo');
+  const [niDue, setNiDue] = useState('');
+  const [addingItem, setAddingItem] = useState(false);
 
-  const { user } = useAuthStore();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => { loadDocs(); }, []);
 
   const loadDocs = async () => {
-    try {
-      const res = await workspaceAPI.getDocs();
-      setDocs(res.data.docs);
-    } catch {
-      Alert.alert('Error', 'Could not load workspace.');
-    } finally {
-      setLoading(false);
-    }
+    try { const r = await workspaceAPI.getDocs(); setDocs(r.data.docs); }
+    catch { Alert.alert('Error', 'Could not load workspace.'); }
+    setLoading(false);
   };
 
   const openDoc = async (doc: WorkspaceDoc) => {
     setDocLoading(true);
-    try {
-      const res = await workspaceAPI.getDoc(doc.id);
-      setSelectedDoc(res.data);
-    } catch {
-      Alert.alert('Error', 'Could not load document.');
-    } finally {
-      setDocLoading(false);
-    }
+    try { const r = await workspaceAPI.getDoc(doc.id); setSelected(r.data); }
+    catch { Alert.alert('Error', 'Could not load document.'); }
+    setDocLoading(false);
   };
 
-  const handleCreateDoc = async () => {
-    if (!newDocTitle.trim()) { Alert.alert('Error', 'Please enter a title.'); return; }
+  const createDoc = async () => {
+    if (!newTitle.trim()) { Alert.alert('Error', 'Please enter a title.'); return; }
     setCreatingDoc(true);
     try {
-      const res = await workspaceAPI.createDoc({ type: newDocType, title: newDocTitle.trim(), color: newDocColor });
-      setDocs((prev) => [res.data, ...prev]);
-      setCreateDocVisible(false);
-      setNewDocTitle('');
-    } catch {
-      Alert.alert('Error', 'Could not create document.');
-    } finally {
-      setCreatingDoc(false);
-    }
+      const t = DOC_TYPES.find(d => d.key === newType)!;
+      const r = await workspaceAPI.createDoc({ type: newType, title: newTitle.trim(), color: t.color });
+      setDocs(p => [r.data, ...p]);
+      setCreateDocOpen(false); setNewTitle('');
+    } catch { Alert.alert('Error', 'Could not create document.'); }
+    setCreatingDoc(false);
   };
 
-  const handleDeleteDoc = (id: number) => {
-    Alert.alert('Delete Document', 'This will delete the document and all its items.', [
+  const deleteDoc = (id: number) => {
+    Alert.alert('Delete Document', 'This will delete the document and all items.', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive',
-        onPress: async () => {
-          try {
-            await workspaceAPI.deleteDoc(id);
-            setDocs((prev) => prev.filter((d) => d.id !== id));
-            setSelectedDoc(null);
-          } catch {
-            Alert.alert('Error', 'Could not delete document.');
-          }
-        },
-      },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try { await workspaceAPI.deleteDoc(id); setDocs(p => p.filter(d => d.id !== id)); setSelected(null); }
+        catch { Alert.alert('Error', 'Could not delete.'); }
+      }},
     ]);
   };
 
-  const handleCreateItem = async () => {
-    if (!selectedDoc || !newItemContent.trim()) return;
-    setCreatingItem(true);
+  const addItem = async () => {
+    if (!selected || !niContent.trim()) return;
+    setAddingItem(true);
     try {
-      const res = await workspaceAPI.createItem(selectedDoc.id, {
-        content: newItemContent.trim(),
-        description: newItemDesc.trim(),
-        priority: newItemPriority,
-        status: newItemStatus,
-        due_date: newItemDue || null,
-      });
-      setSelectedDoc((prev) =>
-        prev ? { ...prev, items: [...(prev.items || []), res.data], item_count: prev.item_count + 1 } : prev
-      );
-      setCreateItemVisible(false);
-      setNewItemContent('');
-      setNewItemDesc('');
-      setNewItemDue('');
-    } catch {
-      Alert.alert('Error', 'Could not add item.');
-    } finally {
-      setCreatingItem(false);
-    }
+      const r = await workspaceAPI.createItem(selected.id, { content: niContent.trim(), description: niDesc.trim(), priority: niPriority, status: niStatus, due_date: niDue || null });
+      setSelected(p => p ? { ...p, items: [...(p.items || []), r.data], item_count: p.item_count + 1 } : p);
+      setAddItemOpen(false); setNiContent(''); setNiDesc(''); setNiDue('');
+    } catch { Alert.alert('Error', 'Could not add item.'); }
+    setAddingItem(false);
   };
 
-  const handleUpdateItem = async (itemId: number, data: Partial<WorkspaceItem>) => {
+  const updateItem = async (id: number, data: Partial<WorkspaceItem>) => {
     try {
-      await workspaceAPI.updateItem(itemId, data);
-      setSelectedDoc((prev) =>
-        prev ? { ...prev, items: prev.items?.map((i) => i.id === itemId ? { ...i, ...data } : i) } : prev
-      );
+      await workspaceAPI.updateItem(id, data);
+      setSelected(p => p ? { ...p, items: p.items?.map(i => i.id === id ? { ...i, ...data } : i) } : p);
     } catch {}
   };
 
-  const handleDeleteItem = (itemId: number) => {
+  const deleteItem = (id: number) => {
     Alert.alert('Delete Item', 'Remove this item?', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive',
-        onPress: async () => {
-          try {
-            await workspaceAPI.deleteItem(itemId);
-            setSelectedDoc((prev) =>
-              prev ? { ...prev, items: prev.items?.filter((i) => i.id !== itemId), item_count: prev.item_count - 1 } : prev
-            );
-          } catch {}
-        },
-      },
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try {
+          await workspaceAPI.deleteItem(id);
+          setSelected(p => p ? { ...p, items: p.items?.filter(i => i.id !== id), item_count: p.item_count - 1 } : p);
+        } catch {}
+      }},
     ]);
   };
 
-  const typeInfo = (type: string) => DOC_TYPES.find((t) => t.key === type);
+  if (loading) return <View style={s.center}><ActivityIndicator color={Colors.primary} size="large" /></View>;
 
-  if (loading) {
-    return <View style={styles.center}><ActivityIndicator color={Colors.primary} size="large" /></View>;
-  }
+  const typeOf = (key: string) => DOC_TYPES.find(t => t.key === key);
+  const docsByType: Record<string, WorkspaceDoc[]> = {};
+  docs.forEach(d => { if (!docsByType[d.type]) docsByType[d.type] = []; docsByType[d.type].push(d); });
 
-  // ── Doc detail view ──────────────────────────────────────────────────────
-  if (selectedDoc) {
+  // ── Selected doc view ─────────────────────────────────────────────────────
+  if (selected) {
+    const ti = typeOf(selected.type);
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => setSelectedDoc(null)} style={styles.backBtn}>
-            <Text style={styles.backBtnText}>← Back</Text>
+      <View style={s.container}>
+        <View style={[s.docHeader, { paddingTop: insets.top + 12 }]}>
+          <TouchableOpacity onPress={() => setSelected(null)} style={s.backBtn} hitSlop={8}>
+            <Ionicons name="arrow-back" size={20} color={Colors.primary} />
           </TouchableOpacity>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.docTitle} numberOfLines={1}>{selectedDoc.title}</Text>
-            <Text style={styles.docType}>{typeInfo(selectedDoc.type)?.label}</Text>
+          <View style={[s.docTypeIcon, { backgroundColor: (ti?.color || Colors.primary) + '22' }]}>
+            <Ionicons name={ti?.icon || 'document-outline'} size={18} color={ti?.color || Colors.primary} />
           </View>
-          <TouchableOpacity style={styles.addItemBtn} onPress={() => setCreateItemVisible(true)}>
-            <Text style={styles.addItemBtnText}>+ Item</Text>
+          <View style={{ flex: 1, marginLeft: 10 }}>
+            <Text style={s.docTitle} numberOfLines={1}>{selected.title}</Text>
+            <Text style={s.docTypeLbl}>{ti?.label}</Text>
+          </View>
+          <TouchableOpacity
+            style={s.addItemBtn}
+            onPress={() => setAddItemOpen(true)}
+          >
+            <Ionicons name="add" size={15} color={Colors.primary} />
+            <Text style={s.addItemBtnText}>Add Item</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleDeleteDoc(selectedDoc.id)} style={{ marginLeft: 8 }}>
-            <Text style={{ color: Colors.error, fontSize: 18 }}>🗑</Text>
+          <TouchableOpacity onPress={() => deleteDoc(selected.id)} hitSlop={8} style={{ marginLeft: 10 }}>
+            <Ionicons name="trash-outline" size={19} color={Colors.error} />
           </TouchableOpacity>
         </View>
 
         {docLoading ? (
-          <View style={styles.center}><ActivityIndicator color={Colors.primary} /></View>
+          <View style={s.center}><ActivityIndicator color={Colors.primary} /></View>
         ) : (
           <FlatList
-            data={selectedDoc.items || []}
-            keyExtractor={(item) => item.id.toString()}
+            key="detail"
+            data={selected.items || []}
+            keyExtractor={i => i.id.toString()}
             renderItem={({ item }) => (
-              <ItemCard
-                item={item}
-                docType={selectedDoc.type}
-                onUpdate={handleUpdateItem}
-                onDelete={handleDeleteItem}
-              />
+              <ItemCard item={item} docType={selected.type} onUpdate={updateItem} onDelete={deleteItem} />
             )}
-            contentContainerStyle={{ padding: Spacing.sm }}
+            contentContainerStyle={{ paddingVertical: Spacing.sm, paddingBottom: 40 }}
             ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyIcon}>📋</Text>
-                <Text style={styles.emptyText}>No items yet</Text>
-                <Text style={styles.emptySubtext}>Tap "+ Item" to add your first item</Text>
+              <View style={s.emptyState}>
+                <Ionicons name="list-outline" size={44} color={Colors.textMuted} />
+                <Text style={s.emptyTitle}>No items yet</Text>
+                <Text style={s.emptySub}>Tap "Add Item" to get started</Text>
               </View>
             }
           />
         )}
 
-        {/* Create Item Modal */}
-        <Modal visible={createItemVisible} animationType="slide" transparent>
-          <View style={styles.modalOverlay}>
-            <ScrollView style={styles.modalCard} keyboardShouldPersistTaps="handled">
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Add Item</Text>
-                <TouchableOpacity onPress={() => setCreateItemVisible(false)}>
-                  <Text style={styles.modalClose}>✕</Text>
-                </TouchableOpacity>
+        {/* Add Item Modal */}
+        <Modal visible={addItemOpen} animationType="slide" transparent>
+          <View style={s.modalOverlay}>
+            <ScrollView style={s.modalSheet} keyboardShouldPersistTaps="handled">
+              <View style={s.modalHead}>
+                <Text style={s.modalTitle}>Add Item</Text>
+                <TouchableOpacity onPress={() => setAddItemOpen(false)}><Ionicons name="close" size={22} color={Colors.textMuted} /></TouchableOpacity>
               </View>
-
-              <Text style={styles.fieldLabel}>Content *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="What needs to be done?"
-                placeholderTextColor={Colors.textMuted}
-                value={newItemContent}
-                onChangeText={setNewItemContent}
-              />
-
-              <Text style={styles.fieldLabel}>Description</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Optional details..."
-                placeholderTextColor={Colors.textMuted}
-                value={newItemDesc}
-                onChangeText={setNewItemDesc}
-                multiline
-              />
-
-              <Text style={styles.fieldLabel}>Status</Text>
-              <View style={styles.pillRow}>
-                {STATUSES.map((s) => (
-                  <TouchableOpacity
-                    key={s}
-                    style={[styles.selectPill, newItemStatus === s && styles.selectPillActive]}
-                    onPress={() => setNewItemStatus(s)}
-                  >
-                    <Text style={[styles.selectPillText, newItemStatus === s && styles.selectPillTextActive]}>
-                      {s.replace('_', ' ')}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <Text style={styles.fieldLabel}>Priority</Text>
-              <View style={styles.pillRow}>
-                {PRIORITIES.map((p) => (
-                  <TouchableOpacity
-                    key={p}
-                    style={[styles.selectPill, newItemPriority === p && styles.selectPillActive]}
-                    onPress={() => setNewItemPriority(p)}
-                  >
-                    <Text style={[styles.selectPillText, newItemPriority === p && styles.selectPillTextActive]}>
-                      {p}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <Text style={styles.fieldLabel}>Due Date (YYYY-MM-DD)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. 2025-12-31"
-                placeholderTextColor={Colors.textMuted}
-                value={newItemDue}
-                onChangeText={setNewItemDue}
-              />
-
-              <TouchableOpacity style={styles.createBtn} onPress={handleCreateItem} disabled={creatingItem}>
-                {creatingItem ? <ActivityIndicator color="#fff" /> : <Text style={styles.createBtnText}>Add Item</Text>}
+              <Text style={s.fieldLabel}>Content *</Text>
+              <TextInput style={s.input} placeholder="What needs to be done?" placeholderTextColor={Colors.textMuted} value={niContent} onChangeText={setNiContent} />
+              <Text style={s.fieldLabel}>Description</Text>
+              <TextInput style={[s.input, { minHeight: 60 }]} placeholder="Optional details..." placeholderTextColor={Colors.textMuted} value={niDesc} onChangeText={setNiDesc} multiline />
+              <Text style={s.fieldLabel}>Status</Text>
+              <PillRow options={STATUSES} value={niStatus} onChange={setNiStatus} colorMap={STATUS_COLORS} />
+              <Text style={s.fieldLabel}>Priority</Text>
+              <PillRow options={PRIORITIES} value={niPriority} onChange={setNiPriority} colorMap={PRIORITY_COLORS} />
+              <Text style={s.fieldLabel}>Due Date (YYYY-MM-DD)</Text>
+              <TextInput style={s.input} placeholder="e.g. 2025-12-31" placeholderTextColor={Colors.textMuted} value={niDue} onChangeText={setNiDue} />
+              <TouchableOpacity style={s.primaryBtn} onPress={addItem} disabled={addingItem}>
+                {addingItem ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryBtnText}>Add Item</Text>}
               </TouchableOpacity>
               <View style={{ height: 32 }} />
             </ScrollView>
@@ -374,79 +342,99 @@ export default function WorkspaceScreen() {
     );
   }
 
-  // ── Doc list view ────────────────────────────────────────────────────────
+  // ── Doc list / welcome ────────────────────────────────────────────────────
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Workspace</Text>
-        <TouchableOpacity style={styles.newDocBtn} onPress={() => setCreateDocVisible(true)}>
-          <Text style={styles.newDocBtnText}>+ New</Text>
+    <View style={s.container}>
+      <View style={[s.docHeader, { paddingTop: insets.top + 12 }]}>
+        <Text style={s.headerTitle}>Workspace</Text>
+        <TouchableOpacity style={s.newDocBtn} onPress={() => setCreateDocOpen(true)}>
+          <Ionicons name="add" size={16} color="#fff" />
+          <Text style={s.newDocBtnText}>New</Text>
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={docs}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        contentContainerStyle={{ padding: Spacing.sm }}
-        columnWrapperStyle={{ gap: Spacing.sm }}
-        renderItem={({ item }) => {
-          const info = typeInfo(item.type);
-          return (
-            <TouchableOpacity
-              style={[styles.docCard, { borderTopColor: item.color, borderTopWidth: 3 }]}
-              onPress={() => openDoc(item)}
-            >
-              <Text style={styles.docCardEmoji}>{info?.label.split(' ')[0]}</Text>
-              <Text style={styles.docCardTitle} numberOfLines={2}>{item.title}</Text>
-              <Text style={styles.docCardType}>{item.type}</Text>
-              <Text style={styles.docCardCount}>{item.item_count} items</Text>
-            </TouchableOpacity>
-          );
-        }}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📂</Text>
-            <Text style={styles.emptyText}>No documents yet</Text>
-            <Text style={styles.emptySubtext}>Tap "+ New" to create your first workspace document</Text>
-          </View>
-        }
-      />
-
-      {/* Create Doc Modal */}
-      <Modal visible={createDocVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>New Document</Text>
-              <TouchableOpacity onPress={() => setCreateDocVisible(false)}>
-                <Text style={styles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.fieldLabel}>Type</Text>
-            {DOC_TYPES.map((t) => (
-              <TouchableOpacity
-                key={t.key}
-                style={[styles.typeOption, newDocType === t.key && styles.typeOptionActive]}
-                onPress={() => setNewDocType(t.key)}
+      {docs.length === 0 ? (
+        // Web-matching welcome screen
+        <ScrollView contentContainerStyle={s.welcomeWrap}>
+          <Ionicons name="albums-outline" size={52} color={Colors.primary} style={{ marginBottom: Spacing.md }} />
+          <Text style={s.welcomeTitle}>Your Personal Workspace</Text>
+          <Text style={s.welcomeSub}>Organize tasks, projects, goals and notes{'\n'}— all in one place.</Text>
+          <View style={s.typeGrid}>
+            {DOC_TYPES.map(t => (
+              <TouchableOpacity key={t.key}
+                style={[s.typeCard, { borderColor: t.color + '44' }]}
+                onPress={() => { setNewType(t.key); setCreateDocOpen(true); }}
               >
-                <Text style={styles.typeOptionText}>{t.label}</Text>
-                {newDocType === t.key && <Text style={{ color: Colors.primary }}>✓</Text>}
+                <View style={[s.typeCardIcon, { backgroundColor: t.color + '1a' }]}>
+                  <Ionicons name={t.icon} size={24} color={t.color} />
+                </View>
+                <Text style={s.typeCardLabel}>{t.label}</Text>
               </TouchableOpacity>
             ))}
+          </View>
+        </ScrollView>
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+          {/* Docs by type — like the web sidebar groups */}
+          {DOC_TYPES.filter(t => docsByType[t.key]?.length).map(t => (
+            <View key={t.key}>
+              <View style={s.groupHeader}>
+                <Ionicons name={t.icon} size={13} color={t.color} />
+                <Text style={[s.groupLabel, { color: t.color }]}>{t.label.toUpperCase()}</Text>
+              </View>
+              {docsByType[t.key].map(doc => (
+                <TouchableOpacity key={doc.id} style={[s.docRow, { borderLeftColor: doc.color || t.color }]} onPress={() => openDoc(doc)}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.docRowTitle}>{doc.title}</Text>
+                    <Text style={s.docRowCount}>{doc.item_count} items</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
 
-            <Text style={[styles.fieldLabel, { marginTop: Spacing.sm }]}>Title</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Document title..."
-              placeholderTextColor={Colors.textMuted}
-              value={newDocTitle}
-              onChangeText={setNewDocTitle}
-            />
+          {/* Create new section */}
+          <Text style={s.createNewLabel}>CREATE NEW</Text>
+          <View style={s.typeGrid}>
+            {DOC_TYPES.map(t => (
+              <TouchableOpacity key={t.key}
+                style={[s.typeCard, { borderColor: t.color + '44' }]}
+                onPress={() => { setNewType(t.key); setCreateDocOpen(true); }}
+              >
+                <View style={[s.typeCardIcon, { backgroundColor: t.color + '1a' }]}>
+                  <Ionicons name={t.icon} size={22} color={t.color} />
+                </View>
+                <Text style={s.typeCardLabel}>{t.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+      )}
 
-            <TouchableOpacity style={styles.createBtn} onPress={handleCreateDoc} disabled={creatingDoc}>
-              {creatingDoc ? <ActivityIndicator color="#fff" /> : <Text style={styles.createBtnText}>Create Document</Text>}
+      {/* Create Doc Modal */}
+      <Modal visible={createDocOpen} animationType="slide" transparent>
+        <View style={s.modalOverlay}>
+          <View style={s.modalSheetSmall}>
+            <View style={s.modalHead}>
+              <Text style={s.modalTitle}>New Document</Text>
+              <TouchableOpacity onPress={() => setCreateDocOpen(false)}><Ionicons name="close" size={22} color={Colors.textMuted} /></TouchableOpacity>
+            </View>
+            <Text style={s.fieldLabel}>Type</Text>
+            {DOC_TYPES.map(t => (
+              <TouchableOpacity key={t.key}
+                style={[s.typeOption, newType === t.key && { backgroundColor: Colors.primary + '11' }]}
+                onPress={() => setNewType(t.key)}
+              >
+                <Ionicons name={t.icon} size={17} color={newType === t.key ? Colors.primary : Colors.textSecondary} style={{ marginRight: 10 }} />
+                <Text style={[s.typeOptionText, newType === t.key && { color: Colors.primary }]}>{t.label}</Text>
+                {newType === t.key && <Ionicons name="checkmark" size={16} color={Colors.primary} style={{ marginLeft: 'auto' as any }} />}
+              </TouchableOpacity>
+            ))}
+            <Text style={s.fieldLabel}>Title</Text>
+            <TextInput style={s.input} placeholder="Document title..." placeholderTextColor={Colors.textMuted} value={newTitle} onChangeText={setNewTitle} />
+            <TouchableOpacity style={s.primaryBtn} onPress={createDoc} disabled={creatingDoc}>
+              {creatingDoc ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryBtnText}>Create Document</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -455,112 +443,128 @@ export default function WorkspaceScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' },
 
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: Spacing.md, paddingTop: 56, paddingBottom: Spacing.sm,
+  // Headers
+  docHeader: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: Spacing.md, paddingBottom: 12,
     backgroundColor: Colors.bgCard, borderBottomWidth: 1, borderBottomColor: Colors.border,
+    gap: 10,
   },
-  headerTitle: { color: Colors.textPrimary, fontSize: 20, fontWeight: '800' },
+  headerTitle: { flex: 1, color: Colors.textPrimary, fontSize: 20, fontWeight: '800' },
   newDocBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: Colors.primary, borderRadius: Radius.full,
-    paddingHorizontal: Spacing.md, paddingVertical: 8,
+    paddingHorizontal: 14, paddingVertical: 8,
   },
-  newDocBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  backBtn: { marginRight: Spacing.sm },
-  backBtnText: { color: Colors.primary, fontSize: 15, fontWeight: '600' },
-  docTitle: { color: Colors.textPrimary, fontWeight: '700', fontSize: 16, flex: 1 },
-  docType: { color: Colors.textMuted, fontSize: 12 },
+  newDocBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  backBtn: { marginRight: 2 },
+  docTypeIcon: { width: 36, height: 36, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center' },
+  docTitle: { color: Colors.textPrimary, fontWeight: '700', fontSize: 16 },
+  docTypeLbl: { color: Colors.textMuted, fontSize: 12 },
   addItemBtn: {
-    backgroundColor: Colors.primary + '33', borderRadius: Radius.sm,
-    paddingHorizontal: Spacing.sm, paddingVertical: 6,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    borderWidth: 1, borderColor: Colors.primary + '66', borderRadius: Radius.sm,
+    paddingHorizontal: 10, paddingVertical: 6,
   },
-  addItemBtnText: { color: Colors.primary, fontWeight: '700', fontSize: 13 },
+  addItemBtnText: { color: Colors.primary, fontWeight: '600', fontSize: 13 },
 
-  docCard: {
-    flex: 1, backgroundColor: Colors.bgCard, borderRadius: Radius.md,
-    padding: Spacing.md, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border,
+  // Welcome
+  welcomeWrap: { alignItems: 'center', paddingTop: 48, paddingHorizontal: Spacing.lg, paddingBottom: 40 },
+  welcomeTitle: { color: Colors.textPrimary, fontSize: 22, fontWeight: '800', textAlign: 'center', marginBottom: 8 },
+  welcomeSub: { color: Colors.textMuted, fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: Spacing.xl },
+  typeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, justifyContent: 'center', paddingHorizontal: Spacing.md, marginTop: Spacing.sm },
+  typeCard: {
+    width: '45%', backgroundColor: Colors.bgCard, borderRadius: Radius.md,
+    borderWidth: 1, padding: Spacing.md, alignItems: 'center',
   },
-  docCardEmoji: { fontSize: 28, marginBottom: Spacing.sm },
-  docCardTitle: { color: Colors.textPrimary, fontWeight: '700', fontSize: 15, marginBottom: 4 },
-  docCardType: { color: Colors.textMuted, fontSize: 12, textTransform: 'capitalize' },
-  docCardCount: { color: Colors.textSecondary, fontSize: 12, marginTop: 6 },
+  typeCardIcon: { borderRadius: Radius.sm, padding: 12, marginBottom: 10 },
+  typeCardLabel: { color: Colors.textPrimary, fontWeight: '600', fontSize: 13, textAlign: 'center' },
 
+  // Doc list
+  groupHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: Spacing.md, paddingTop: Spacing.md, paddingBottom: 4,
+  },
+  groupLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 1 },
+  docRow: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: Spacing.md, paddingVertical: 13,
+    borderBottomWidth: 1, borderBottomColor: Colors.border,
+    borderLeftWidth: 3, backgroundColor: Colors.bgCard,
+  },
+  docRowTitle: { color: Colors.textPrimary, fontWeight: '600', fontSize: 15 },
+  docRowCount: { color: Colors.textMuted, fontSize: 12, marginTop: 2 },
+  createNewLabel: {
+    color: Colors.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1,
+    paddingHorizontal: Spacing.md, paddingTop: Spacing.lg, paddingBottom: 4,
+  },
+
+  // Item card
   itemCard: {
-    backgroundColor: Colors.bgCard, borderRadius: Radius.sm,
-    padding: Spacing.sm, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: Colors.bgCard, margin: Spacing.sm, marginBottom: 0,
+    borderRadius: Radius.sm, padding: Spacing.sm,
+    borderWidth: 1, borderColor: Colors.border, borderLeftWidth: 3,
   },
   checkbox: {
-    width: 22, height: 22, borderRadius: 4,
-    borderWidth: 2, borderColor: Colors.border,
-    alignItems: 'center', justifyContent: 'center',
-    marginRight: Spacing.sm, marginTop: 1,
+    width: 20, height: 20, borderRadius: 4, borderWidth: 2, borderColor: Colors.border,
+    alignItems: 'center', justifyContent: 'center', marginRight: Spacing.sm, marginTop: 2, flexShrink: 0,
   },
-  checkboxDone: { backgroundColor: Colors.success, borderColor: Colors.success },
-  checkmark: { color: '#fff', fontSize: 13, fontWeight: '800' },
-  itemContent: { color: Colors.textPrimary, fontSize: 15, fontWeight: '600', marginBottom: 2 },
+  itemContent: { color: Colors.textPrimary, fontSize: 14, fontWeight: '600' },
   itemDone: { textDecorationLine: 'line-through', color: Colors.textMuted },
-  itemDesc: { color: Colors.textSecondary, fontSize: 13, marginBottom: Spacing.sm },
-  itemMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  pill: { borderRadius: Radius.full, paddingHorizontal: 8, paddingVertical: 2 },
-  pillText: { fontSize: 11, fontWeight: '600', textTransform: 'capitalize' },
-  dueDate: { color: Colors.textMuted, fontSize: 11 },
-  progressBar: {
-    height: 4, backgroundColor: Colors.border, borderRadius: 2,
-    marginTop: Spacing.sm, overflow: 'hidden',
-  },
-  progressFill: { height: 4, backgroundColor: Colors.primary, borderRadius: 2 },
-  deleteItemBtn: { padding: 4, marginLeft: 4 },
-  deleteItemText: { color: Colors.textMuted, fontSize: 14 },
+  itemDesc: { color: Colors.textSecondary, fontSize: 12, marginTop: 3 },
+  itemMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 },
+  statusPill: { borderRadius: Radius.full, borderWidth: 1, paddingHorizontal: 7, paddingVertical: 2 },
+  statusText: { fontSize: 11, fontWeight: '600', textTransform: 'capitalize' },
+  dueTxt: { color: Colors.textMuted, fontSize: 11 },
+  progressBar: { height: 3, backgroundColor: Colors.border, borderRadius: 2, marginTop: 7, overflow: 'hidden' },
+  progressFill: { height: 3, backgroundColor: Colors.primary, borderRadius: 2 },
 
-  emptyState: { alignItems: 'center', paddingTop: Spacing.xxl },
-  emptyIcon: { fontSize: 48, marginBottom: Spacing.md },
-  emptyText: { color: Colors.textPrimary, fontSize: 16, fontWeight: '700' },
-  emptySubtext: { color: Colors.textMuted, fontSize: 13, marginTop: 6, textAlign: 'center', paddingHorizontal: Spacing.xl },
+  emptyState: { alignItems: 'center', paddingTop: 60, gap: 10 },
+  emptyTitle: { color: Colors.textPrimary, fontSize: 16, fontWeight: '700' },
+  emptySub: { color: Colors.textMuted, fontSize: 13 },
 
-  modalOverlay: { flex: 1, backgroundColor: '#000000aa', justifyContent: 'flex-end' },
-  modalCard: {
+  // Modals
+  modalOverlay: { flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end' },
+  modalSheet: {
     backgroundColor: Colors.bgCard,
     borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
-    padding: Spacing.lg, maxHeight: '85%',
+    padding: Spacing.lg, maxHeight: '88%',
+    borderTopWidth: 1, borderTopColor: Colors.border,
   },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
+  modalSheetSmall: {
+    backgroundColor: Colors.bgCard,
+    borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
+    padding: Spacing.lg, paddingBottom: 40,
+    borderTopWidth: 1, borderTopColor: Colors.border,
+  },
+  modalHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
   modalTitle: { color: Colors.textPrimary, fontSize: 18, fontWeight: '700' },
-  modalClose: { color: Colors.textMuted, fontSize: 18 },
-
-  fieldLabel: { color: Colors.textSecondary, fontSize: 13, marginBottom: 6 },
+  fieldLabel: { color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 },
   input: {
-    backgroundColor: Colors.bgInput, color: Colors.textPrimary,
+    backgroundColor: Colors.bg, color: Colors.textPrimary,
     borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12,
-    fontSize: 14, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border,
+    fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4,
   },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: Spacing.sm },
-  selectPill: {
+  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 4 },
+  pill: {
     paddingHorizontal: Spacing.sm, paddingVertical: 6,
     borderRadius: Radius.full, borderWidth: 1, borderColor: Colors.border,
   },
-  selectPillActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  selectPillText: { color: Colors.textSecondary, fontSize: 13, textTransform: 'capitalize' },
-  selectPillTextActive: { color: '#fff', fontWeight: '700' },
-
+  pillText: { color: Colors.textMuted, fontSize: 12, textTransform: 'capitalize' },
   typeOption: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: Spacing.sm, borderBottomWidth: 1, borderBottomColor: Colors.border,
+    flexDirection: 'row', alignItems: 'center',
+    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: Colors.border,
+    borderRadius: Radius.xs,
   },
-  typeOptionActive: { backgroundColor: Colors.primary + '11' },
   typeOptionText: { color: Colors.textPrimary, fontSize: 15 },
-
-  createBtn: {
+  primaryBtn: {
     backgroundColor: Colors.primary, borderRadius: Radius.sm,
     paddingVertical: 14, alignItems: 'center', marginTop: Spacing.sm,
-    shadowColor: Colors.primary, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4, shadowRadius: 12, elevation: 8,
+    flexDirection: 'row', justifyContent: 'center', gap: 8,
   },
-  createBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 });

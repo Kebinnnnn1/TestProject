@@ -1,106 +1,104 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useNotifStore } from '../../store';
 import { Colors } from '../../constants';
 
-function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
-  return (
-    <View style={[styles.tabIcon, focused && styles.tabIconActive]}>
-      <Text style={styles.tabEmoji}>{emoji}</Text>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelActive]}>{label}</Text>
-    </View>
-  );
-}
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
-function ChatTabIcon({ focused }: { focused: boolean }) {
-  const unread = useNotifStore((s) => s.unreadDMs);
+function TabIcon({ name, color, size, badge }: { name: IoniconsName; color: string; size: number; badge?: number }) {
   return (
-    <View style={{ position: 'relative' }}>
-      <TabIcon emoji="💬" label="Chat" focused={focused} />
-      {unread > 0 && (
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{unread > 9 ? '9+' : unread}</Text>
+    <View style={tb.iconWrap}>
+      <Ionicons name={name} size={24} color={color} />
+      {!!badge && badge > 0 && (
+        <View style={tb.badge}>
+          <Text style={tb.badgeText}>{badge > 9 ? '9+' : badge}</Text>
         </View>
       )}
     </View>
   );
 }
 
+function ChatIcon({ color }: { color: string }) {
+  const unread = useNotifStore(s => s.unreadDMs);
+  return <TabIcon name="chatbubbles-outline" color={color} size={24} badge={unread} />;
+}
+
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+  const bottomPad = Platform.OS === 'android'
+    ? Math.max(insets.bottom, 8)
+    : Math.max(insets.bottom, 0);
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: Colors.primary,
+        tabBarInactiveTintColor: Colors.textMuted,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+          marginTop: 2,
+        },
+        tabBarStyle: {
+          backgroundColor: Colors.bgCard,
+          borderTopColor: Colors.border,
+          borderTopWidth: 1,
+          height: 58 + bottomPad,
+          paddingBottom: bottomPad + 6,
+          paddingTop: 8,
+        },
       }}
     >
       <Tabs.Screen
         name="wall"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" label="Wall" focused={focused} />,
+          tabBarLabel: 'Wall',
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="newspaper-outline" color={color} size={24} />
+          ),
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
-          tabBarIcon: ({ focused }) => <ChatTabIcon focused={focused} />,
+          tabBarLabel: 'Chat',
+          tabBarIcon: ({ color }) => <ChatIcon color={color} />,
         }}
       />
       <Tabs.Screen
         name="workspace"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📋" label="Work" focused={focused} />,
+          tabBarLabel: 'Workspace',
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="grid-outline" color={color} size={24} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="Profile" focused={focused} />,
+          tabBarLabel: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="person-outline" color={color} size={24} />
+          ),
         }}
       />
     </Tabs>
   );
 }
 
-const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: Colors.bgCard,
-    borderTopColor: Colors.border,
-    borderTopWidth: 1,
-    height: 72,
-    paddingBottom: 8,
-    paddingTop: 8,
-  },
-  tabIcon: {
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  tabIconActive: {
-    backgroundColor: Colors.primary + '22',
-  },
-  tabEmoji: { fontSize: 22 },
-  tabLabel: {
-    color: Colors.textMuted,
-    fontSize: 10,
-    marginTop: 2,
-    fontWeight: '500',
-  },
-  tabLabelActive: {
-    color: Colors.primary,
-    fontWeight: '700',
-  },
+const tb = StyleSheet.create({
+  iconWrap: { position: 'relative', alignItems: 'center', justifyContent: 'center', width: 28, height: 28 },
   badge: {
-    position: 'absolute',
-    top: -2, right: -2,
-    backgroundColor: Colors.error,
-    borderRadius: 8,
+    position: 'absolute', top: -3, right: -8,
+    backgroundColor: Colors.error, borderRadius: 999,
     minWidth: 16, height: 16,
-    alignItems: 'center', justifyContent: 'center',
-    paddingHorizontal: 3,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3,
   },
   badgeText: { color: '#fff', fontSize: 9, fontWeight: '800' },
 });
