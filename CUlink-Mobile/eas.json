@@ -16,9 +16,11 @@
       }
     },
     "ipa": {
+      "developmentClient": false,
       "distribution": "internal",
       "ios": {
-        "simulator": false
+        "simulator": false,
+        "resourceClass": "m-medium"
       }
     },
     "production": {
