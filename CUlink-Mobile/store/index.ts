@@ -85,3 +85,31 @@ export const useNotifStore = create<NotifState>((set) => ({
   incrementUnreadDMs: () => set((s) => ({ unreadDMs: s.unreadDMs + 1 })),
   clearUnreadDMs: () => set({ unreadDMs: 0 }),
 }));
+
+// ── Theme Store ────────────────────────────────────────────────────────────
+
+interface ThemeState {
+  isDark: boolean;
+  toggle: () => void;
+  hydrate: () => Promise<void>;
+}
+
+export const useThemeStore = create<ThemeState>((set, get) => ({
+  isDark: true, // default dark
+
+  toggle: () => {
+    const next = !get().isDark;
+    AsyncStorage.setItem('theme', next ? 'dark' : 'light').catch(() => {});
+    set({ isDark: next });
+  },
+
+  hydrate: async () => {
+    try {
+      const saved = await AsyncStorage.getItem('theme');
+      if (saved === 'light') set({ isDark: false });
+      else set({ isDark: true }); // default dark if nothing saved
+    } catch {
+      set({ isDark: true });
+    }
+  },
+}));

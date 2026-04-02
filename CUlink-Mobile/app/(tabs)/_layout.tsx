@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNotifStore } from '../../store';
-import { Colors } from '../../constants';
+import { useTheme, Colors } from '../../constants';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -27,6 +27,7 @@ function ChatIcon({ color }: { color: string }) {
 }
 
 export default function TabsLayout() {
+  const C = useTheme();
   const insets = useSafeAreaInsets();
   const bottomPad = Platform.OS === 'android'
     ? Math.max(insets.bottom, 8)
@@ -37,16 +38,16 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textMuted,
+        tabBarActiveTintColor: C.primary,
+        tabBarInactiveTintColor: C.textMuted,
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
           marginTop: 2,
         },
         tabBarStyle: {
-          backgroundColor: Colors.bgCard,
-          borderTopColor: Colors.border,
+          backgroundColor: C.bgCard,
+          borderTopColor: C.border,
           borderTopWidth: 1,
           height: 58 + bottomPad,
           paddingBottom: bottomPad + 6,

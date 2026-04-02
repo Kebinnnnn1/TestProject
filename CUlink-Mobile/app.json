@@ -23,6 +23,8 @@
       },
       "package": "com.culink.mobile",
       "edgeToEdgeEnabled": true,
+      "minSdkVersion": 31,
+      "targetSdkVersion": 35,
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ]
@@ -42,9 +44,9 @@
     "scheme": "culink",
     "extra": {
       "eas": {
-        "projectId": "1772db27-3c5b-4304-89cd-2ffc8e6263ed"
+        "projectId": "c2962f48-9a28-4c55-b23c-95d2ebcc8ed6"
       }
     },
-    "owner": "kebinnnnn"
+    "owner": "kxvxn124"
   }
 }

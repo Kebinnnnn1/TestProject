@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   RefreshControl, ActivityIndicator, Alert, Modal, ScrollView,
-  KeyboardAvoidingView, Platform, FlatList,
+  KeyboardAvoidingView, Platform, FlatList, Dimensions, StatusBar,
 } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { wallAPI } from '../../services/api';
 import { useAuthStore } from '../../store';
-import { Colors, Spacing, Radius } from '../../constants';
+import { useTheme, DarkColors as Colors, Spacing, Radius } from '../../constants';
 
 // Who we're currently replying to (null = plain comment)
 type ReplyTarget = { username: string; displayName: string } | null;
@@ -53,6 +53,8 @@ function getReplyMention(content: string): string | null {
 }
 
 function Avatar({ url, name, size = 40 }: { url?: string; name: string; size?: number }) {
+  const Colors = useTheme();
+  const s = useMemo(() => makeStyles(Colors), [Colors]);
   return (
     <View style={[s.avatarWrap, { width: size, height: size, borderRadius: size / 2 }]}>
       {url
@@ -65,8 +67,15 @@ function Avatar({ url, name, size = 40 }: { url?: string; name: string; size?: n
 function PostCard({ post, onLike, onDelete, onComment }: {
   post: Post; onLike: (id: number) => void; onDelete: (id: number) => void; onComment: (p: Post) => void;
 }) {
+  const Colors = useTheme();
+  const s = useMemo(() => makeStyles(Colors), [Colors]);
   const all = [post.image_url, ...post.extra_image_urls].filter(Boolean);
   const name = post.author.display_name || post.author.username;
+
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const { width: SW, height: SH } = Dimensions.get('window');
+  const flatRef = useRef<FlatList>(null);
+
   return (
     <View style={s.card}>
       <View style={s.cardTop}>
@@ -94,7 +103,11 @@ function PostCard({ post, onLike, onDelete, onComment }: {
 
       {all.length > 0 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.imgRow}>
-          {all.map((url, i) => <Image key={i} source={{ uri: url }} style={s.postImg} contentFit="cover" />)}
+          {all.map((url, i) => (
+            <TouchableOpacity key={i} activeOpacity={0.85} onPress={() => setLightboxIndex(i)}>
+              <Image source={{ uri: url }} style={s.postImg} contentFit="cover" />
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       )}
 
@@ -108,6 +121,78 @@ function PostCard({ post, onLike, onDelete, onComment }: {
           <Text style={s.cardActionCount}>{post.comment_count}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Full-screen image lightbox */}
+      <Modal
+        visible={lightboxIndex !== null}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={() => setLightboxIndex(null)}
+      >
+        <StatusBar hidden />
+        <View style={{ flex: 1, backgroundColor: '#000' }}>
+          {/* Image pager */}
+          <FlatList
+            ref={flatRef}
+            data={all}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            initialScrollIndex={lightboxIndex ?? 0}
+            getItemLayout={(_, index) => ({ length: SW, offset: SW * index, index })}
+            onMomentumScrollEnd={(e) => {
+              const idx = Math.round(e.nativeEvent.contentOffset.x / SW);
+              setLightboxIndex(idx);
+            }}
+            keyExtractor={(_, i) => i.toString()}
+            renderItem={({ item: url }) => (
+              <ScrollView
+                style={{ width: SW, height: SH }}
+                contentContainerStyle={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+                maximumZoomScale={4}
+                minimumZoomScale={1}
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}
+                scrollEnabled
+              >
+                <Image
+                  source={{ uri: url }}
+                  style={{ width: SW, height: SH }}
+                  contentFit="contain"
+                />
+              </ScrollView>
+            )}
+          />
+
+          {/* Counter pill */}
+          {all.length > 1 && lightboxIndex !== null && (
+            <View style={{
+              position: 'absolute', top: 54, alignSelf: 'center',
+              backgroundColor: '#000000aa', borderRadius: 20,
+              paddingHorizontal: 12, paddingVertical: 4,
+            }}>
+              <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>
+                {lightboxIndex + 1} / {all.length}
+              </Text>
+            </View>
+          )}
+
+          {/* Close button */}
+          <TouchableOpacity
+            onPress={() => setLightboxIndex(null)}
+            style={{
+              position: 'absolute', top: 44, right: 16,
+              width: 36, height: 36, borderRadius: 18,
+              backgroundColor: '#000000bb',
+              alignItems: 'center', justifyContent: 'center',
+            }}
+            hitSlop={12}
+          >
+            <Ionicons name="close" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -120,6 +205,8 @@ function CommentItem({
   comment: Comment;
   onReply: (author: { username: string; display_name: string }) => void;
 }) {
+  const Colors = useTheme();
+  const s = useMemo(() => makeStyles(Colors), [Colors]);
   const mention = getReplyMention(comment.content);
   const isReply = !!mention;
   const name = comment.author.display_name || comment.author.username;
@@ -193,6 +280,8 @@ function CommentItem({
 }
 
 export default function WallScreen() {
+  const Colors = useTheme();
+  const s = useMemo(() => makeStyles(Colors), [Colors]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -475,7 +564,7 @@ export default function WallScreen() {
   );
 }
 
-const s = StyleSheet.create({
+function makeStyles(Colors: import('../../constants').ThemeColors) { return StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   center: { flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' },
 
@@ -721,4 +810,4 @@ const s = StyleSheet.create({
     width: 40, height: 40, alignItems: 'center', justifyContent: 'center',
     flexShrink: 0,
   },
-});
+}); }

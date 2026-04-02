@@ -8,11 +8,15 @@
       "developmentClient": true,
       "distribution": "internal"
     },
-    "preview": {
+    "apk": {
       "distribution": "internal",
       "android": {
-        "buildType": "apk"
-      },
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
+      }
+    },
+    "ipa": {
+      "distribution": "internal",
       "ios": {
         "simulator": false
       }
@@ -20,6 +24,9 @@
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "ios": {
+        "simulator": false
       }
     }
   },

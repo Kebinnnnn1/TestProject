@@ -1,4 +1,5 @@
-// Central constants for the CUlink mobile app — dark theme matching the web
+// Central constants for the CUlink mobile app
+import { useThemeStore } from '../store';
 
 // ── API ────────────────────────────────────────────────────────────────────
 export const API_BASE_URL = 'https://www.culink.me/api/v1/';
@@ -7,36 +8,83 @@ export const API_BASE_URL = 'https://www.culink.me/api/v1/';
 export const PUSHER_CLUSTER = 'ap1';
 export const PUSHER_KEY = '60490e9f86732e30a7b6';
 
-// ── Colors — exactly matching the web [data-theme="dark"] CSS variables ───
-export const Colors = {
-  // Backgrounds
-  bg:           '#111114',   // --bg
-  bgCard:       '#1a1a1f',   // --bg-card
-  bgCardAlt:    '#1f1f2a',   // --bg-card-alt
-  bgDark:       '#0a0a0d',   // --bg-dark
-  bgInput:      '#1f1f2a',
+// ── Brand ─────────────────────────────────────────────────────────────────
+export const PRIMARY = '#FF3FA4';
+export const PRIMARY_DARK = '#e0348e';
 
-  // Brand — exact CUlink pink
-  primary:      '#FF3FA4',   // --pink
-  primaryDark:  '#e0348e',   // --pink-dark
-  primaryLight: '#ff75c0',
-  accent:       '#FF3FA4',
-
-  // Text
-  textPrimary:  '#f0f0f5',   // --text-dark (in dark mode)
-  textSecondary:'#a0a0b0',   // --text-mid
-  textMuted:    '#666680',   // --text-light
-
-  // Status
-  success:      '#22c55e',
-  error:        '#ef4444',
-  warning:      '#f59e0b',
-  info:         '#3b82f6',
-
-  // Borders
-  border:       '#2a2a35',
-  borderLight:  '#3a3a50',
+// ── Dark theme (default) ──────────────────────────────────────────────────
+export const DarkColors = {
+  bg:            '#111114',
+  bgCard:        '#1a1a1f',
+  bgCardAlt:     '#1f1f2a',
+  bgInput:       '#1f1f2a',
+  primary:       PRIMARY,
+  primaryDark:   PRIMARY_DARK,
+  primaryLight:  '#ff75c0',
+  accent:        PRIMARY,
+  textPrimary:   '#f0f0f5',
+  textSecondary: '#a0a0b0',
+  textMuted:     '#666680',
+  success:       '#22c55e',
+  error:         '#ef4444',
+  warning:       '#f59e0b',
+  info:          '#3b82f6',
+  border:        '#2a2a35',
+  borderLight:   '#3a3a50',
+  isDark:        true,
 } as const;
+
+// ── Light theme ───────────────────────────────────────────────────────────
+export const LightColors = {
+  bg:            '#f5f5f7',
+  bgCard:        '#ffffff',
+  bgCardAlt:     '#f0f0f5',
+  bgInput:       '#f0f0f5',
+  primary:       PRIMARY,
+  primaryDark:   PRIMARY_DARK,
+  primaryLight:  '#ff75c0',
+  accent:        PRIMARY,
+  textPrimary:   '#111114',
+  textSecondary: '#444455',
+  textMuted:     '#888899',
+  success:       '#16a34a',
+  error:         '#dc2626',
+  warning:       '#d97706',
+  info:          '#2563eb',
+  border:        '#e0e0e8',
+  borderLight:   '#d0d0dc',
+  isDark:        false,
+} as const;
+
+export type ThemeColors = {
+  bg:            string;
+  bgCard:        string;
+  bgCardAlt:     string;
+  bgInput:       string;
+  primary:       string;
+  primaryDark:   string;
+  primaryLight:  string;
+  accent:        string;
+  textPrimary:   string;
+  textSecondary: string;
+  textMuted:     string;
+  success:       string;
+  error:         string;
+  warning:       string;
+  info:          string;
+  border:        string;
+  borderLight:   string;
+  isDark:        boolean;
+};
+
+// ── useTheme hook — call this inside any component ─────────────────────────
+export function useTheme(): ThemeColors {
+  const isDark = useThemeStore((s) => s.isDark);
+  return isDark ? DarkColors : LightColors;
+}
+
+// ── Legacy export (dark) — kept so old static StyleSheets still compile ────
+export const Colors = DarkColors;
 
 // ── Spacing ────────────────────────────────────────────────────────────────
 export const Spacing = {

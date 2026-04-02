@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TouchableOpacity, StyleSheet,
+  View, Text, TouchableOpacity,
   ScrollView, ActivityIndicator, Alert, Modal,
   TextInput, FlatList,
 } from 'react-native';
@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { workspaceAPI } from '../../services/api';
 import { useAuthStore } from '../../store';
-import { Colors, Spacing, Radius } from '../../constants';
+import { useTheme, DarkColors as Colors, Spacing, Radius } from '../../constants';
 
 interface WorkspaceItem {
   id: number; content: string; description: string;
@@ -34,25 +34,26 @@ const PRIORITIES = ['low', 'medium', 'high'];
 const STATUSES   = ['todo', 'in_progress', 'done', 'blocked'];
 
 const STATUS_COLORS: Record<string,string> = {
-  todo: Colors.textMuted, in_progress: Colors.info, done: Colors.success, blocked: Colors.error,
+  todo: '#888899', in_progress: '#3b82f6', done: '#22c55e', blocked: '#ef4444',
 };
 const PRIORITY_COLORS: Record<string,string> = {
-  low: Colors.success, medium: Colors.warning, high: Colors.error,
+  low: '#22c55e', medium: '#f59e0b', high: '#ef4444',
 };
 
 // ── Pill selector ──────────────────────────────────────────────────────────
 function PillRow({ options, value, onChange, colorMap }: { options: string[]; value: string; onChange: (v: string) => void; colorMap?: Record<string,string> }) {
+  const Colors = useTheme();
   return (
-    <View style={s.pillRow}>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 4 }}>
       {options.map(o => {
         const active = value === o;
         const col = colorMap?.[o] || Colors.primary;
         return (
           <TouchableOpacity key={o}
-            style={[s.pill, active && { backgroundColor: col + '33', borderColor: col }]}
+            style={[{ paddingHorizontal: Spacing.sm, paddingVertical: 6, borderRadius: Radius.full, borderWidth: 1, borderColor: Colors.border }, active && { backgroundColor: col + '33', borderColor: col }]}
             onPress={() => onChange(o)}
           >
-            <Text style={[s.pillText, { color: active ? col : Colors.textMuted }]}>{o.replace('_', ' ')}</Text>
+            <Text style={{ color: active ? col : Colors.textMuted, fontSize: 12, textTransform: 'capitalize' }}>{o.replace('_', ' ')}</Text>
           </TouchableOpacity>
         );
       })}
@@ -66,6 +67,7 @@ function ItemCard({ item, docType, onUpdate, onDelete }: {
   onUpdate: (id: number, data: Partial<WorkspaceItem>) => void;
   onDelete: (id: number) => void;
 }) {
+  const Colors = useTheme();
   const [open, setOpen] = useState(false);
   const [ec, setEc] = useState(item.content);
   const [ed, setEd] = useState(item.description || '');
@@ -88,34 +90,34 @@ function ItemCard({ item, docType, onUpdate, onDelete }: {
 
   return (
     <>
-      <TouchableOpacity style={[s.itemCard, { borderLeftColor: item.color || Colors.primary }]} onPress={openEdit} activeOpacity={0.78}>
+      <TouchableOpacity style={{ backgroundColor: Colors.bgCard, margin: Spacing.sm, marginBottom: 0, borderRadius: Radius.sm, padding: Spacing.sm, borderWidth: 1, borderColor: Colors.border, borderLeftWidth: 3, borderLeftColor: item.color || Colors.primary }} onPress={openEdit} activeOpacity={0.78}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
           {docType === 'todo' && (
             <TouchableOpacity onPress={() => onUpdate(item.id, { is_done: !item.is_done })}
-              style={[s.checkbox, item.is_done && { backgroundColor: Colors.success, borderColor: Colors.success }]}>
+              style={{ width: 20, height: 20, borderRadius: 4, borderWidth: 2, borderColor: item.is_done ? Colors.success : Colors.border, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.sm, marginTop: 2, flexShrink: 0, backgroundColor: item.is_done ? Colors.success : 'transparent' }}>
               {item.is_done && <Ionicons name="checkmark" size={13} color="#fff" />}
             </TouchableOpacity>
           )}
           <View style={{ flex: 1 }}>
-            <Text style={[s.itemContent, item.is_done && s.itemDone]}>{item.content}</Text>
-            {item.description ? <Text style={s.itemDesc} numberOfLines={2}>{item.description}</Text> : null}
-            <View style={s.itemMeta}>
-              <View style={[s.statusPill, { backgroundColor: sc + '22', borderColor: sc + '55' }]}>
-                <Text style={[s.statusText, { color: sc }]}>{item.status.replace('_', ' ')}</Text>
+            <Text style={{ color: item.is_done ? Colors.textMuted : Colors.textPrimary, fontSize: 14, fontWeight: '600', textDecorationLine: item.is_done ? 'line-through' : 'none' }}>{item.content}</Text>
+            {item.description ? <Text style={{ color: Colors.textSecondary, fontSize: 12, marginTop: 3 }} numberOfLines={2}>{item.description}</Text> : null}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
+              <View style={{ borderRadius: Radius.full, borderWidth: 1, paddingHorizontal: 7, paddingVertical: 2, backgroundColor: sc + '22', borderColor: sc + '55' }}>
+                <Text style={{ fontSize: 11, fontWeight: '600', color: sc, textTransform: 'capitalize' }}>{item.status.replace('_', ' ')}</Text>
               </View>
-              <View style={[s.statusPill, { backgroundColor: pc + '22', borderColor: pc + '55' }]}>
-                <Text style={[s.statusText, { color: pc }]}>{item.priority}</Text>
+              <View style={{ borderRadius: Radius.full, borderWidth: 1, paddingHorizontal: 7, paddingVertical: 2, backgroundColor: pc + '22', borderColor: pc + '55' }}>
+                <Text style={{ fontSize: 11, fontWeight: '600', color: pc, textTransform: 'capitalize' }}>{item.priority}</Text>
               </View>
               {item.due_date && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
                   <Ionicons name="calendar-outline" size={11} color={Colors.textMuted} />
-                  <Text style={s.dueTxt}>{item.due_date}</Text>
+                  <Text style={{ color: Colors.textMuted, fontSize: 11 }}>{item.due_date}</Text>
                 </View>
               )}
             </View>
             {docType === 'project' && (
-              <View style={s.progressBar}>
-                <View style={[s.progressFill, { width: `${item.progress}%` as any }]} />
+              <View style={{ height: 3, backgroundColor: Colors.border, borderRadius: 2, marginTop: 7, overflow: 'hidden' }}>
+                <View style={{ height: 3, backgroundColor: Colors.primary, borderRadius: 2, width: `${item.progress}%` as any }} />
               </View>
             )}
           </View>
@@ -126,40 +128,40 @@ function ItemCard({ item, docType, onUpdate, onDelete }: {
       </TouchableOpacity>
 
       <Modal visible={open} animationType="slide" transparent>
-        <View style={s.modalOverlay}>
-          <ScrollView style={s.modalSheet} keyboardShouldPersistTaps="handled">
-            <View style={s.modalHead}>
-              <Text style={s.modalTitle}>Edit Item</Text>
+        <View style={{ flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end' }}>
+          <ScrollView style={{ backgroundColor: Colors.bgCard, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl, padding: Spacing.lg, maxHeight: '88%', borderTopWidth: 1, borderTopColor: Colors.border }} keyboardShouldPersistTaps="handled">
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md }}>
+              <Text style={{ color: Colors.textPrimary, fontSize: 18, fontWeight: '700' }}>Edit Item</Text>
               <TouchableOpacity onPress={() => setOpen(false)}><Ionicons name="close" size={22} color={Colors.textMuted} /></TouchableOpacity>
             </View>
-            <Text style={s.fieldLabel}>Content</Text>
-            <TextInput style={s.input} value={ec} onChangeText={setEc} placeholderTextColor={Colors.textMuted} />
-            <Text style={s.fieldLabel}>Description</Text>
-            <TextInput style={[s.input, { minHeight: 64 }]} value={ed} onChangeText={setEd} multiline placeholder="Optional..." placeholderTextColor={Colors.textMuted} />
-            <Text style={s.fieldLabel}>Status</Text>
+            <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Content</Text>
+            <TextInput style={{ backgroundColor: Colors.bg, color: Colors.textPrimary, borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4 }} value={ec} onChangeText={setEc} placeholderTextColor={Colors.textMuted} />
+            <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Description</Text>
+            <TextInput style={{ backgroundColor: Colors.bg, color: Colors.textPrimary, borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4, minHeight: 64 }} value={ed} onChangeText={setEd} multiline placeholder="Optional..." placeholderTextColor={Colors.textMuted} />
+            <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Status</Text>
             <PillRow options={STATUSES} value={es} onChange={setEs} colorMap={STATUS_COLORS} />
-            <Text style={s.fieldLabel}>Priority</Text>
+            <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Priority</Text>
             <PillRow options={PRIORITIES} value={ep} onChange={setEp} colorMap={PRIORITY_COLORS} />
-            <Text style={s.fieldLabel}>Due Date (YYYY-MM-DD)</Text>
-            <TextInput style={s.input} value={edu} onChangeText={setEdu} placeholder="e.g. 2025-12-31" placeholderTextColor={Colors.textMuted} />
+            <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Due Date (YYYY-MM-DD)</Text>
+            <TextInput style={{ backgroundColor: Colors.bg, color: Colors.textPrimary, borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4 }} value={edu} onChangeText={setEdu} placeholder="e.g. 2025-12-31" placeholderTextColor={Colors.textMuted} />
             {docType === 'project' && <>
-              <Text style={s.fieldLabel}>Progress (0–100)</Text>
-              <TextInput style={s.input} value={eprog} onChangeText={setEprog} keyboardType="numeric" placeholderTextColor={Colors.textMuted} />
+              <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Progress (0–100)</Text>
+              <TextInput style={{ backgroundColor: Colors.bg, color: Colors.textPrimary, borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4 }} value={eprog} onChangeText={setEprog} keyboardType="numeric" placeholderTextColor={Colors.textMuted} />
             </>}
             {docType === 'todo' && (
-              <TouchableOpacity style={[s.pill, { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm }]}
+              <TouchableOpacity style={{ paddingHorizontal: Spacing.sm, paddingVertical: 6, borderRadius: Radius.full, borderWidth: 1, borderColor: Colors.border, alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm }}
                 onPress={() => onUpdate(item.id, { is_done: !item.is_done })}>
                 <Ionicons name={item.is_done ? 'arrow-undo-outline' : 'checkmark-circle-outline'} size={14} color={Colors.textSecondary} />
-                <Text style={s.pillText}>{item.is_done ? 'Mark as Not Done' : 'Mark as Done'}</Text>
+                <Text style={{ color: Colors.textMuted, fontSize: 12, textTransform: 'capitalize' }}>{item.is_done ? 'Mark as Not Done' : 'Mark as Done'}</Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity style={s.primaryBtn} onPress={save} disabled={saving}>
-              {saving ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryBtnText}>Save Changes</Text>}
+            <TouchableOpacity style={{ backgroundColor: Colors.primary, borderRadius: Radius.sm, paddingVertical: 14, alignItems: 'center', marginTop: Spacing.sm, flexDirection: 'row', justifyContent: 'center' }} onPress={save} disabled={saving}>
+              {saving ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Save Changes</Text>}
             </TouchableOpacity>
-            <TouchableOpacity style={[s.primaryBtn, { backgroundColor: Colors.error + 'dd', marginTop: 8, flexDirection: 'row', gap: 8 }]}
+            <TouchableOpacity style={{ backgroundColor: Colors.error + 'dd', borderRadius: Radius.sm, paddingVertical: 14, alignItems: 'center', marginTop: 8, flexDirection: 'row', justifyContent: 'center', gap: 8 }}
               onPress={() => { setOpen(false); onDelete(item.id); }}>
               <Ionicons name="trash-outline" size={15} color="#fff" />
-              <Text style={s.primaryBtnText}>Delete Item</Text>
+              <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Delete Item</Text>
             </TouchableOpacity>
             <View style={{ height: 40 }} />
           </ScrollView>
@@ -171,6 +173,7 @@ function ItemCard({ item, docType, onUpdate, onDelete }: {
 
 // ── Main ───────────────────────────────────────────────────────────────────
 export default function WorkspaceScreen() {
+  const Colors = useTheme();
   const [docs, setDocs] = useState<WorkspaceDoc[]>([]);
   const [selected, setSelected] = useState<WorkspaceDoc | null>(null);
   const [loading, setLoading] = useState(true);
@@ -258,7 +261,7 @@ export default function WorkspaceScreen() {
     ]);
   };
 
-  if (loading) return <View style={s.center}><ActivityIndicator color={Colors.primary} size="large" /></View>;
+  if (loading) return <View style={{ flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator color={Colors.primary} size="large" /></View>;
 
   const typeOf = (key: string) => DOC_TYPES.find(t => t.key === key);
   const docsByType: Record<string, WorkspaceDoc[]> = {};
@@ -268,24 +271,21 @@ export default function WorkspaceScreen() {
   if (selected) {
     const ti = typeOf(selected.type);
     return (
-      <View style={s.container}>
-        <View style={[s.docHeader, { paddingTop: insets.top + 12 }]}>
-          <TouchableOpacity onPress={() => setSelected(null)} style={s.backBtn} hitSlop={8}>
+      <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.md, paddingBottom: 12, backgroundColor: Colors.bgCard, borderBottomWidth: 1, borderBottomColor: Colors.border, gap: 10, paddingTop: insets.top + 12 }}>
+          <TouchableOpacity onPress={() => setSelected(null)} hitSlop={8}>
             <Ionicons name="arrow-back" size={20} color={Colors.primary} />
           </TouchableOpacity>
-          <View style={[s.docTypeIcon, { backgroundColor: (ti?.color || Colors.primary) + '22' }]}>
+          <View style={{ width: 36, height: 36, borderRadius: Radius.sm, backgroundColor: (ti?.color || Colors.primary) + '22', alignItems: 'center', justifyContent: 'center' }}>
             <Ionicons name={ti?.icon || 'document-outline'} size={18} color={ti?.color || Colors.primary} />
           </View>
           <View style={{ flex: 1, marginLeft: 10 }}>
-            <Text style={s.docTitle} numberOfLines={1}>{selected.title}</Text>
-            <Text style={s.docTypeLbl}>{ti?.label}</Text>
+            <Text style={{ color: Colors.textPrimary, fontWeight: '700', fontSize: 16 }} numberOfLines={1}>{selected.title}</Text>
+            <Text style={{ color: Colors.textMuted, fontSize: 12 }}>{ti?.label}</Text>
           </View>
-          <TouchableOpacity
-            style={s.addItemBtn}
-            onPress={() => setAddItemOpen(true)}
-          >
+          <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderColor: Colors.primary + '66', borderRadius: Radius.sm, paddingHorizontal: 10, paddingVertical: 6 }} onPress={() => setAddItemOpen(true)}>
             <Ionicons name="add" size={15} color={Colors.primary} />
-            <Text style={s.addItemBtnText}>Add Item</Text>
+            <Text style={{ color: Colors.primary, fontWeight: '600', fontSize: 13 }}>Add Item</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => deleteDoc(selected.id)} hitSlop={8} style={{ marginLeft: 10 }}>
             <Ionicons name="trash-outline" size={19} color={Colors.error} />
@@ -293,46 +293,46 @@ export default function WorkspaceScreen() {
         </View>
 
         {docLoading ? (
-          <View style={s.center}><ActivityIndicator color={Colors.primary} /></View>
+          <View style={{ flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator color={Colors.primary} /></View>
         ) : (
           <FlatList
             key="detail"
             data={selected.items || []}
             keyExtractor={i => i.id.toString()}
+            style={{ backgroundColor: Colors.bg }}
             renderItem={({ item }) => (
               <ItemCard item={item} docType={selected.type} onUpdate={updateItem} onDelete={deleteItem} />
             )}
             contentContainerStyle={{ paddingVertical: Spacing.sm, paddingBottom: 40 }}
             ListEmptyComponent={
-              <View style={s.emptyState}>
+              <View style={{ alignItems: 'center', paddingTop: 60, gap: 10 }}>
                 <Ionicons name="list-outline" size={44} color={Colors.textMuted} />
-                <Text style={s.emptyTitle}>No items yet</Text>
-                <Text style={s.emptySub}>Tap "Add Item" to get started</Text>
+                <Text style={{ color: Colors.textPrimary, fontSize: 16, fontWeight: '700' }}>No items yet</Text>
+                <Text style={{ color: Colors.textMuted, fontSize: 13 }}>Tap "Add Item" to get started</Text>
               </View>
             }
           />
         )}
 
-        {/* Add Item Modal */}
         <Modal visible={addItemOpen} animationType="slide" transparent>
-          <View style={s.modalOverlay}>
-            <ScrollView style={s.modalSheet} keyboardShouldPersistTaps="handled">
-              <View style={s.modalHead}>
-                <Text style={s.modalTitle}>Add Item</Text>
+          <View style={{ flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end' }}>
+            <ScrollView style={{ backgroundColor: Colors.bgCard, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl, padding: Spacing.lg, maxHeight: '88%', borderTopWidth: 1, borderTopColor: Colors.border }} keyboardShouldPersistTaps="handled">
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md }}>
+                <Text style={{ color: Colors.textPrimary, fontSize: 18, fontWeight: '700' }}>Add Item</Text>
                 <TouchableOpacity onPress={() => setAddItemOpen(false)}><Ionicons name="close" size={22} color={Colors.textMuted} /></TouchableOpacity>
               </View>
-              <Text style={s.fieldLabel}>Content *</Text>
-              <TextInput style={s.input} placeholder="What needs to be done?" placeholderTextColor={Colors.textMuted} value={niContent} onChangeText={setNiContent} />
-              <Text style={s.fieldLabel}>Description</Text>
-              <TextInput style={[s.input, { minHeight: 60 }]} placeholder="Optional details..." placeholderTextColor={Colors.textMuted} value={niDesc} onChangeText={setNiDesc} multiline />
-              <Text style={s.fieldLabel}>Status</Text>
+              <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Content *</Text>
+              <TextInput style={{ backgroundColor: Colors.bg, color: Colors.textPrimary, borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4 }} placeholder="What needs to be done?" placeholderTextColor={Colors.textMuted} value={niContent} onChangeText={setNiContent} />
+              <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Description</Text>
+              <TextInput style={{ backgroundColor: Colors.bg, color: Colors.textPrimary, borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4, minHeight: 60 }} placeholder="Optional details..." placeholderTextColor={Colors.textMuted} value={niDesc} onChangeText={setNiDesc} multiline />
+              <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Status</Text>
               <PillRow options={STATUSES} value={niStatus} onChange={setNiStatus} colorMap={STATUS_COLORS} />
-              <Text style={s.fieldLabel}>Priority</Text>
+              <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Priority</Text>
               <PillRow options={PRIORITIES} value={niPriority} onChange={setNiPriority} colorMap={PRIORITY_COLORS} />
-              <Text style={s.fieldLabel}>Due Date (YYYY-MM-DD)</Text>
-              <TextInput style={s.input} placeholder="e.g. 2025-12-31" placeholderTextColor={Colors.textMuted} value={niDue} onChangeText={setNiDue} />
-              <TouchableOpacity style={s.primaryBtn} onPress={addItem} disabled={addingItem}>
-                {addingItem ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryBtnText}>Add Item</Text>}
+              <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Due Date (YYYY-MM-DD)</Text>
+              <TextInput style={{ backgroundColor: Colors.bg, color: Colors.textPrimary, borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4 }} placeholder="e.g. 2025-12-31" placeholderTextColor={Colors.textMuted} value={niDue} onChangeText={setNiDue} />
+              <TouchableOpacity style={{ backgroundColor: Colors.primary, borderRadius: Radius.sm, paddingVertical: 14, alignItems: 'center', marginTop: Spacing.sm, flexDirection: 'row', justifyContent: 'center' }} onPress={addItem} disabled={addingItem}>
+                {addingItem ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Add Item</Text>}
               </TouchableOpacity>
               <View style={{ height: 32 }} />
             </ScrollView>
@@ -344,49 +344,47 @@ export default function WorkspaceScreen() {
 
   // ── Doc list / welcome ────────────────────────────────────────────────────
   return (
-    <View style={s.container}>
-      <View style={[s.docHeader, { paddingTop: insets.top + 12 }]}>
-        <Text style={s.headerTitle}>Workspace</Text>
-        <TouchableOpacity style={s.newDocBtn} onPress={() => setCreateDocOpen(true)}>
+    <View style={{ flex: 1, backgroundColor: Colors.bg }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.md, paddingBottom: 12, backgroundColor: Colors.bgCard, borderBottomWidth: 1, borderBottomColor: Colors.border, gap: 10, paddingTop: insets.top + 12 }}>
+        <Text style={{ flex: 1, color: Colors.textPrimary, fontSize: 20, fontWeight: '800' }}>Workspace</Text>
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: Colors.primary, borderRadius: Radius.full, paddingHorizontal: 14, paddingVertical: 8 }} onPress={() => setCreateDocOpen(true)}>
           <Ionicons name="add" size={16} color="#fff" />
-          <Text style={s.newDocBtnText}>New</Text>
+          <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>New</Text>
         </TouchableOpacity>
       </View>
 
       {docs.length === 0 ? (
-        // Web-matching welcome screen
-        <ScrollView contentContainerStyle={s.welcomeWrap}>
+        <ScrollView contentContainerStyle={{ alignItems: 'center', paddingTop: 48, paddingHorizontal: Spacing.lg, paddingBottom: 40 }}>
           <Ionicons name="albums-outline" size={52} color={Colors.primary} style={{ marginBottom: Spacing.md }} />
-          <Text style={s.welcomeTitle}>Your Personal Workspace</Text>
-          <Text style={s.welcomeSub}>Organize tasks, projects, goals and notes{'\n'}— all in one place.</Text>
-          <View style={s.typeGrid}>
+          <Text style={{ color: Colors.textPrimary, fontSize: 22, fontWeight: '800', textAlign: 'center', marginBottom: 8 }}>Your Personal Workspace</Text>
+          <Text style={{ color: Colors.textMuted, fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: Spacing.xl }}>Organize tasks, projects, goals and notes{'\n'}— all in one place.</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, justifyContent: 'center', paddingHorizontal: Spacing.md, marginTop: Spacing.sm }}>
             {DOC_TYPES.map(t => (
               <TouchableOpacity key={t.key}
-                style={[s.typeCard, { borderColor: t.color + '44' }]}
+                style={{ width: '45%', backgroundColor: Colors.bgCard, borderRadius: Radius.md, borderWidth: 1, borderColor: t.color + '44', padding: Spacing.md, alignItems: 'center' }}
                 onPress={() => { setNewType(t.key); setCreateDocOpen(true); }}
               >
-                <View style={[s.typeCardIcon, { backgroundColor: t.color + '1a' }]}>
+                <View style={{ borderRadius: Radius.sm, padding: 12, marginBottom: 10, backgroundColor: t.color + '1a' }}>
                   <Ionicons name={t.icon} size={24} color={t.color} />
                 </View>
-                <Text style={s.typeCardLabel}>{t.label}</Text>
+                <Text style={{ color: Colors.textPrimary, fontWeight: '600', fontSize: 13, textAlign: 'center' }}>{t.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </ScrollView>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-          {/* Docs by type — like the web sidebar groups */}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }} style={{ backgroundColor: Colors.bg }}>
           {DOC_TYPES.filter(t => docsByType[t.key]?.length).map(t => (
             <View key={t.key}>
-              <View style={s.groupHeader}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: Spacing.md, paddingTop: Spacing.md, paddingBottom: 4 }}>
                 <Ionicons name={t.icon} size={13} color={t.color} />
-                <Text style={[s.groupLabel, { color: t.color }]}>{t.label.toUpperCase()}</Text>
+                <Text style={{ fontSize: 11, fontWeight: '700', letterSpacing: 1, color: t.color }}>{t.label.toUpperCase()}</Text>
               </View>
               {docsByType[t.key].map(doc => (
-                <TouchableOpacity key={doc.id} style={[s.docRow, { borderLeftColor: doc.color || t.color }]} onPress={() => openDoc(doc)}>
+                <TouchableOpacity key={doc.id} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.md, paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: Colors.border, borderLeftWidth: 3, borderLeftColor: doc.color || t.color, backgroundColor: Colors.bgCard }} onPress={() => openDoc(doc)}>
                   <View style={{ flex: 1 }}>
-                    <Text style={s.docRowTitle}>{doc.title}</Text>
-                    <Text style={s.docRowCount}>{doc.item_count} items</Text>
+                    <Text style={{ color: Colors.textPrimary, fontWeight: '600', fontSize: 15 }}>{doc.title}</Text>
+                    <Text style={{ color: Colors.textMuted, fontSize: 12, marginTop: 2 }}>{doc.item_count} items</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
                 </TouchableOpacity>
@@ -394,47 +392,45 @@ export default function WorkspaceScreen() {
             </View>
           ))}
 
-          {/* Create new section */}
-          <Text style={s.createNewLabel}>CREATE NEW</Text>
-          <View style={s.typeGrid}>
+          <Text style={{ color: Colors.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1, paddingHorizontal: Spacing.md, paddingTop: Spacing.lg, paddingBottom: 4 }}>CREATE NEW</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, justifyContent: 'center', paddingHorizontal: Spacing.md, marginTop: Spacing.sm }}>
             {DOC_TYPES.map(t => (
               <TouchableOpacity key={t.key}
-                style={[s.typeCard, { borderColor: t.color + '44' }]}
+                style={{ width: '45%', backgroundColor: Colors.bgCard, borderRadius: Radius.md, borderWidth: 1, borderColor: t.color + '44', padding: Spacing.md, alignItems: 'center' }}
                 onPress={() => { setNewType(t.key); setCreateDocOpen(true); }}
               >
-                <View style={[s.typeCardIcon, { backgroundColor: t.color + '1a' }]}>
+                <View style={{ borderRadius: Radius.sm, padding: 12, marginBottom: 10, backgroundColor: t.color + '1a' }}>
                   <Ionicons name={t.icon} size={22} color={t.color} />
                 </View>
-                <Text style={s.typeCardLabel}>{t.label}</Text>
+                <Text style={{ color: Colors.textPrimary, fontWeight: '600', fontSize: 13, textAlign: 'center' }}>{t.label}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </ScrollView>
       )}
 
-      {/* Create Doc Modal */}
       <Modal visible={createDocOpen} animationType="slide" transparent>
-        <View style={s.modalOverlay}>
-          <View style={s.modalSheetSmall}>
-            <View style={s.modalHead}>
-              <Text style={s.modalTitle}>New Document</Text>
+        <View style={{ flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: Colors.bgCard, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl, padding: Spacing.lg, paddingBottom: 40, borderTopWidth: 1, borderTopColor: Colors.border }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md }}>
+              <Text style={{ color: Colors.textPrimary, fontSize: 18, fontWeight: '700' }}>New Document</Text>
               <TouchableOpacity onPress={() => setCreateDocOpen(false)}><Ionicons name="close" size={22} color={Colors.textMuted} /></TouchableOpacity>
             </View>
-            <Text style={s.fieldLabel}>Type</Text>
+            <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Type</Text>
             {DOC_TYPES.map(t => (
               <TouchableOpacity key={t.key}
-                style={[s.typeOption, newType === t.key && { backgroundColor: Colors.primary + '11' }]}
+                style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: Colors.border, borderRadius: Radius.xs, backgroundColor: newType === t.key ? Colors.primary + '11' : 'transparent' }}
                 onPress={() => setNewType(t.key)}
               >
                 <Ionicons name={t.icon} size={17} color={newType === t.key ? Colors.primary : Colors.textSecondary} style={{ marginRight: 10 }} />
-                <Text style={[s.typeOptionText, newType === t.key && { color: Colors.primary }]}>{t.label}</Text>
+                <Text style={{ color: newType === t.key ? Colors.primary : Colors.textPrimary, fontSize: 15 }}>{t.label}</Text>
                 {newType === t.key && <Ionicons name="checkmark" size={16} color={Colors.primary} style={{ marginLeft: 'auto' as any }} />}
               </TouchableOpacity>
             ))}
-            <Text style={s.fieldLabel}>Title</Text>
-            <TextInput style={s.input} placeholder="Document title..." placeholderTextColor={Colors.textMuted} value={newTitle} onChangeText={setNewTitle} />
-            <TouchableOpacity style={s.primaryBtn} onPress={createDoc} disabled={creatingDoc}>
-              {creatingDoc ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryBtnText}>Create Document</Text>}
+            <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>Title</Text>
+            <TextInput style={{ backgroundColor: Colors.bg, color: Colors.textPrimary, borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4 }} placeholder="Document title..." placeholderTextColor={Colors.textMuted} value={newTitle} onChangeText={setNewTitle} />
+            <TouchableOpacity style={{ backgroundColor: Colors.primary, borderRadius: Radius.sm, paddingVertical: 14, alignItems: 'center', marginTop: Spacing.sm, flexDirection: 'row', justifyContent: 'center' }} onPress={createDoc} disabled={creatingDoc}>
+              {creatingDoc ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Create Document</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -443,128 +439,5 @@ export default function WorkspaceScreen() {
   );
 }
 
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
-  center: { flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' },
 
-  // Headers
-  docHeader: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: Spacing.md, paddingBottom: 12,
-    backgroundColor: Colors.bgCard, borderBottomWidth: 1, borderBottomColor: Colors.border,
-    gap: 10,
-  },
-  headerTitle: { flex: 1, color: Colors.textPrimary, fontSize: 20, fontWeight: '800' },
-  newDocBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: Colors.primary, borderRadius: Radius.full,
-    paddingHorizontal: 14, paddingVertical: 8,
-  },
-  newDocBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-  backBtn: { marginRight: 2 },
-  docTypeIcon: { width: 36, height: 36, borderRadius: Radius.sm, alignItems: 'center', justifyContent: 'center' },
-  docTitle: { color: Colors.textPrimary, fontWeight: '700', fontSize: 16 },
-  docTypeLbl: { color: Colors.textMuted, fontSize: 12 },
-  addItemBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    borderWidth: 1, borderColor: Colors.primary + '66', borderRadius: Radius.sm,
-    paddingHorizontal: 10, paddingVertical: 6,
-  },
-  addItemBtnText: { color: Colors.primary, fontWeight: '600', fontSize: 13 },
-
-  // Welcome
-  welcomeWrap: { alignItems: 'center', paddingTop: 48, paddingHorizontal: Spacing.lg, paddingBottom: 40 },
-  welcomeTitle: { color: Colors.textPrimary, fontSize: 22, fontWeight: '800', textAlign: 'center', marginBottom: 8 },
-  welcomeSub: { color: Colors.textMuted, fontSize: 14, textAlign: 'center', lineHeight: 20, marginBottom: Spacing.xl },
-  typeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, justifyContent: 'center', paddingHorizontal: Spacing.md, marginTop: Spacing.sm },
-  typeCard: {
-    width: '45%', backgroundColor: Colors.bgCard, borderRadius: Radius.md,
-    borderWidth: 1, padding: Spacing.md, alignItems: 'center',
-  },
-  typeCardIcon: { borderRadius: Radius.sm, padding: 12, marginBottom: 10 },
-  typeCardLabel: { color: Colors.textPrimary, fontWeight: '600', fontSize: 13, textAlign: 'center' },
-
-  // Doc list
-  groupHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: Spacing.md, paddingTop: Spacing.md, paddingBottom: 4,
-  },
-  groupLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 1 },
-  docRow: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: Spacing.md, paddingVertical: 13,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
-    borderLeftWidth: 3, backgroundColor: Colors.bgCard,
-  },
-  docRowTitle: { color: Colors.textPrimary, fontWeight: '600', fontSize: 15 },
-  docRowCount: { color: Colors.textMuted, fontSize: 12, marginTop: 2 },
-  createNewLabel: {
-    color: Colors.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1,
-    paddingHorizontal: Spacing.md, paddingTop: Spacing.lg, paddingBottom: 4,
-  },
-
-  // Item card
-  itemCard: {
-    backgroundColor: Colors.bgCard, margin: Spacing.sm, marginBottom: 0,
-    borderRadius: Radius.sm, padding: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border, borderLeftWidth: 3,
-  },
-  checkbox: {
-    width: 20, height: 20, borderRadius: 4, borderWidth: 2, borderColor: Colors.border,
-    alignItems: 'center', justifyContent: 'center', marginRight: Spacing.sm, marginTop: 2, flexShrink: 0,
-  },
-  itemContent: { color: Colors.textPrimary, fontSize: 14, fontWeight: '600' },
-  itemDone: { textDecorationLine: 'line-through', color: Colors.textMuted },
-  itemDesc: { color: Colors.textSecondary, fontSize: 12, marginTop: 3 },
-  itemMeta: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 6 },
-  statusPill: { borderRadius: Radius.full, borderWidth: 1, paddingHorizontal: 7, paddingVertical: 2 },
-  statusText: { fontSize: 11, fontWeight: '600', textTransform: 'capitalize' },
-  dueTxt: { color: Colors.textMuted, fontSize: 11 },
-  progressBar: { height: 3, backgroundColor: Colors.border, borderRadius: 2, marginTop: 7, overflow: 'hidden' },
-  progressFill: { height: 3, backgroundColor: Colors.primary, borderRadius: 2 },
-
-  emptyState: { alignItems: 'center', paddingTop: 60, gap: 10 },
-  emptyTitle: { color: Colors.textPrimary, fontSize: 16, fontWeight: '700' },
-  emptySub: { color: Colors.textMuted, fontSize: 13 },
-
-  // Modals
-  modalOverlay: { flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end' },
-  modalSheet: {
-    backgroundColor: Colors.bgCard,
-    borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
-    padding: Spacing.lg, maxHeight: '88%',
-    borderTopWidth: 1, borderTopColor: Colors.border,
-  },
-  modalSheetSmall: {
-    backgroundColor: Colors.bgCard,
-    borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
-    padding: Spacing.lg, paddingBottom: 40,
-    borderTopWidth: 1, borderTopColor: Colors.border,
-  },
-  modalHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
-  modalTitle: { color: Colors.textPrimary, fontSize: 18, fontWeight: '700' },
-  fieldLabel: { color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 },
-  input: {
-    backgroundColor: Colors.bg, color: Colors.textPrimary,
-    borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12,
-    fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4,
-  },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 4 },
-  pill: {
-    paddingHorizontal: Spacing.sm, paddingVertical: 6,
-    borderRadius: Radius.full, borderWidth: 1, borderColor: Colors.border,
-  },
-  pillText: { color: Colors.textMuted, fontSize: 12, textTransform: 'capitalize' },
-  typeOption: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: Colors.border,
-    borderRadius: Radius.xs,
-  },
-  typeOptionText: { color: Colors.textPrimary, fontSize: 15 },
-  primaryBtn: {
-    backgroundColor: Colors.primary, borderRadius: Radius.sm,
-    paddingVertical: 14, alignItems: 'center', marginTop: Spacing.sm,
-    flexDirection: 'row', justifyContent: 'center', gap: 8,
-  },
-  primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-});
+// No static StyleSheet — all styles are inline and driven by useTheme() per render

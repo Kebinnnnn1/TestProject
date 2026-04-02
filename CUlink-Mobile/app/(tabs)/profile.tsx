@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView,
-  ActivityIndicator, Alert, Modal, TextInput,
+  ActivityIndicator, Alert, Modal, TextInput, useColorScheme,
 } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { profileAPI, authAPI } from '../../services/api';
-import { useAuthStore } from '../../store';
-import { Colors, Spacing, Radius } from '../../constants';
+import { useAuthStore, useThemeStore } from '../../store';
+import { useTheme, ThemeColors, Spacing, Radius } from '../../constants';
 
 const UNIVERSITY_CHOICES = [
   { value: 'CTU', label: 'CTU - Cebu Technological University' },
@@ -21,7 +21,9 @@ const UNIVERSITY_CHOICES = [
 ];
 
 export default function ProfileScreen() {
+  const C = useTheme();
   const { user, setUser, clearAuth } = useAuthStore();
+  const { isDark, toggle: toggleTheme } = useThemeStore();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
 
@@ -81,7 +83,7 @@ export default function ProfileScreen() {
     try {
       await profileAPI.changePassword({ old_password: oldPw, new_password: newPw, confirm_password: confirmPw });
       setPwVisible(false); setOldPw(''); setNewPw(''); setConfirmPw('');
-      Alert.alert('Password changed!');
+      Alert.alert('Success', 'Password changed!');
     } catch (err: any) { Alert.alert('Error', err.response?.data?.error || 'Could not change password.'); }
     setChangingPw(false);
   };
@@ -103,171 +105,247 @@ export default function ProfileScreen() {
     setResending(false);
   };
 
-  if (loading) return <View style={s.center}><ActivityIndicator color={Colors.primary} size="large" /></View>;
+  if (loading) return (
+    <View style={{ flex: 1, backgroundColor: C.bg, alignItems: 'center', justifyContent: 'center' }}>
+      <ActivityIndicator color={C.primary} size="large" />
+    </View>
+  );
 
   const displayNameText = user?.display_name || user?.username || '';
-  const roleBadgeColor = user?.role === 'admin' ? '#ef4444' : user?.role === 'moderator' ? '#f59e0b' : Colors.primary;
+  const roleBadgeColor = user?.role === 'admin' ? '#ef4444' : user?.role === 'moderator' ? '#f59e0b' : C.primary;
 
   return (
-    <ScrollView style={s.container} contentContainerStyle={{ paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: C.bg }}
+      contentContainerStyle={{ paddingBottom: 60 }}
+      showsVerticalScrollIndicator={false}
+    >
       {/* ── Header Banner ──────────────────────────────────── */}
-      <View style={[s.banner, { paddingTop: insets.top + 16 }]}>
-        <View style={s.bannerGlow} pointerEvents="none" />
+      <View style={[{
+        backgroundColor: C.bgCard,
+        borderBottomWidth: 1, borderBottomColor: C.border,
+        paddingHorizontal: Spacing.md, paddingBottom: Spacing.lg,
+        paddingTop: insets.top + 16,
+        overflow: 'hidden',
+      }]}>
 
-        <View style={s.bannerContent}>
-          <TouchableOpacity onPress={handlePickAvatar} disabled={saving} style={s.avatarWrap}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: Spacing.sm }}>
+          {/* Avatar — fixed: just the image/fallback with camera overlay, no misaligned glow */}
+          <TouchableOpacity onPress={handlePickAvatar} disabled={saving} style={{ position: 'relative' }}>
             {user?.avatar_url ? (
-              <Image source={{ uri: user.avatar_url }} style={s.avatar} contentFit="cover" />
+              <Image
+                source={{ uri: user.avatar_url }}
+                style={{ width: 76, height: 76, borderRadius: 38, borderWidth: 2, borderColor: C.primary }}
+                contentFit="cover"
+              />
             ) : (
-              <View style={s.avatarFallback}>
-                <Text style={s.avatarFallbackText}>{displayNameText.charAt(0).toUpperCase()}</Text>
+              <View style={{
+                width: 76, height: 76, borderRadius: 38,
+                backgroundColor: C.primary,
+                alignItems: 'center', justifyContent: 'center',
+                borderWidth: 2, borderColor: C.primaryDark,
+              }}>
+                <Text style={{ color: '#fff', fontSize: 30, fontWeight: '800' }}>
+                  {displayNameText.charAt(0).toUpperCase()}
+                </Text>
               </View>
             )}
-            <View style={s.avatarCameraBtn}>
-              <Ionicons name="camera" size={12} color={Colors.textSecondary} />
+            {/* Camera badge */}
+            <View style={{
+              position: 'absolute', bottom: 0, right: 0,
+              width: 22, height: 22, borderRadius: 11,
+              backgroundColor: C.bgCard,
+              alignItems: 'center', justifyContent: 'center',
+              borderWidth: 1.5, borderColor: C.border,
+            }}>
+              <Ionicons name="camera" size={11} color={C.textSecondary} />
             </View>
           </TouchableOpacity>
 
           <View style={{ flex: 1, marginLeft: Spacing.md }}>
-            <Text style={s.bannerName}>{displayNameText}</Text>
-            <View style={s.badgeRow}>
+            <Text style={{ color: C.textPrimary, fontSize: 20, fontWeight: '800', marginBottom: 6 }}>
+              {displayNameText}
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
               {user?.is_verified ? (
-                <View style={[s.badge, { backgroundColor: '#22c55e22', borderColor: '#22c55e44' }]}>
+                <View style={[badge, { backgroundColor: '#22c55e22', borderColor: '#22c55e44' }]}>
                   <Ionicons name="shield-checkmark" size={11} color="#22c55e" />
-                  <Text style={[s.badgeText, { color: '#22c55e' }]}>Verified</Text>
+                  <Text style={[badgeText, { color: '#22c55e' }]}>Verified</Text>
                 </View>
               ) : (
-                <View style={[s.badge, { backgroundColor: '#f59e0b22', borderColor: '#f59e0b44' }]}>
+                <View style={[badge, { backgroundColor: '#f59e0b22', borderColor: '#f59e0b44' }]}>
                   <Ionicons name="alert-circle" size={11} color="#f59e0b" />
-                  <Text style={[s.badgeText, { color: '#f59e0b' }]}>Unverified</Text>
+                  <Text style={[badgeText, { color: '#f59e0b' }]}>Unverified</Text>
                 </View>
               )}
               {user?.role && (
-                <View style={[s.badge, { backgroundColor: roleBadgeColor + '22', borderColor: roleBadgeColor + '44' }]}>
-                  <Text style={[s.badgeText, { color: roleBadgeColor }]}>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</Text>
+                <View style={[badge, { backgroundColor: roleBadgeColor + '22', borderColor: roleBadgeColor + '44' }]}>
+                  <Text style={[badgeText, { color: roleBadgeColor }]}>{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</Text>
                 </View>
               )}
               {user?.university && (
-                <View style={[s.badge, { backgroundColor: Colors.border, borderColor: Colors.borderLight }]}>
-                  <Text style={[s.badgeText, { color: Colors.textSecondary }]}>{user.university}</Text>
+                <View style={[badge, { backgroundColor: C.border, borderColor: C.borderLight }]}>
+                  <Text style={[badgeText, { color: C.textSecondary }]}>{user.university}</Text>
                 </View>
               )}
             </View>
           </View>
 
           <TouchableOpacity
-            style={s.editProfileBtn}
+            style={{
+              flexDirection: 'row', alignItems: 'center', gap: 5,
+              backgroundColor: C.bgCardAlt, borderRadius: Radius.sm,
+              borderWidth: 1, borderColor: C.border,
+              paddingHorizontal: 10, paddingVertical: 7, alignSelf: 'flex-start',
+            }}
             onPress={() => { setDisplayName(user?.display_name || ''); setUniversity(user?.university || ''); setEditVisible(true); }}
           >
-            <Ionicons name="create-outline" size={14} color={Colors.textPrimary} />
-            <Text style={s.editProfileBtnText}>Edit Profile</Text>
+            <Ionicons name="create-outline" size={14} color={C.textPrimary} />
+            <Text style={{ color: C.textPrimary, fontSize: 12, fontWeight: '600' }}>Edit Profile</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <View style={s.body}>
-        {/* ── Email verification nudge ──────────────────────── */}
+      <View style={{ padding: Spacing.md, gap: Spacing.md }}>
+        {/* ── Email verification nudge ── */}
         {!user?.is_verified && (
-          <View style={s.verifyCard}>
+          <View style={{ backgroundColor: '#f59e0b11', borderWidth: 1, borderColor: '#f59e0b33', borderRadius: Radius.md, padding: Spacing.md, gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Ionicons name="mail-outline" size={16} color="#f59e0b" />
-              <Text style={s.verifyTitle}>Verify your email</Text>
+              <Text style={{ color: '#f59e0b', fontWeight: '700', fontSize: 14 }}>Verify your email</Text>
             </View>
-            <Text style={s.verifyText}>Verify your email to access Chat and the Knowledge Wall.</Text>
+            <Text style={{ color: C.textSecondary, fontSize: 13, lineHeight: 18 }}>Verify your email to access Chat and the Knowledge Wall.</Text>
             <TouchableOpacity onPress={handleResendVerification} disabled={resending}>
               {resending
                 ? <ActivityIndicator color="#f59e0b" size="small" />
-                : <Text style={s.verifyLink}>Resend verification email →</Text>}
+                : <Text style={{ color: '#f59e0b', fontWeight: '700', fontSize: 13 }}>Resend verification email →</Text>}
             </TouchableOpacity>
           </View>
         )}
 
-        {/* ── Account Details ─────────────────────────────── */}
-        <View style={s.card}>
-          <View style={s.cardHeader}>
-            <Ionicons name="person-circle-outline" size={16} color={Colors.primary} />
-            <Text style={s.cardTitle}>ACCOUNT DETAILS</Text>
+        {/* ── Account Details ── */}
+        <View style={{ backgroundColor: C.bgCard, borderRadius: Radius.md, borderWidth: 1, borderColor: C.border, overflow: 'hidden' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: Spacing.md, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.border }}>
+            <Ionicons name="person-circle-outline" size={16} color={C.primary} />
+            <Text style={{ color: C.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1 }}>ACCOUNT DETAILS</Text>
           </View>
-          <DetailRow label="Username" value={user?.username} />
-          <DetailRow label="Email" value={user?.email} />
-          {user?.university && <DetailRow label="University" value={UNIVERSITY_CHOICES.find(u => u.value === user.university)?.label || user.university} />}
-          <DetailRow label="Role" value={user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ''} />
-          <DetailRow label="Email Verified" value={user?.is_verified ? 'Yes' : 'No'} valueColor={user?.is_verified ? '#22c55e' : '#ef4444'} />
+          <DetailRow label="Username" value={user?.username} C={C} />
+          <DetailRow label="Email" value={user?.email} C={C} />
+          {user?.university && <DetailRow label="University" value={UNIVERSITY_CHOICES.find(u => u.value === user.university)?.label || user.university} C={C} />}
+          <DetailRow label="Role" value={user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ''} C={C} />
+          <DetailRow label="Email Verified" value={user?.is_verified ? 'Yes' : 'No'} valueColor={user?.is_verified ? '#22c55e' : '#ef4444'} C={C} />
         </View>
 
-        {/* ── Quick Actions ────────────────────────────────── */}
-        <View style={s.card}>
-          <View style={s.cardHeader}>
-            <Ionicons name="flash-outline" size={16} color={Colors.primary} />
-            <Text style={s.cardTitle}>QUICK ACTIONS</Text>
+        {/* ── Quick Actions ── */}
+        <View style={{ backgroundColor: C.bgCard, borderRadius: Radius.md, borderWidth: 1, borderColor: C.border, overflow: 'hidden' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: Spacing.md, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.border }}>
+            <Ionicons name="flash-outline" size={16} color={C.primary} />
+            <Text style={{ color: C.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1 }}>QUICK ACTIONS</Text>
           </View>
-          <ActionRow
-            icon="create-outline"
-            label="Edit Profile"
-            onPress={() => { setDisplayName(user?.display_name || ''); setUniversity(user?.university || ''); setEditVisible(true); }}
-            accent
-          />
-          <ActionRow icon="lock-closed-outline" label="Change Password" onPress={() => setPwVisible(true)} />
+          <ActionRow icon="create-outline" label="Edit Profile" onPress={() => { setDisplayName(user?.display_name || ''); setUniversity(user?.university || ''); setEditVisible(true); }} accent C={C} />
+          <ActionRow icon="lock-closed-outline" label="Change Password" onPress={() => setPwVisible(true)} C={C} />
           {user?.role === 'admin' && (
-            <ActionRow icon="shield-outline" label="Admin Dashboard" onPress={() => Alert.alert('Admin', 'Open the web admin panel at culink.me/admin')} />
+            <ActionRow icon="shield-outline" label="Admin Dashboard" onPress={() => Alert.alert('Admin', 'Open the web admin panel at culink.me/admin')} C={C} />
           )}
-          <ActionRow icon="log-out-outline" label="Sign Out" onPress={handleLogout} danger />
+          {/* Dark / Light mode toggle */}
+          <TouchableOpacity
+            style={[{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.md, paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: C.border }]}
+            onPress={toggleTheme}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name={isDark ? 'moon' : 'sunny-outline'}
+              size={18}
+              color={isDark ? '#a78bfa' : '#64748b'}
+              style={{ marginRight: Spacing.sm }}
+            />
+            <Text style={{ flex: 1, fontSize: 14, fontWeight: '500', color: C.textPrimary }}>
+              Dark Mode
+            </Text>
+            {/* Toggle pill — circle moves RIGHT when ON */}
+            <View style={{
+              width: 44, height: 26, borderRadius: 13,
+              backgroundColor: isDark ? '#a78bfa' : C.border,
+              justifyContent: 'center',
+              paddingHorizontal: 3,
+            }}>
+              <View style={{
+                width: 20, height: 20, borderRadius: 10,
+                backgroundColor: '#fff',
+                transform: [{ translateX: isDark ? 18 : 0 }],
+              }} />
+            </View>
+          </TouchableOpacity>
+          <ActionRow icon="log-out-outline" label="Sign Out" onPress={handleLogout} danger C={C} />
         </View>
 
-        <Text style={s.version}>CUlink Mobile v1.0.0</Text>
+        <Text style={{ color: C.textMuted, fontSize: 12, textAlign: 'center', marginTop: Spacing.xl }}>CUlink Mobile v1.0.0</Text>
       </View>
 
-      {/* ── Edit Profile Modal ──────────────────────────────────────────── */}
+      {/* ── Edit Profile Modal ── */}
       <Modal visible={editVisible} animationType="slide" transparent>
-        <View style={s.modalOverlay}>
-          <View style={s.modalSheet}>
-            <View style={s.modalHead}>
-              <Text style={s.modalTitle}>Edit Profile</Text>
-              <TouchableOpacity onPress={() => setEditVisible(false)} hitSlop={8}>
-                <Ionicons name="close" size={22} color={Colors.textMuted} />
+        <View style={{ flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: C.bgCard, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl, padding: Spacing.lg, paddingBottom: 40, maxHeight: '90%', borderTopWidth: 1, borderColor: C.border }}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg }}>
+                <Text style={{ color: C.textPrimary, fontSize: 18, fontWeight: '700' }}>Edit Profile</Text>
+                <TouchableOpacity onPress={() => setEditVisible(false)} hitSlop={8}>
+                  <Ionicons name="close" size={22} color={C.textMuted} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={{ color: C.textMuted, fontSize: 12, marginBottom: 6, marginTop: 4 }}>Display Name</Text>
+              <TextInput
+                style={{ backgroundColor: C.bg, color: C.textPrimary, borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: C.border, marginBottom: 4 }}
+                placeholder="Your display name" placeholderTextColor={C.textMuted}
+                value={displayName} onChangeText={setDisplayName} maxLength={60}
+              />
+
+              <Text style={{ color: C.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>University</Text>
+              {UNIVERSITY_CHOICES.map((u) => (
+                <TouchableOpacity key={u.value}
+                  style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: C.border }}
+                  onPress={() => setUniversity(u.value)}
+                >
+                  <Text style={{ color: university === u.value ? C.primary : C.textPrimary, fontSize: 14 }}>{u.label}</Text>
+                  {university === u.value && <Ionicons name="checkmark" size={16} color={C.primary} />}
+                </TouchableOpacity>
+              ))}
+
+              <TouchableOpacity style={{ backgroundColor: C.primary, borderRadius: Radius.sm, paddingVertical: 14, alignItems: 'center', marginTop: Spacing.lg }} onPress={handleSaveProfile} disabled={saving}>
+                {saving ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Save Changes</Text>}
               </TouchableOpacity>
-            </View>
-
-            <Text style={s.fieldLabel}>Display Name</Text>
-            <TextInput style={s.input} placeholder="Your display name" placeholderTextColor={Colors.textMuted}
-              value={displayName} onChangeText={setDisplayName} maxLength={60} />
-
-            <Text style={s.fieldLabel}>University</Text>
-            {UNIVERSITY_CHOICES.map((u) => (
-              <TouchableOpacity key={u.value}
-                style={[s.uniRow, university === u.value && s.uniRowActive]}
-                onPress={() => setUniversity(u.value)}
-              >
-                <Text style={[s.uniRowText, university === u.value && { color: Colors.primary }]}>{u.label}</Text>
-                {university === u.value && <Ionicons name="checkmark" size={16} color={Colors.primary} />}
-              </TouchableOpacity>
-            ))}
-
-            <TouchableOpacity style={s.primaryBtn} onPress={handleSaveProfile} disabled={saving}>
-              {saving ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryBtnText}>Save Changes</Text>}
-            </TouchableOpacity>
+            </ScrollView>
           </View>
         </View>
       </Modal>
 
-      {/* ── Change Password Modal ───────────────────────────────────────── */}
+      {/* ── Change Password Modal ── */}
       <Modal visible={pwVisible} animationType="slide" transparent>
-        <View style={s.modalOverlay}>
-          <View style={s.modalSheet}>
-            <View style={s.modalHead}>
-              <Text style={s.modalTitle}>Change Password</Text>
+        <View style={{ flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end' }}>
+          <View style={{ backgroundColor: C.bgCard, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl, padding: Spacing.lg, paddingBottom: 40, borderTopWidth: 1, borderColor: C.border }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg }}>
+              <Text style={{ color: C.textPrimary, fontSize: 18, fontWeight: '700' }}>Change Password</Text>
               <TouchableOpacity onPress={() => setPwVisible(false)} hitSlop={8}>
-                <Ionicons name="close" size={22} color={Colors.textMuted} />
+                <Ionicons name="close" size={22} color={C.textMuted} />
               </TouchableOpacity>
             </View>
-            <Text style={s.fieldLabel}>Current Password</Text>
-            <TextInput style={s.input} secureTextEntry placeholder="Current password" placeholderTextColor={Colors.textMuted} value={oldPw} onChangeText={setOldPw} />
-            <Text style={s.fieldLabel}>New Password</Text>
-            <TextInput style={s.input} secureTextEntry placeholder="Min. 8 characters" placeholderTextColor={Colors.textMuted} value={newPw} onChangeText={setNewPw} />
-            <Text style={s.fieldLabel}>Confirm New Password</Text>
-            <TextInput style={s.input} secureTextEntry placeholder="Repeat new password" placeholderTextColor={Colors.textMuted} value={confirmPw} onChangeText={setConfirmPw} />
-            <TouchableOpacity style={s.primaryBtn} onPress={handleChangePassword} disabled={changingPw}>
-              {changingPw ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryBtnText}>Change Password</Text>}
+            {[
+              { label: 'Current Password', val: oldPw, set: setOldPw, ph: 'Current password' },
+              { label: 'New Password', val: newPw, set: setNewPw, ph: 'Min. 8 characters' },
+              { label: 'Confirm New Password', val: confirmPw, set: setConfirmPw, ph: 'Repeat new password' },
+            ].map(({ label, val, set, ph }) => (
+              <View key={label}>
+                <Text style={{ color: C.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 }}>{label}</Text>
+                <TextInput
+                  style={{ backgroundColor: C.bg, color: C.textPrimary, borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12, fontSize: 14, borderWidth: 1, borderColor: C.border }}
+                  secureTextEntry placeholder={ph} placeholderTextColor={C.textMuted}
+                  value={val} onChangeText={set}
+                />
+              </View>
+            ))}
+            <TouchableOpacity style={{ backgroundColor: C.primary, borderRadius: Radius.sm, paddingVertical: 14, alignItems: 'center', marginTop: Spacing.lg }} onPress={handleChangePassword} disabled={changingPw}>
+              {changingPw ? <ActivityIndicator color="#fff" /> : <Text style={{ color: '#fff', fontWeight: '700', fontSize: 15 }}>Change Password</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -276,152 +354,41 @@ export default function ProfileScreen() {
   );
 }
 
-function DetailRow({ label, value, valueColor }: { label: string; value?: string | null; valueColor?: string }) {
+// ── Shared static styles ────────────────────────────────────────────────────
+const badge: object = {
+  flexDirection: 'row', alignItems: 'center', gap: 4,
+  borderRadius: Radius.full, borderWidth: 1,
+  paddingHorizontal: 8, paddingVertical: 3,
+};
+const badgeText: object = { fontSize: 11, fontWeight: '700' };
+
+function DetailRow({ label, value, valueColor, C }: { label: string; value?: string | null; valueColor?: string; C: ThemeColors }) {
   return (
-    <View style={s.detailRow}>
-      <Text style={s.detailLabel}>{label}</Text>
-      <Text style={[s.detailValue, valueColor ? { color: valueColor } : {}]} numberOfLines={1}>{value || '—'}</Text>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: Spacing.md, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: C.border, gap: 12 }}>
+      <Text style={{ color: C.textMuted, fontSize: 13, paddingTop: 1 }}>{label}</Text>
+      <Text style={{ color: valueColor || C.textPrimary, fontSize: 13, fontWeight: '600', flex: 1, textAlign: 'right' }} numberOfLines={1}>
+        {value || '—'}
+      </Text>
     </View>
   );
 }
 
-function ActionRow({ icon, label, onPress, danger, accent }: {
+function ActionRow({ icon, label, onPress, danger, accent, C }: {
   icon: React.ComponentProps<typeof Ionicons>['name'];
-  label: string; onPress: () => void; danger?: boolean; accent?: boolean;
+  label: string; onPress: () => void; danger?: boolean; accent?: boolean; C: ThemeColors;
 }) {
-  const color = danger ? '#ef4444' : accent ? Colors.primary : Colors.textPrimary;
+  const color = danger ? '#ef4444' : accent ? C.primary : C.textPrimary;
   return (
     <TouchableOpacity
-      style={[s.actionRow, accent && { backgroundColor: Colors.primary + '18', borderRadius: Radius.sm }, danger && { backgroundColor: '#ef444410', borderRadius: Radius.sm }]}
+      style={[{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: Spacing.md, paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: C.border },
+        accent && { backgroundColor: C.primary + '18' },
+        danger  && { backgroundColor: '#ef444410' },
+      ]}
       onPress={onPress}
     >
       <Ionicons name={icon} size={18} color={color} style={{ marginRight: Spacing.sm }} />
-      <Text style={[s.actionRowLabel, { color }]}>{label}</Text>
-      <Ionicons name="chevron-forward" size={16} color={accent ? color : Colors.textMuted} />
+      <Text style={{ flex: 1, fontSize: 14, fontWeight: '500', color }}>{label}</Text>
+      <Ionicons name="chevron-forward" size={16} color={accent ? color : C.textMuted} />
     </TouchableOpacity>
   );
 }
-
-const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
-  center: { flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' },
-
-  // Banner
-  banner: {
-    backgroundColor: Colors.bgCard,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
-    paddingHorizontal: Spacing.md, paddingBottom: Spacing.lg,
-    overflow: 'hidden',
-  },
-  bannerGlow: {
-    position: 'absolute', right: -40, top: -40,
-    width: 200, height: 200, borderRadius: 100,
-    backgroundColor: Colors.primary, opacity: 0.07,
-  },
-  bannerContent: { flexDirection: 'row', alignItems: 'center', marginTop: Spacing.sm },
-  avatarWrap: { position: 'relative' },
-  avatar: { width: 72, height: 72, borderRadius: 36, borderWidth: 2, borderColor: Colors.border },
-  avatarFallback: {
-    width: 72, height: 72, borderRadius: 36,
-    backgroundColor: Colors.primary,
-    alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: Colors.border,
-  },
-  avatarFallbackText: { color: '#fff', fontSize: 28, fontWeight: '800' },
-  avatarCameraBtn: {
-    position: 'absolute', bottom: 0, right: 0,
-    backgroundColor: Colors.bgCardAlt || Colors.bgInput,
-    borderRadius: 10, width: 20, height: 20,
-    alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: Colors.border,
-  },
-  bannerName: { color: Colors.textPrimary, fontSize: 20, fontWeight: '800', marginBottom: 6 },
-  badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  badge: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    borderRadius: Radius.full, borderWidth: 1,
-    paddingHorizontal: 8, paddingVertical: 3,
-  },
-  badgeText: { fontSize: 11, fontWeight: '700' },
-  editProfileBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 5,
-    backgroundColor: Colors.bgCardAlt || Colors.bgInput,
-    borderRadius: Radius.sm, borderWidth: 1, borderColor: Colors.border,
-    paddingHorizontal: 10, paddingVertical: 7,
-    alignSelf: 'flex-start',
-  },
-  editProfileBtnText: { color: Colors.textPrimary, fontSize: 12, fontWeight: '600' },
-
-  body: { padding: Spacing.md, gap: Spacing.md },
-
-  verifyCard: {
-    backgroundColor: '#f59e0b11', borderWidth: 1, borderColor: '#f59e0b33',
-    borderRadius: Radius.md, padding: Spacing.md, gap: 6,
-  },
-  verifyTitle: { color: '#f59e0b', fontWeight: '700', fontSize: 14 },
-  verifyText: { color: Colors.textSecondary, fontSize: 13, lineHeight: 18 },
-  verifyLink: { color: '#f59e0b', fontWeight: '700', fontSize: 13 },
-
-  card: {
-    backgroundColor: Colors.bgCard, borderRadius: Radius.md,
-    borderWidth: 1, borderColor: Colors.border,
-    overflow: 'hidden',
-  },
-  cardHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 7,
-    paddingHorizontal: Spacing.md, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  cardTitle: {
-    color: Colors.textMuted, fontSize: 11, fontWeight: '700', letterSpacing: 1,
-  },
-
-  detailRow: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
-    paddingHorizontal: Spacing.md, paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: Colors.border, gap: 12,
-  },
-  detailLabel: { color: Colors.textMuted, fontSize: 13, paddingTop: 1 },
-  detailValue: { color: Colors.textPrimary, fontSize: 13, fontWeight: '600', flex: 1, textAlign: 'right', flexWrap: 'wrap' },
-
-  actionRow: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingHorizontal: Spacing.md, paddingVertical: 13,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  actionRowLabel: { flex: 1, fontSize: 14, fontWeight: '500' },
-
-  version: {
-    color: Colors.textMuted, fontSize: 12, textAlign: 'center', marginTop: Spacing.xl,
-  },
-
-  // Modals
-  modalOverlay: { flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end' },
-  modalSheet: {
-    backgroundColor: Colors.bgCard, borderTopLeftRadius: Radius.xl, borderTopRightRadius: Radius.xl,
-    padding: Spacing.lg, paddingBottom: 40, maxHeight: '90%',
-    borderTopWidth: 1, borderColor: Colors.border,
-  },
-  modalHead: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  modalTitle: { color: Colors.textPrimary, fontSize: 18, fontWeight: '700' },
-  fieldLabel: { color: Colors.textMuted, fontSize: 12, marginBottom: 6, marginTop: 12 },
-  input: {
-    backgroundColor: Colors.bg, color: Colors.textPrimary,
-    borderRadius: Radius.sm, paddingHorizontal: Spacing.md, paddingVertical: 12,
-    fontSize: 14, borderWidth: 1, borderColor: Colors.border, marginBottom: 4,
-  },
-  uniRow: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: Colors.border,
-  },
-  uniRowActive: { },
-  uniRowText: { color: Colors.textPrimary, fontSize: 14 },
-  primaryBtn: {
-    backgroundColor: Colors.primary, borderRadius: Radius.sm,
-    paddingVertical: 14, alignItems: 'center', marginTop: Spacing.lg,
-  },
-  primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-});

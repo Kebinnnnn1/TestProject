@@ -1,15 +1,17 @@
 import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useAuthStore } from '../store';
+import { useAuthStore, useThemeStore } from '../store';
 
 export default function RootLayout() {
   const { user, isHydrated, hydrate } = useAuthStore();
+  const { isDark, hydrate: hydrateTheme } = useThemeStore();
   const router = useRouter();
   const segments = useSegments();
 
   useEffect(() => {
     hydrate();
+    hydrateTheme(); // load saved theme preference from AsyncStorage
   }, []);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function RootLayout() {
 
   return (
     <>
-      <StatusBar style="light" backgroundColor="#0f1117" />
+      <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={isDark ? '#111114' : '#f5f5f7'} />
       <Stack screenOptions={{ headerShown: false }} />
     </>
   );
