@@ -6,3 +6,6 @@ psycopg2-binary
 pusher
 cloudinary
 django-cloudinary-storage
+djangorestframework
+djangorestframework-simplejwt
+django-cors-headers

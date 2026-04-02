@@ -58,6 +58,9 @@ INSTALLED_APPS = [
     'cloudinary_storage',          # must be before staticfiles
     'django.contrib.staticfiles',
     'cloudinary',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
     'accounts',
 ]
 
@@ -66,6 +69,7 @@ MEDIA_URL = '/media/'  # Required by django-cloudinary-storage
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',          # <-- must be before CommonMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -136,6 +140,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# ── Django REST Framework ──────────────────────────────────────────────────
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': None,  # We handle pagination manually
+}
+
+# ── JWT ───────────────────────────────────────────────────────────────────
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME':  timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS':  True,
+    'BLACKLIST_AFTER_ROTATION': False,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# ── CORS ──────────────────────────────────────────────────────────────────
+# Allows Expo dev client / mobile app to call the API
+CORS_ALLOW_ALL_ORIGINS = True  # Fine for personal projects; restrict in prod
 
 # Auth redirects
 LOGIN_URL = '/login/'

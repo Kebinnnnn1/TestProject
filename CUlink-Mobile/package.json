@@ -1,0 +1,38 @@
+{
+  "name": "culink-mobile",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build:apk": "eas build --platform android --profile preview",
+    "build:ipa": "eas build --platform ios --profile preview",
+    "build:all": "eas build --platform all --profile preview"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^3.0.2",
+    "@shopify/flash-list": "^2.3.1",
+    "axios": "^1.14.0",
+    "expo": "~54.0.33",
+    "expo-constants": "~18.0.13",
+    "expo-image": "^55.0.6",
+    "expo-image-picker": "^55.0.14",
+    "expo-linking": "~8.0.11",
+    "expo-router": "~6.0.23",
+    "expo-status-bar": "~3.0.9",
+    "pusher-js": "^8.5.0",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-reanimated": "^4.3.0",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.0",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}
