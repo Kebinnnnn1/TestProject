@@ -58,8 +58,6 @@ INSTALLED_APPS = [
     'cloudinary_storage',          # must be before staticfiles
     'django.contrib.staticfiles',
     'cloudinary',
-    'rest_framework',
-    'rest_framework_simplejwt',
     'accounts',
 ]
 
@@ -212,36 +210,3 @@ LOGGING = {
     },
 }
 
-
-# ---------------------------------------------------------------------------
-# Django REST Framework - used by the /api/ endpoints for the mobile app
-# ---------------------------------------------------------------------------
-from datetime import timedelta
-
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-    ),
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
-    ],
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '30/minute',
-        'user': '120/minute',
-    },
-}
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME':  timedelta(days=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS':  True,
-    'BLACKLIST_AFTER_ROTATION': False,
-    'AUTH_HEADER_TYPES': ('Bearer',),
-}
