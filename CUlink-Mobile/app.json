@@ -22,7 +22,10 @@
         "backgroundColor": "#0f1117"
       },
       "package": "com.culink.mobile",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -36,6 +39,12 @@
         }
       ]
     ],
-    "scheme": "culink"
+    "scheme": "culink",
+    "extra": {
+      "eas": {
+        "projectId": "3a7795bf-5736-45a7-b78d-58d3e50fb18e"
+      }
+    },
+    "owner": "kebintong"
   }
 }
