@@ -7,7 +7,7 @@
 //   1. Run: ipconfig  (Windows) → find your IPv4 address e.g. 192.168.1.5
 //   2. Change to: 'http://192.168.1.5:8000/api/v1'
 //   3. Make sure Django is running: python manage.py runserver 0.0.0.0:8000
-export const API_BASE_URL = 'https://YOUR-PROJECT.vercel.app/api/v1';
+export const API_BASE_URL = 'https://www.culink.me/api/v1';
 
 // ── Pusher ─────────────────────────────────────────────────────────────────
 // ✅ Fixed: your Pusher cluster is 'ap1' (from your .env PUSHER_CLUSTER)
