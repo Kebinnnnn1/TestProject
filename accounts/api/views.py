@@ -363,6 +363,7 @@ def api_add_comment(request, pk):
         post=post,
         author=request.user,
         content=content,
+        is_reply=content.startswith('@'),
     )
     return Response(
         PostCommentSerializer(comment, context={'request': request}).data,

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   RefreshControl, ActivityIndicator, Alert, Modal, ScrollView,
@@ -12,11 +12,15 @@ import { wallAPI } from '../../services/api';
 import { useAuthStore } from '../../store';
 import { Colors, Spacing, Radius } from '../../constants';
 
+// Who we're currently replying to (null = plain comment)
+type ReplyTarget = { username: string; displayName: string } | null;
+
 interface Comment {
   id: number;
   author: { username: string; display_name: string; avatar_url: string };
   content: string;
   timestamp: string;
+  is_reply: boolean;
 }
 interface Post {
   id: number;
@@ -40,6 +44,12 @@ function timeAgo(iso: string) {
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   return `${Math.floor(diff / 86400)}d ago`;
+}
+
+/** Returns the @username mentioned at the start of a comment, or null */
+function getReplyMention(content: string): string | null {
+  const m = content.match(/^@(\w+)\s/);
+  return m ? m[1] : null;
 }
 
 function Avatar({ url, name, size = 40 }: { url?: string; name: string; size?: number }) {
@@ -102,6 +112,86 @@ function PostCard({ post, onLike, onDelete, onComment }: {
   );
 }
 
+// ── Comment item: detects @mention to render as threaded reply ────────────
+function CommentItem({
+  comment,
+  onReply,
+}: {
+  comment: Comment;
+  onReply: (author: { username: string; display_name: string }) => void;
+}) {
+  const mention = getReplyMention(comment.content);
+  const isReply = !!mention;
+  const name = comment.author.display_name || comment.author.username;
+
+  if (isReply) {
+    // Render as indented reply (matches web style)
+    return (
+      <View style={s.replyWrapper}>
+        {/* Vertical thread line */}
+        <View style={s.threadLine} />
+        <View style={{ flex: 1 }}>
+          {/* "Replying to @x" label */}
+          <View style={s.replyingToRow}>
+            <Ionicons name="return-down-forward-outline" size={12} color={Colors.textMuted} />
+            <Text style={s.replyingToText} numberOfLines={1}>
+              Replying to{' '}
+              <Text style={{ color: Colors.primary, fontWeight: '700' }}>@{mention}</Text>
+            </Text>
+          </View>
+          {/* Reply bubble */}
+          <View style={s.commentBubbleRow}>
+            <View style={[s.commentAvatar, { width: 28, height: 28, borderRadius: 14 }]}>
+              <Text style={[s.commentAvatarText, { fontSize: 11 }]}>
+                {name.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+            <View style={[s.commentBubble, s.replyBubble]}>
+              <View style={s.commentBubbleTop}>
+                <Text style={s.commentAuthor}>{name}</Text>
+                <Text style={s.commentTimestamp}>{timeAgo(comment.timestamp)}</Text>
+                <TouchableOpacity
+                  style={s.replyBtn}
+                  onPress={() => onReply(comment.author)}
+                  hitSlop={8}
+                >
+                  <Ionicons name="return-down-forward-outline" size={12} color={Colors.primary} />
+                  <Text style={s.replyBtnText}>Reply</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={s.commentBody}>{comment.content}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  // Top-level comment
+  return (
+    <View style={s.commentBubbleRow}>
+      <View style={s.commentAvatar}>
+        <Text style={s.commentAvatarText}>{name.charAt(0).toUpperCase()}</Text>
+      </View>
+      <View style={s.commentBubble}>
+        <View style={s.commentBubbleTop}>
+          <Text style={s.commentAuthor}>{name}</Text>
+          <Text style={s.commentTimestamp}>{timeAgo(comment.timestamp)}</Text>
+          <TouchableOpacity
+            style={s.replyBtn}
+            onPress={() => onReply(comment.author)}
+            hitSlop={8}
+          >
+            <Ionicons name="return-down-forward-outline" size={12} color={Colors.primary} />
+            <Text style={s.replyBtnText}>Reply</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={s.commentBody}>{comment.content}</Text>
+      </View>
+    </View>
+  );
+}
+
 export default function WallScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,6 +209,9 @@ export default function WallScreen() {
   const [commentPost, setCommentPost] = useState<Post | null>(null);
   const [commentText, setCommentText] = useState('');
   const [commenting, setCommenting] = useState(false);
+  const [replyTarget, setReplyTarget] = useState<ReplyTarget>(null);
+  const commentListRef = useRef<FlatList>(null);
+  const commentInputRef = useRef<TextInput>(null);
 
   const { user } = useAuthStore();
   const insets = useSafeAreaInsets();
@@ -180,23 +273,38 @@ export default function WallScreen() {
     if (!commentPost || !commentText.trim()) return;
     setCommenting(true);
     const body = commentText.trim();
-    setCommentText(''); // clear immediately for UX
+    setCommentText('');
+    setReplyTarget(null);
     try {
       const r = await wallAPI.addComment(commentPost.id, body);
-      const newComment = r.data;
-      // Update the posts list
+      const newComment: Comment = r.data;
       setPosts(p => p.map(post => post.id === commentPost.id
         ? { ...post, comments: [...post.comments, newComment], comment_count: post.comment_count + 1 }
         : post));
-      // ✅ Also update commentPost so the modal shows the new comment immediately
-      setCommentPost(prev => prev
-        ? { ...prev, comments: [...prev.comments, newComment], comment_count: prev.comment_count + 1 }
-        : prev);
+      setCommentPost(prev =>
+        prev
+          ? { ...prev, comments: [...prev.comments, newComment], comment_count: prev.comment_count + 1 }
+          : prev);
+      setTimeout(() => commentListRef.current?.scrollToEnd({ animated: true }), 80);
     } catch {
-      setCommentText(body); // restore on failure
+      setCommentText(body);
       Alert.alert('Error', 'Could not add comment.');
     }
     setCommenting(false);
+  };
+
+  const startReply = (author: { username: string; display_name: string }) => {
+    const displayName = author.display_name || author.username;
+    setReplyTarget({ username: author.username, displayName });
+    setCommentText(`@${author.username} `);
+    setTimeout(() => commentInputRef.current?.focus(), 50);
+  };
+
+  const cancelReply = () => {
+    setReplyTarget(null);
+    setCommentText(prev =>
+      prev.startsWith('@') && prev.trim().split(' ').length <= 1 ? '' : prev
+    );
   };
 
   if (loading) return <View style={s.center}><ActivityIndicator color={Colors.primary} size="large" /></View>;
@@ -281,8 +389,7 @@ export default function WallScreen() {
       {/* ── Comments Bottom Sheet ──────────────────────────────── */}
       <Modal visible={!!commentPost} animationType="slide" transparent statusBarTranslucent>
         <View style={s.sheetOverlay}>
-          {/* Tap outside to dismiss */}
-          <TouchableOpacity style={StyleSheet.absoluteFill} onPress={() => { setCommentPost(null); setCommentText(''); }} />
+          <TouchableOpacity style={StyleSheet.absoluteFill} onPress={() => { setCommentPost(null); setCommentText(''); setReplyTarget(null); }} />
 
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -292,47 +399,56 @@ export default function WallScreen() {
             <View style={s.sheetHandle} />
 
             {/* Header */}
-            <View style={s.modalHead}>
+            <View style={s.sheetHeader}>
               <Text style={s.modalTitle}>
                 Comments {commentPost ? `(${commentPost.comment_count})` : ''}
               </Text>
-              <TouchableOpacity onPress={() => { setCommentPost(null); setCommentText(''); }} hitSlop={8}>
-                <Ionicons name="close" size={22} color={Colors.textMuted} />
+              <TouchableOpacity
+                onPress={() => { setCommentPost(null); setCommentText(''); setReplyTarget(null); }}
+                style={s.sheetClose}
+                hitSlop={12}
+              >
+                <Ionicons name="close" size={20} color={Colors.textMuted} />
               </TouchableOpacity>
             </View>
 
-            {/* Comments list — flex:1 so it takes all remaining space */}
+            {/* Comments list */}
             <FlatList
+              ref={commentListRef}
               data={commentPost?.comments || []}
               keyExtractor={(c, i) => (c.id?.toString() ?? i.toString())}
               renderItem={({ item: c }) => (
-                <View style={s.commentRow}>
-                  <View style={s.commentAvatar}>
-                    <Text style={s.commentAvatarText}>
-                      {(c.author.display_name || c.author.username).charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.commentAuthor}>{c.author.display_name || c.author.username}</Text>
-                    <Text style={s.commentBody}>{c.content}</Text>
-                  </View>
-                </View>
+                <CommentItem comment={c} onReply={startReply} />
               )}
               ListEmptyComponent={
-                <View style={{ alignItems: 'center', paddingVertical: 32 }}>
-                  <Ionicons name="chatbubble-outline" size={36} color={Colors.textMuted} />
+                <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+                  <Ionicons name="chatbubble-outline" size={40} color={Colors.textMuted} />
                   <Text style={{ color: Colors.textMuted, marginTop: 10, fontSize: 14 }}>No comments yet — be the first!</Text>
                 </View>
               }
               style={{ flex: 1 }}
-              contentContainerStyle={{ paddingHorizontal: Spacing.md, paddingBottom: Spacing.sm }}
+              contentContainerStyle={{ paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm }}
             />
+
+            {/* Reply-to banner */}
+            {replyTarget && (
+              <View style={s.replyBanner}>
+                <Ionicons name="return-down-forward-outline" size={14} color={Colors.primary} />
+                <Text style={s.replyBannerText} numberOfLines={1}>
+                  Replying to <Text style={{ color: Colors.primary, fontWeight: '700' }}>@{replyTarget.username}</Text>
+                </Text>
+                <TouchableOpacity onPress={cancelReply} hitSlop={8} style={{ marginLeft: 'auto' }}>
+                  <Ionicons name="close-circle" size={16} color={Colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+            )}
 
             {/* Input pinned at bottom */}
             <View style={s.commentInputBar}>
               <TextInput
+                ref={commentInputRef}
                 style={s.commentInput}
-                placeholder="Write a comment..."
+                placeholder={replyTarget ? `Reply to @${replyTarget.username}...` : 'Write a comment...'}
                 placeholderTextColor={Colors.textMuted}
                 value={commentText}
                 onChangeText={setCommentText}
@@ -378,7 +494,6 @@ const s = StyleSheet.create({
   },
   newPostBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 
-  // Each post = a proper rounded card with spacing — exactly like the web
   card: {
     backgroundColor: Colors.bgCard,
     borderRadius: Radius.md,
@@ -446,7 +561,7 @@ const s = StyleSheet.create({
   },
   primaryBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 
-  // ── Comment bottom sheet ───────────────────────────────────────────
+  // ── Comment bottom sheet ─────────────────────────────────────────────────
   sheetOverlay: {
     flex: 1,
     backgroundColor: '#000000bb',
@@ -458,31 +573,130 @@ const s = StyleSheet.create({
     borderTopRightRadius: Radius.xl,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
-    // Give it a fixed portion of the screen height
     height: '65%',
-    // flex layout: header + list(flex:1) + input
+    flexDirection: 'column',
   },
   sheetHandle: {
     alignSelf: 'center',
     width: 40, height: 4,
     backgroundColor: Colors.border,
     borderRadius: 2,
-    marginTop: 10, marginBottom: 4,
+    marginTop: 10, marginBottom: 6,
+    flexShrink: 0,
   },
-  commentRow: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
     paddingVertical: 10,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    flexShrink: 0,
+  },
+  sheetClose: {
+    width: 32, height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // ── Top-level comment bubble ─────────────────────────────────────────────
+  commentBubbleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginBottom: 10,
   },
   commentAvatar: {
-    width: 32, height: 32, borderRadius: 16,
+    width: 34, height: 34, borderRadius: 17,
     backgroundColor: Colors.primary + '33',
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   commentAvatarText: { color: Colors.primary, fontWeight: '700', fontSize: 13 },
-  commentAuthor: { color: Colors.primary, fontWeight: '700', fontSize: 13, marginBottom: 2 },
+  commentBubble: {
+    flex: 1,
+    backgroundColor: Colors.bg,
+    borderRadius: Radius.md,
+    borderTopLeftRadius: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  commentBubbleTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 3,
+    flexWrap: 'wrap',
+  },
+  commentAuthor: { color: Colors.primary, fontWeight: '700', fontSize: 13 },
+  commentTimestamp: { color: Colors.textMuted, fontSize: 11, flex: 1 },
   commentBody: { color: Colors.textPrimary, fontSize: 14, lineHeight: 20 },
-  commentInputRow: { flexDirection: 'row', alignItems: 'center', marginTop: Spacing.sm },
+
+  // ── Reply button ─────────────────────────────────────────────────────────
+  replyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.primary + '15',
+  },
+  replyBtnText: { color: Colors.primary, fontSize: 11, fontWeight: '600' },
+
+  // ── Threaded reply display (indented) ────────────────────────────────────
+  replyWrapper: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    marginBottom: 10,
+    marginLeft: 16,
+  },
+  threadLine: {
+    width: 2,
+    backgroundColor: Colors.primary + '40',
+    borderRadius: 2,
+    marginRight: 8,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  replyingToRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 4,
+  },
+  replyingToText: {
+    color: Colors.textMuted,
+    fontSize: 11,
+  },
+  replyBubble: {
+    backgroundColor: Colors.primary + '0A',
+    borderColor: Colors.primary + '28',
+    borderTopLeftRadius: 4,
+  },
+
+  // ── Reply banner (shown above input when replying) ───────────────────────
+  replyBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 8,
+    backgroundColor: Colors.primary + '12',
+    borderTopWidth: 1,
+    borderTopColor: Colors.primary + '28',
+  },
+  replyBannerText: {
+    flex: 1,
+    color: Colors.textSecondary,
+    fontSize: 13,
+  },
+
+  // ── Comment input bar ────────────────────────────────────────────────────
   commentInputBar: {
     flexDirection: 'row', alignItems: 'flex-end',
     paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm,

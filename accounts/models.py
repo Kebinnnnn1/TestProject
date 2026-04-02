@@ -112,6 +112,10 @@ class PostComment(models.Model):
     content   = models.TextField(max_length=1000)
     timestamp = models.DateTimeField(default=timezone.now)
     is_reply  = models.BooleanField(default=False)
+    parent    = models.ForeignKey(
+        'self', on_delete=models.CASCADE, null=True, blank=True,
+        related_name='replies'
+    )
 
     class Meta:
         ordering = ['timestamp']
